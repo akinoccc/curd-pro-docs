@@ -1,0 +1,10 @@
+{
+  "name": "curd-pro",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "build": "echo \"no-op build for now\"",
+    "lint": "echo \"no-op lint for now\""
+  }
+}

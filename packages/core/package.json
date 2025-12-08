@@ -1,0 +1,11 @@
+{
+  "name": "@fcurd/core",
+  "version": "0.1.0",
+  "main": "src/index.ts",
+  "module": "src/index.ts",
+  "types": "src/index.ts",
+  "sideEffects": false,
+  "peerDependencies": {
+    "vue": "^3.4.0"
+  }
+}
