@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, h, onMounted, ref } from 'vue'
+import type { FunctionalComponent } from 'vue'
 import type {
   CrudAdapter,
   CrudField,
@@ -51,6 +52,47 @@ const visible = ref(false)
 const editingRow = ref<any | null>(null)
 
 const mode = computed<'create' | 'edit'>(() => (editingRow.value ? 'edit' : 'create'))
+
+interface RowActionProps {
+  row: any
+}
+
+const EditAction: FunctionalComponent<RowActionProps> = (p) => {
+  if (props.disableEdit) return null
+
+  return h(
+    NButton,
+    {
+      tertiary: true,
+      size: 'small',
+      onClick: () => openEdit(p.row),
+    },
+    {
+      default: () => '编辑',
+    },
+  )
+}
+
+const DeleteAction: FunctionalComponent<RowActionProps> = (p) => {
+  if (props.disableDelete || !props.adapter.remove) return null
+
+  return h(
+    NButton,
+    {
+      tertiary: true,
+      type: 'error',
+      size: 'small',
+      onClick: () => {
+        void props.adapter
+          .remove?.((p.row as any).id)
+          .then(() => crud.refresh())
+      },
+    },
+    {
+      default: () => '删除',
+    },
+  )
+}
 
 function openCreate(): void {
   editingRow.value = null
@@ -152,24 +194,13 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
               name="row-actions"
               :row="row"
               :open-edit="openEdit"
+               :default-actions="{
+                 Edit: EditAction,
+                 Delete: DeleteAction,
+               }"
             >
-              <NButton
-                v-if="!disableEdit"
-                tertiary
-                size="small"
-                @click="openEdit(row)"
-              >
-                编辑
-              </NButton>
-              <NButton
-                v-if="!disableDelete && adapter.remove"
-                tertiary
-                type="error"
-                size="small"
-                @click="adapter.remove((row as any).id).then(() => crud.refresh())"
-              >
-                删除
-              </NButton>
+              <EditAction :row="row" />
+              <DeleteAction :row="row" />
             </slot>
           </template>
         </NaiveCrudTable>

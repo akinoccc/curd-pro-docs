@@ -34,6 +34,48 @@ export interface CrudFieldContext<Row = any, FormModel = any> {
   extra?: Record<string, any>
 }
 
+export interface CrudFieldUi<Row = any, FormModel = any> {
+  /**
+   * UI 层透传配置，适配各 UI 库可用：例如 naiveProps/antProps 等。
+   * 在 naive-ui 适配层会读取 naiveProps/naiveColumn。
+   */
+  naiveProps?: Record<string, any>
+  naiveColumn?: Record<string, any>
+  /**
+   * 表单/搜索项容器 props（例如 Naive 的 NFormItem / 搜索行布局）
+   */
+  formItemProps?: Record<string, any>
+  searchItemProps?: Record<string, any>
+  /**
+   * 额外自定义扩展
+   */
+  extra?: Record<string, any>
+  /**
+   * 自定义渲染组件（覆盖 type）
+   */
+  component?: any
+}
+
+export type CrudRuleTrigger = 'change' | 'blur' | 'input' | 'submit'
+
+export interface CrudRuleContext<Row = any, FormModel = any> {
+  value: any
+  field: CrudField<Row, FormModel>
+  model: Record<string, any>
+  mode: 'create' | 'edit'
+}
+
+export type CrudRuleValidator<Row = any, FormModel = any> = (
+  context: CrudRuleContext<Row, FormModel>,
+) => boolean | string | Promise<boolean | string>
+
+export interface CrudFieldRule<Row = any, FormModel = any> {
+  trigger?: CrudRuleTrigger | CrudRuleTrigger[]
+  required?: boolean
+  message?: string
+  validator?: CrudRuleValidator<Row, FormModel>
+}
+
 export interface CrudField<Row = any, FormModel = any> {
   key: string
   label: () => string
@@ -48,8 +90,9 @@ export interface CrudField<Row = any, FormModel = any> {
     | 'money'
     | 'custom'
   required?: boolean
-  rules?: any[]
+  rules?: CrudFieldRule<Row, FormModel>[]
   dictKey?: string
+  ui?: CrudFieldUi<Row, FormModel>
   visibleIn?: Partial<
     Record<CrudSurface, boolean | ((ctx: CrudFieldContext<Row, FormModel>) => boolean)>
   >
@@ -83,6 +126,10 @@ export interface CrudTableColumn<Row = any> {
   searchable?: 'input' | 'select' | 'dateRange' | false
   // cellComponent 在核心层保持 any，具体由 UI 适配层约束
   cellComponent?: any
+  /**
+   * UI 透传配置（由具体 UI 适配层消费，例如 naiveColumn）
+   */
+  ui?: Record<string, any>
 }
 
 // Action system

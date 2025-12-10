@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { computed, reactive, watch } from 'vue'
+import { computed, inject, reactive, watch } from 'vue'
 import type { CrudField } from '@fcurd/core'
 import { CrudControlMapSymbol } from './symbols'
-import { inject } from 'vue'
 
 interface CrudFormProps<Row = any> {
   modelValue?: boolean
@@ -24,7 +23,9 @@ interface CrudFormEmits<Row = any> {
   (e: 'form-model-ready', model: Row, mode: 'create' | 'edit'): void
 }
 
-const props = defineProps<CrudFormProps<any>>()
+const props = withDefaults(defineProps<CrudFormProps<any>>(), {
+  formMode: 'modal',
+})
 const emit = defineEmits<CrudFormEmits<any>>()
 
 const controlMap = inject(CrudControlMapSymbol)

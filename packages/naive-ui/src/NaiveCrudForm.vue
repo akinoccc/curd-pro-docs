@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, inject, reactive, watch } from 'vue'
-import type { CrudField } from '@fcurd/core'
+import { computed, inject, reactive, ref, watch } from 'vue'
+import type { CrudField, CrudFieldRule } from '@fcurd/core'
 import { CrudControlMapSymbol } from '@fcurd/vue'
 import {
   NButton,
@@ -10,6 +10,9 @@ import {
   NFormItem,
   NModal,
   NSpace,
+  type FormInst,
+  type FormItemRule,
+  type FormRules,
 } from 'naive-ui'
 
 interface NaiveCrudFormProps<Row = any> {
@@ -20,6 +23,7 @@ interface NaiveCrudFormProps<Row = any> {
   layout?: any
   title?: string | ((payload: { mode: 'create' | 'edit'; row?: Row | null }) => string)
   resetOnClose?: boolean
+  formProps?: Record<string, any>
 }
 
 interface NaiveCrudFormEmits<Row = any> {
@@ -36,6 +40,7 @@ const props = defineProps<NaiveCrudFormProps<any>>()
 const emit = defineEmits<NaiveCrudFormEmits<any>>()
 
 const controlMap = inject(CrudControlMapSymbol)
+const formRef = ref<FormInst | null>(null)
 
 const visible = computed<boolean>({
   get() {
@@ -51,6 +56,75 @@ const mode = computed<'create' | 'edit'>(() => (props.row ? 'edit' : 'create'))
 const effectiveFormMode = computed<'modal' | 'drawer' | 'inline'>(() => props.formMode ?? 'modal')
 
 const formModel = reactive<Record<string, any>>({})
+const formPropsWithoutRules = computed<Record<string, any>>(() => {
+  const { rules, ...rest } = props.formProps ?? {}
+  return rest
+})
+
+function toNaiveTriggers(rule: CrudFieldRule<any, any>): ('blur' | 'change' | 'input')[] {
+  const triggers = Array.isArray(rule.trigger) ? rule.trigger : rule.trigger ? [rule.trigger] : []
+  return triggers
+    .filter(
+      (trigger): trigger is 'blur' | 'change' | 'input' =>
+        trigger === 'blur' || trigger === 'change' || trigger === 'input',
+    )
+}
+
+function mapToNaiveRule(
+  rule: CrudFieldRule<any, any>,
+  field: CrudField<any, any>,
+): FormItemRule {
+  const message = rule.message ?? `${field.label()}为必填项`
+  const triggers = toNaiveTriggers(rule)
+  const baseRule: FormItemRule = {
+    required: rule.required,
+    message,
+  }
+  if (triggers.length) {
+    baseRule.trigger = triggers
+  }
+  const validator = rule.validator
+  if (validator) {
+    baseRule.validator = async (_r, value) => {
+      const result = await validator({
+        value,
+        field,
+        model: formModel,
+        mode: mode.value,
+      })
+      if (result === true || result === undefined) return
+      if (result === false) throw new Error(message)
+      if (typeof result === 'string') throw new Error(result)
+      throw new Error(message)
+    }
+  }
+  return baseRule
+}
+
+function mergeRules(builtin: FormRules, external?: FormRules): FormRules {
+  const merged: FormRules = external ? { ...external } : {}
+  for (const [key, value] of Object.entries(builtin)) {
+    merged[key] = [
+      ...((external?.[key] as FormItemRule[]) ?? []),
+      ...(value as FormItemRule[]),
+    ]
+  }
+  return merged
+}
+
+const builtinFormRules = computed<FormRules>(() => {
+  const rules: FormRules = {}
+  for (const field of props.fields || []) {
+    const selfRules = field.rules ?? []
+    if (!selfRules.length) continue
+    rules[field.key] = selfRules.map(rule => mapToNaiveRule(rule, field))
+  }
+  return rules
+})
+
+const mergedFormRules = computed<FormRules>(() =>
+  mergeRules(builtinFormRules.value, props.formProps?.rules as FormRules | undefined),
+)
 
 function initFormModel(): void {
   Object.keys(formModel).forEach((key) => {
@@ -60,6 +134,7 @@ function initFormModel(): void {
   if (props.row) {
     Object.assign(formModel, props.row)
   }
+  formRef.value?.restoreValidation()
   emit('form-model-ready', formModel as any, mode.value)
 }
 
@@ -84,7 +159,20 @@ watch(
   },
 )
 
-function handleSubmit(): void {
+async function validateOnSubmit(): Promise<boolean> {
+  if (!formRef.value) return true
+  try {
+    await formRef.value.validate()
+    return true
+  }
+  catch {
+    return false
+  }
+}
+
+async function handleSubmit(): Promise<void> {
+  const valid = await validateOnSubmit()
+  if (!valid) return
   emit('submit', { mode: mode.value, data: { ...formModel } })
 }
 
@@ -109,6 +197,9 @@ function handleSubmit(): void {
       size="small"
       label-placement="left"
       label-align="right"
+      ref="formRef"
+      :rules="mergedFormRules"
+      v-bind="formPropsWithoutRules"
       @submit.prevent="handleSubmit"
     >
       <slot
@@ -121,12 +212,16 @@ function handleSubmit(): void {
             v-for="field in fields || []"
             :key="field.key"
             :label="field.label()"
+          :required="field.required"
+            :path="field.key"
             class="fcurd-form__item"
+            v-bind="field.ui?.formItemProps"
           >
             <component
               :is="controlMap[field.type] || controlMap.text"
               v-model="formModel[field.key]"
               :field="field"
+              v-bind="field.ui?.naiveProps"
             />
           </NFormItem>
         </div>
@@ -166,6 +261,9 @@ function handleSubmit(): void {
       :model="formModel"
       size="small"
       label-placement="top"
+      ref="formRef"
+      :rules="mergedFormRules"
+      v-bind="formPropsWithoutRules"
       @submit.prevent="handleSubmit"
     >
       <slot
@@ -178,12 +276,16 @@ function handleSubmit(): void {
             v-for="field in fields || []"
             :key="field.key"
             :label="field.label()"
+          :required="field.required"
+            :path="field.key"
             class="fcurd-form__item"
+            v-bind="field.ui?.formItemProps"
           >
             <component
               :is="controlMap[field.type] || controlMap.text"
               v-model="formModel[field.key]"
               :field="field"
+              v-bind="field.ui?.naiveProps"
             />
           </NFormItem>
         </div>
@@ -226,6 +328,9 @@ function handleSubmit(): void {
         :model="formModel"
         size="small"
         label-placement="top"
+        ref="formRef"
+        :rules="mergedFormRules"
+        v-bind="formPropsWithoutRules"
         @submit.prevent="handleSubmit"
       >
         <slot
@@ -238,12 +343,16 @@ function handleSubmit(): void {
               v-for="field in fields || []"
               :key="field.key"
               :label="field.label()"
+          :required="field.required"
+            :path="field.key"
               class="fcurd-form__item"
+              v-bind="field.ui?.formItemProps"
             >
               <component
                 :is="controlMap[field.type] || controlMap.text"
                 v-model="formModel[field.key]"
                 :field="field"
+                v-bind="field.ui?.naiveProps"
               />
             </NFormItem>
           </div>

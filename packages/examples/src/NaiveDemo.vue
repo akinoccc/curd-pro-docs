@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { CrudAdapter, CrudField, CrudTableColumn } from '@fcurd/core'
-import { NaiveAutoCrud } from '@fcurd/naive-ui'
+import type { CrudAdapter, CrudField } from '@fcurd/core'
+import { createNaiveColumns, NaiveAutoCrud } from '@fcurd/naive-ui'
 
 interface DemoClient {
   id: number
@@ -15,19 +15,38 @@ const fields: CrudField<DemoClient, DemoClient>[] = [
     type: 'text',
     required: true,
     visibleIn: { table: true, search: true, form: true },
+    ui: {
+      naiveProps: { clearable: true, maxlength: 30 },
+      naiveColumn: { ellipsis: true },
+    },
   },
   {
     key: 'email',
     label: () => '邮箱',
     type: 'text',
+    required: true,
+    rules: [
+      {
+        trigger: ['blur', 'submit'],
+        validator: ({ value }) =>
+          /^[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}$/.test(value || '') || '邮箱格式不正确',
+      },
+    ],
     visibleIn: { table: true, search: true, form: true },
+    ui: {
+      naiveProps: { clearable: true },
+      naiveColumn: { ellipsis: true },
+    },
   },
 ]
 
-const columns: CrudTableColumn<DemoClient>[] = [
-  { field: fields[0], width: 150, searchable: 'input' },
-  { field: fields[1], width: 200, searchable: 'input' },
-]
+const columns = createNaiveColumns<DemoClient>(fields, {
+  defaults: { searchable: 'input' },
+  overrides: {
+    name: { width: 150 },
+    email: { width: 200 },
+  },
+})
 
 let idSeed = 4
 const mockData: DemoClient[] = [
@@ -51,6 +70,7 @@ const mockData: DemoClient[] = [
 const adapter: CrudAdapter<DemoClient> = {
   async list(params) {
     const { page, pageSize, query } = params
+    console.log('list', params)
     const filtered = mockData.filter((item) => {
       if (query.name && !item.name.includes(query.name)) return false
       if (query.email && !item.email.includes(query.email)) return false
@@ -95,6 +115,14 @@ const adapter: CrudAdapter<DemoClient> = {
       :table-columns="columns"
       :search-fields="fields"
       form-mode="modal"
-    />
+    >
+      <!-- 自定义行操作示例：使用默认 actions 并自定义排序 -->
+      <template #row-actions="{ row, defaultActions }">
+        <!-- 这里演示：先删除、再编辑 -->
+        <component :is="defaultActions.Delete" :row="row" />
+        <div>测试</div>
+        <component :is="defaultActions.Edit" :row="row" />
+      </template>
+    </NaiveAutoCrud>
   </div>
 </template>

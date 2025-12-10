@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { NInputNumber } from 'naive-ui'
 import type { BaseControlProps } from '@fcurd/core'
 
@@ -8,17 +9,22 @@ interface NaiveNumberFieldProps extends BaseControlProps<number | null> {
   step?: number
 }
 
+const modelValue = defineModel<number | null>()
 const props = defineProps<NaiveNumberFieldProps>()
+
+const controlProps = computed<Record<string, any>>(
+  () => props.field.ui?.naiveProps ?? {},
+)
 </script>
 
 <template>
   <NInputNumber
-    :value="props.modelValue ?? null"
+    v-model:value="modelValue"
     :min="props.min"
     :max="props.max"
     :step="props.step"
     :disabled="props.disabled"
     :placeholder="props.placeholder ?? props.field.label()"
-    @update:value="val => props['onUpdate:modelValue'](val as number | null)"
+    v-bind="controlProps"
   />
 </template>

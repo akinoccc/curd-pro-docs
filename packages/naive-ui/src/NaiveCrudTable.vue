@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, h, inject, ref, useSlots } from 'vue'
+import { computed, h, inject, ref, useSlots, VNodeChild } from 'vue'
 import type { CrudTableColumn, UseCrudReturn } from '@fcurd/core'
 import {
   CrudColumnsSymbol,
@@ -8,6 +8,7 @@ import {
 } from '@fcurd/vue'
 import { NDataTable, NCheckbox, NPagination, NSpace } from 'naive-ui'
 import type { DataTableColumn } from 'naive-ui'
+import { InternalRowData } from 'naive-ui/es/data-table/src/interface'
 
 interface NaiveCrudTableProps<Row = any> {
   columns?: CrudTableColumn<Row>[]
@@ -18,14 +19,13 @@ interface NaiveCrudTableProps<Row = any> {
 const props = defineProps<NaiveCrudTableProps<any>>()
 
 const crud = inject(CrudInstanceSymbol) as UseCrudReturn<any> | undefined
+// CrudProvider 提供的是 CrudTableColumn，这里通过扩展类型 NaiveCrudTableColumn 增强能力
 const providedColumns = inject(CrudColumnsSymbol) as CrudTableColumn<any>[] | undefined
 const selection = inject(CrudSelectionSymbol, ref<any[]>([]))
 
 const slots = useSlots()
 
-const columns = computed(
-  () => (props.columns ?? providedColumns ?? []) as CrudTableColumn<any>[],
-)
+const columns = computed(() => (props.columns ?? providedColumns ?? []) as CrudTableColumn<any>[])
 
 function isSelected(row: any): boolean {
   return selection.value.includes(row)
@@ -44,25 +44,39 @@ const naiveColumns = computed<DataTableColumn[]>(() => {
   const baseColumns: DataTableColumn[] = columns.value.map((column) => {
     const field = column.field
     const cellSlot = slots[`cell-${field.key}`]
+    const naiveColumn = (column as any).naiveColumn ?? column.ui?.naiveColumn
 
-    return {
+    // 基础映射：保持 CrudTableColumn 的语义
+    const base: DataTableColumn = {
       key: field.key,
       title: field.label(),
       width: column.width,
       minWidth: column.minWidth,
       fixed: column.fixed,
       sorter: column.sortable ? 'default' : undefined,
-      render(row: any) {
+      render(row: InternalRowData, rowIndex: number): VNodeChild {
         if (cellSlot) {
           const content = cellSlot({
             row,
             field,
+            rowIndex,
           })
           return Array.isArray(content) ? content[0] : content
         }
-        return (row as any)[field.key]
+        return row[field.key] as any
       },
     }
+
+    // 透传并合并用户提供的 Naive UI 列配置（例如 filters / ellipsis / align / sorter 等）
+    if (naiveColumn) {
+      const extra = naiveColumn as DataTableColumn
+      return {
+        ...base,
+        ...extra,
+      } as DataTableColumn
+    }
+
+    return base
   })
 
   const result: DataTableColumn[] = []
@@ -87,6 +101,7 @@ const naiveColumns = computed<DataTableColumn[]>(() => {
     const actionsHeader = slots['actions-header']
     result.push({
       key: '__actions',
+      minWidth: 'fit',
       title: () => {
         if (actionsHeader) {
           const content = actionsHeader()
@@ -119,7 +134,7 @@ const naiveColumns = computed<DataTableColumn[]>(() => {
 const tableData = computed<any[]>(() => {
   if (!crud || !crud.rows) return []
   // useCrud 返回的是 ref，所以这里取 .value
-  return (crud.rows as any).value ?? []
+  return crud.rows?.value ?? []
 })
 </script>
 

@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import { NSelect } from 'naive-ui'
 import type { NaiveSelectFieldProps } from './controls'
 import { DictApiSymbol } from '@fcurd/vue'
 import { useDict } from '@fcurd/core'
 
+const modelValue = defineModel<string | number | (string | number)[] | null>()
 const props = defineProps<NaiveSelectFieldProps>()
 
 const dictApi = inject(DictApiSymbol)
 const optionsRef = ref(props.options)
 const loading = ref(false)
+
+const controlProps = computed<Record<string, any>>(
+  () => props.field.ui?.naiveProps ?? {},
+)
 
 onMounted(async () => {
   if (!dictApi || !props.field.dictKey) return
@@ -27,13 +32,13 @@ onMounted(async () => {
 
 <template>
   <NSelect
-    :value="props.modelValue"
+    v-model:value="modelValue"
     :options="optionsRef"
     :multiple="props.multiple"
     :clearable="props.clearable"
     :disabled="props.disabled"
     :placeholder="props.placeholder ?? props.field.label()"
     :loading="loading"
-    @update:value="val => props['onUpdate:modelValue'](val as any)"
+    v-bind="controlProps"
   />
 </template>

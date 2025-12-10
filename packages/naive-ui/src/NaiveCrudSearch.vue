@@ -10,6 +10,7 @@ import { NButton, NForm, NFormItem, NSpace } from 'naive-ui'
 
 interface NaiveCrudSearchProps<Row = any> {
   fields?: CrudField<Row, any>[]
+  formProps?: Record<string, any>
 }
 
 const props = defineProps<NaiveCrudSearchProps<any>>()
@@ -70,6 +71,7 @@ function handleReset(): void {
         size="small"
         label-placement="left"
         label-align="right"
+        v-bind="props.formProps"
         @submit.prevent="handleSubmit"
       >
         <div class="fcurd-search__fields">
@@ -78,11 +80,13 @@ function handleReset(): void {
             :key="field.key"
             :label="field.label()"
             class="fcurd-search__item"
+            v-bind="field.ui?.searchItemProps"
           >
             <component
               :is="controlMap[field.type] || controlMap.text"
               v-model="formModel[field.key]"
               :field="field"
+              v-bind="field.ui?.naiveProps"
             />
           </NFormItem>
         </div>
