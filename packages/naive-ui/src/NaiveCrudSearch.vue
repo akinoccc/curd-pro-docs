@@ -47,7 +47,7 @@ try {
   routerRef.value = useRouter()
 }
 catch (_error) {
-  // allow using component without vue-router
+  // allow using component without vue-router; fallback to window.location
 }
 
 const enableRouteSync = computed(() => Boolean(routeRef.value && routerRef.value))
@@ -75,6 +75,16 @@ function normalizeRouteQuery(query: LocationQuery): Record<string, any> {
       continue
     }
     normalized[key] = value
+  }
+  return normalized
+}
+
+function normalizeSearchParams(params: URLSearchParams): Record<string, any> {
+  const normalized: Record<string, any> = {}
+  for (const key of searchKeys.value) {
+    const values = params.getAll(key)
+    if (values.length === 0) continue
+    normalized[key] = values.length === 1 ? values[0] : [...values]
   }
   return normalized
 }
@@ -127,9 +137,17 @@ function applyFromCrud(): void {
   Object.assign(formModel, fromCrud)
 }
 
+function readQueryFromExternal(): Record<string, any> {
+  if (enableRouteSync.value && routeRef.value) {
+    return normalizeRouteQuery(routeRef.value.query)
+  }
+  if (typeof window === 'undefined') return {}
+  const params = new URLSearchParams(window.location.search)
+  return normalizeSearchParams(params)
+}
+
 function applyFromRoute(shouldFetch: boolean): void {
-  if (!enableRouteSync.value || !routeRef.value) return
-  const fromRoute = normalizeRouteQuery(routeRef.value.query)
+  const fromRoute = readQueryFromExternal()
   if (!Object.keys(fromRoute).length) return
   const current = pickSearchQuery(formModel)
   if (isQueryEqual(fromRoute, current)) return
@@ -151,12 +169,7 @@ onMounted(() => {
   hasMounted.value = true
 })
 
-function syncRouteQuery(nextSearch: Record<string, any>): void {
-  if (!enableRouteSync.value || !routeRef.value || !routerRef.value) return
-  const base: LocationQueryRaw = { ...routeRef.value.query }
-  searchKeys.value.forEach((key) => {
-    delete base[key]
-  })
+function buildNormalizedSearch(nextSearch: Record<string, any>): LocationQueryRaw {
   const normalized: LocationQueryRaw = {}
   Object.entries(nextSearch).forEach(([key, value]) => {
     if (value === undefined || value === null) return
@@ -167,7 +180,33 @@ function syncRouteQuery(nextSearch: Record<string, any>): void {
     }
     normalized[key] = value as any
   })
-  void routerRef.value.replace({ query: { ...base, ...normalized } })
+  return normalized
+}
+
+function syncRouteQuery(nextSearch: Record<string, any>): void {
+  const normalized = buildNormalizedSearch(nextSearch)
+  if (enableRouteSync.value && routeRef.value && routerRef.value) {
+    const base: LocationQueryRaw = { ...routeRef.value.query }
+    searchKeys.value.forEach((key) => {
+      delete base[key]
+    })
+    void routerRef.value.replace({ query: { ...base, ...normalized } })
+    return
+  }
+  if (typeof window === 'undefined') return
+  const url = new URL(window.location.href)
+  const params = new URLSearchParams(url.search)
+  searchKeys.value.forEach((key) => params.delete(key))
+  Object.entries(normalized).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((v) => params.append(key, `${v}`))
+    }
+    else {
+      params.set(key, `${value}`)
+    }
+  })
+  url.search = params.toString()
+  window.history.replaceState({}, '', url)
 }
 
 function handleSubmit(): void {
