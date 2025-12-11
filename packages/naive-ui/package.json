@@ -9,6 +9,10 @@
     "vue": "^3.4.0",
     "naive-ui": "^2.39.0",
     "@fcurd/core": "workspace:*",
-    "@fcurd/vue": "workspace:*"
+    "@fcurd/vue": "workspace:*",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "vue-router": "^4.6.0"
   }
 }

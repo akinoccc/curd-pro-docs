@@ -6,5 +6,8 @@
   "scripts": {
     "build": "echo \"no-op build for now\"",
     "lint": "echo \"no-op lint for now\""
+  },
+  "devDependencies": {
+    "vue-router": "^4.6.0"
   }
 }
