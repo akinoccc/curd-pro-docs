@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, reactive, ref, watch } from 'vue'
 import type { CrudField, UseCrudReturn } from '@fcurd/core'
-import { useRoute, useRouter, type LocationQuery, type LocationQueryRaw } from 'vue-router'
+import { useRoute, useRouter, type LocationQueryRaw } from 'vue-router'
 import {
   CrudControlMapSymbol,
   CrudFieldsSymbol,
@@ -35,7 +35,6 @@ const effectiveFields = computed(() => {
   })
 })
 
-const searchKeys = computed(() => effectiveFields.value.map((field) => field.key))
 const formModel = reactive<Record<string, any>>({})
 
 const hasMounted = ref(false)
@@ -52,41 +51,31 @@ catch (_error) {
 
 const enableRouteSync = computed(() => Boolean(routeRef.value && routerRef.value))
 
-function pickSearchQuery(source: Record<string, any>): Record<string, any> {
+function pickSearchModel(source: Record<string, any>): Record<string, any> {
   const picked: Record<string, any> = {}
-  for (const key of searchKeys.value) {
-    const value = source[key]
-    if (value === undefined || value === null) continue
-    if (Array.isArray(value) && value.length === 0) continue
-    if (value === '') continue
-    picked[key] = value
-  }
+  effectiveFields.value.forEach((field) => {
+    const value = source[field.key]
+    if (value === undefined || value === null) return
+    if (Array.isArray(value) && value.length === 0) return
+    if (value === '') return
+    picked[field.key] = value
+  })
   return picked
 }
 
-function normalizeRouteQuery(query: LocationQuery): Record<string, any> {
-  const normalized: Record<string, any> = {}
-  for (const key of searchKeys.value) {
-    const value = query[key]
-    if (value === undefined || value === null) continue
-    if (Array.isArray(value)) {
-      if (value.length === 0) continue
-      normalized[key] = value.length === 1 ? value[0] : [...value]
-      continue
+function parseSearchPayload(raw: unknown): Record<string, any> {
+  if (!raw) return {}
+  if (typeof raw === 'string') {
+    try {
+      const parsed = JSON.parse(raw)
+      return typeof parsed === 'object' && parsed !== null ? parsed as Record<string, any> : {}
     }
-    normalized[key] = value
+    catch (_error) {
+      return {}
+    }
   }
-  return normalized
-}
-
-function normalizeSearchParams(params: URLSearchParams): Record<string, any> {
-  const normalized: Record<string, any> = {}
-  for (const key of searchKeys.value) {
-    const values = params.getAll(key)
-    if (values.length === 0) continue
-    normalized[key] = values.length === 1 ? values[0] : [...values]
-  }
-  return normalized
+  if (typeof raw === 'object') return raw as Record<string, any>
+  return {}
 }
 
 function toArray(value: any): any[] {
@@ -120,10 +109,11 @@ function clearFormModel(): void {
 function applyQueryToCrud(nextSearch: Record<string, any>, fetch = true): void {
   if (!crud) return
   const preserved = { ...crud.query.value }
-  searchKeys.value.forEach((key) => {
-    delete preserved[key]
-  })
-  crud.query.value = { ...preserved, ...nextSearch }
+  delete preserved.search
+  crud.query.value = {
+    ...preserved,
+    search: { ...nextSearch },
+  }
   crud.page.value = 1
   if (fetch) {
     void crud.refresh()
@@ -132,24 +122,24 @@ function applyQueryToCrud(nextSearch: Record<string, any>, fetch = true): void {
 
 function applyFromCrud(): void {
   if (!crud) return
-  const fromCrud = pickSearchQuery(crud.query.value)
+  const fromCrud = pickSearchModel(crud.query.value.search ?? {})
   if (!Object.keys(fromCrud).length) return
   Object.assign(formModel, fromCrud)
 }
 
 function readQueryFromExternal(): Record<string, any> {
   if (enableRouteSync.value && routeRef.value) {
-    return normalizeRouteQuery(routeRef.value.query)
+    return parseSearchPayload(routeRef.value.query.search)
   }
   if (typeof window === 'undefined') return {}
   const params = new URLSearchParams(window.location.search)
-  return normalizeSearchParams(params)
+  return parseSearchPayload(params.get('search'))
 }
 
 function applyFromRoute(shouldFetch: boolean): void {
   const fromRoute = readQueryFromExternal()
   if (!Object.keys(fromRoute).length) return
-  const current = pickSearchQuery(formModel)
+  const current = pickSearchModel(formModel)
   if (isQueryEqual(fromRoute, current)) return
   clearFormModel()
   Object.assign(formModel, fromRoute)
@@ -170,47 +160,29 @@ onMounted(() => {
 })
 
 function buildNormalizedSearch(nextSearch: Record<string, any>): LocationQueryRaw {
-  const normalized: LocationQueryRaw = {}
-  Object.entries(nextSearch).forEach(([key, value]) => {
-    if (value === undefined || value === null) return
-    if (Array.isArray(value)) {
-      if (value.length === 0) return
-      normalized[key] = value as any
-      return
-    }
-    normalized[key] = value as any
-  })
-  return normalized
+  if (!Object.keys(nextSearch).length) return {}
+  return { search: JSON.stringify(nextSearch) }
 }
 
 function syncRouteQuery(nextSearch: Record<string, any>): void {
   const normalized = buildNormalizedSearch(nextSearch)
   if (enableRouteSync.value && routeRef.value && routerRef.value) {
     const base: LocationQueryRaw = { ...routeRef.value.query }
-    searchKeys.value.forEach((key) => {
-      delete base[key]
-    })
+    delete base.search
     void routerRef.value.replace({ query: { ...base, ...normalized } })
     return
   }
   if (typeof window === 'undefined') return
   const url = new URL(window.location.href)
   const params = new URLSearchParams(url.search)
-  searchKeys.value.forEach((key) => params.delete(key))
-  Object.entries(normalized).forEach(([key, value]) => {
-    if (Array.isArray(value)) {
-      value.forEach((v) => params.append(key, `${v}`))
-    }
-    else {
-      params.set(key, `${value}`)
-    }
-  })
+  params.delete('search')
+  if (normalized.search) params.set('search', `${normalized.search}`)
   url.search = params.toString()
   window.history.replaceState({}, '', url)
 }
 
 function handleSubmit(): void {
-  const next = pickSearchQuery(formModel)
+  const next = pickSearchModel(formModel)
   applyQueryToCrud(next)
   syncRouteQuery(next)
 }
