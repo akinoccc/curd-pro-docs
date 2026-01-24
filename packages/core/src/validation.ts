@@ -11,21 +11,27 @@ export interface ValidationResult {
 }
 
 function toArray<T>(value: T | T[] | undefined): T[] {
-  if (value === undefined) return []
+  if (value === undefined)
+    return []
   return Array.isArray(value) ? value : [value]
 }
 
 function isEmptyValue(value: any): boolean {
-  if (value === null || value === undefined) return true
-  if (typeof value === 'string') return value.trim() === ''
-  if (Array.isArray(value)) return value.length === 0
+  if (value === null || value === undefined)
+    return true
+  if (typeof value === 'string')
+    return value.trim() === ''
+  if (Array.isArray(value))
+    return value.length === 0
   return false
 }
 
 function matchTrigger(rule: CrudFieldRule<any, any>, trigger?: CrudRuleTrigger): boolean {
-  if (!trigger) return true
+  if (!trigger)
+    return true
   const ruleTriggers = toArray(rule.trigger)
-  if (ruleTriggers.length === 0) return true
+  if (ruleTriggers.length === 0)
+    return true
   return ruleTriggers.includes(trigger)
 }
 
@@ -77,7 +83,8 @@ export async function validateFields<Row, FormModel>(
           field,
           mode,
         })
-        if (result === true || result === undefined) continue
+        if (result === true || result === undefined)
+          continue
         if (result === false) {
           messages.push(message)
           errors[field.key] = messages

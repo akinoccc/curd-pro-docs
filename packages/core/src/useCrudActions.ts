@@ -1,9 +1,9 @@
-import { ref } from 'vue'
 import type {
   CrudAction,
   CrudActionArea,
   UseCrudActionsReturn,
 } from './models'
+import { ref } from 'vue'
 
 export function useCrudActions<Row = any>(): UseCrudActionsReturn<Row> {
   const actions = ref<CrudAction<Row>[]>([])

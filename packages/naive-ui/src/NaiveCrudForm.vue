@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed, inject, reactive, ref, watch } from 'vue'
 import type { CrudField, CrudFieldRule } from '@fcurd/core'
-import { CrudControlMapSymbol } from '@fcurd/vue'
+import type { FormInst, FormItemRule, FormRules } from 'naive-ui'
+import { normalizeFieldRules } from '@fcurd/core'
+import { CrudControlMapSymbol, CrudFormModelSymbol, CrudFormModeSymbol } from '@fcurd/vue'
 import {
+
   NButton,
   NDrawer,
   NDrawerContent,
@@ -10,10 +12,20 @@ import {
   NFormItem,
   NModal,
   NSpace,
-  type FormInst,
-  type FormItemRule,
-  type FormRules,
 } from 'naive-ui'
+import { computed, inject, provide, reactive, ref, useSlots, watch } from 'vue'
+
+type NFormProps = InstanceType<typeof NForm>['$props']
+type NModalProps = InstanceType<typeof NModal>['$props']
+type NDrawerProps = InstanceType<typeof NDrawer>['$props']
+type NDrawerContentProps = InstanceType<typeof NDrawerContent>['$props']
+
+interface ForwardCrudFormProps extends Omit<NFormProps, 'model' | 'rules'> {
+  rules?: FormRules
+}
+interface ForwardModalProps extends Omit<NModalProps, 'show'> {}
+interface ForwardDrawerProps extends Omit<NDrawerProps, 'show'> {}
+interface ForwardDrawerContentProps extends Omit<NDrawerContentProps, 'title'> {}
 
 interface NaiveCrudFormProps<Row = any> {
   modelValue?: boolean
@@ -21,19 +33,22 @@ interface NaiveCrudFormProps<Row = any> {
   row?: Row | null
   fields?: CrudField<Row, Row>[]
   layout?: any
-  title?: string | ((payload: { mode: 'create' | 'edit'; row?: Row | null }) => string)
+  title?: string | ((payload: { mode: 'create' | 'edit', row?: Row | null }) => string)
   resetOnClose?: boolean
-  formProps?: Record<string, any>
+  formProps?: ForwardCrudFormProps
+  modalProps?: ForwardModalProps
+  drawerProps?: ForwardDrawerProps
+  drawerContentProps?: ForwardDrawerContentProps
 }
 
 interface NaiveCrudFormEmits<Row = any> {
   (e: 'update:modelValue', visible: boolean): void
-  (e: 'submit', payload: { mode: 'create' | 'edit'; data: Partial<Row> }): void
-  (e: 'success', payload: { mode: 'create' | 'edit'; data: Row }): void
+  (e: 'submit', payload: { mode: 'create' | 'edit', data: Partial<Row> }): void
+  (e: 'success', payload: { mode: 'create' | 'edit', data: Row }): void
   (e: 'error', error: unknown): void
-  (e: 'open', payload: { mode: 'create' | 'edit'; row?: Row | null }): void
+  (e: 'open', payload: { mode: 'create' | 'edit', row?: Row | null }): void
   (e: 'close'): void
-  (e: 'form-model-ready', model: Row, mode: 'create' | 'edit'): void
+  (e: 'formModelReady', model: Row, mode: 'create' | 'edit'): void
 }
 
 const props = defineProps<NaiveCrudFormProps<any>>()
@@ -41,6 +56,7 @@ const emit = defineEmits<NaiveCrudFormEmits<any>>()
 
 const controlMap = inject(CrudControlMapSymbol)
 const formRef = ref<FormInst | null>(null)
+const slots = useSlots()
 
 const visible = computed<boolean>({
   get() {
@@ -56,9 +72,31 @@ const mode = computed<'create' | 'edit'>(() => (props.row ? 'edit' : 'create'))
 const effectiveFormMode = computed<'modal' | 'drawer' | 'inline'>(() => props.formMode ?? 'modal')
 
 const formModel = reactive<Record<string, any>>({})
+
+// 向自定义表单控件暴露当前 formModel/mode，便于跨字段联动（例如：选图标时同步设置主题色）
+provide(CrudFormModelSymbol, formModel)
+provide(CrudFormModeSymbol, mode as any)
 const formPropsWithoutRules = computed<Record<string, any>>(() => {
   const { rules, ...rest } = props.formProps ?? {}
   return rest
+})
+
+const effectiveFields = computed(() => {
+  const list = (props.fields ?? []) as CrudField<any, any>[]
+  return list.filter((field) => {
+    const visible = field.visibleIn?.form
+    if (visible === undefined)
+      return false
+    if (typeof visible === 'boolean')
+      return visible
+    return visible({
+      surface: 'form',
+      row: props.row ?? undefined,
+      formModel,
+      query: {},
+      extra: {},
+    })
+  })
 })
 
 function toNaiveTriggers(rule: CrudFieldRule<any, any>): ('blur' | 'change' | 'input')[] {
@@ -70,6 +108,20 @@ function toNaiveTriggers(rule: CrudFieldRule<any, any>): ('blur' | 'change' | 'i
     )
 }
 
+function isEmptyForRequired(value: unknown): boolean {
+  if (value === null || value === undefined)
+    return true
+  if (typeof value === 'string')
+    return value.length === 0
+  if (typeof value === 'number')
+    return Number.isNaN(value)
+  if (Array.isArray(value))
+    return value.length === 0
+  if (value instanceof Set || value instanceof Map)
+    return value.size === 0
+  return false
+}
+
 function mapToNaiveRule(
   rule: CrudFieldRule<any, any>,
   field: CrudField<any, any>,
@@ -77,24 +129,31 @@ function mapToNaiveRule(
   const message = rule.message ?? `${field.label()}为必填项`
   const triggers = toNaiveTriggers(rule)
   const baseRule: FormItemRule = {
-    required: rule.required,
     message,
   }
   if (triggers.length) {
     baseRule.trigger = triggers
   }
   const validator = rule.validator
-  if (validator) {
+  if (rule.required || validator) {
+    // 统一必填判空逻辑，避免 0/false 等值被误判为空（尤其是数字输入场景）
     baseRule.validator = async (_r, value) => {
+      if (rule.required && isEmptyForRequired(value))
+        throw new Error(message)
+      if (!validator)
+        return
       const result = await validator({
         value,
         field,
         model: formModel,
         mode: mode.value,
       })
-      if (result === true || result === undefined) return
-      if (result === false) throw new Error(message)
-      if (typeof result === 'string') throw new Error(result)
+      if (result === true || result === undefined)
+        return
+      if (result === false)
+        throw new Error(message)
+      if (typeof result === 'string')
+        throw new Error(result)
       throw new Error(message)
     }
   }
@@ -114,10 +173,11 @@ function mergeRules(builtin: FormRules, external?: FormRules): FormRules {
 
 const builtinFormRules = computed<FormRules>(() => {
   const rules: FormRules = {}
-  for (const field of props.fields || []) {
-    const selfRules = field.rules ?? []
-    if (!selfRules.length) continue
-    rules[field.key] = selfRules.map(rule => mapToNaiveRule(rule, field))
+  for (const field of effectiveFields.value) {
+    const normalized = normalizeFieldRules(field, mode.value)
+    if (!normalized.length)
+      continue
+    rules[field.key] = normalized.map(rule => mapToNaiveRule(rule, field))
   }
   return rules
 })
@@ -126,16 +186,30 @@ const mergedFormRules = computed<FormRules>(() =>
   mergeRules(builtinFormRules.value, props.formProps?.rules as FormRules | undefined),
 )
 
+function getFieldSlotName(fieldKey: string): string | null {
+  // 兼容两种命名：
+  // - #field-xxx（推荐）
+  // - #field_xxx（业务侧常见写法）
+  const candidates = [
+    `field-${fieldKey}`,
+    `field_${fieldKey}`,
+  ]
+  for (const name of candidates) {
+    if (slots[name])
+      return name
+  }
+  return null
+}
+
 function initFormModel(): void {
   Object.keys(formModel).forEach((key) => {
-    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete formModel[key]
   })
   if (props.row) {
     Object.assign(formModel, props.row)
   }
   formRef.value?.restoreValidation()
-  emit('form-model-ready', formModel as any, mode.value)
+  emit('formModelReady', formModel as any, mode.value)
 }
 
 watch(
@@ -154,13 +228,15 @@ watch(
     }
     else {
       emit('close')
-      if (props.resetOnClose) initFormModel()
+      if (props.resetOnClose)
+        initFormModel()
     }
   },
 )
 
 async function validateOnSubmit(): Promise<boolean> {
-  if (!formRef.value) return true
+  if (!formRef.value)
+    return true
   try {
     await formRef.value.validate()
     return true
@@ -172,7 +248,8 @@ async function validateOnSubmit(): Promise<boolean> {
 
 async function handleSubmit(): Promise<void> {
   const valid = await validateOnSubmit()
-  if (!valid) return
+  if (!valid)
+    return
   emit('submit', { mode: mode.value, data: { ...formModel } })
 }
 
@@ -185,19 +262,19 @@ async function handleSubmit(): Promise<void> {
     v-if="effectiveFormMode === 'inline'"
     class="fcurd-form fcurd-form--naive"
   >
-    <header v-if="title" class="fcurd-form__header">
+    <header
+      v-if="title"
+      class="fcurd-form__header"
+    >
       <h3 class="fcurd-form__title">
         {{ typeof title === 'function' ? title({ mode, row }) : title }}
       </h3>
     </header>
 
     <NForm
+      ref="formRef"
       class="fcurd-form__body"
       :model="formModel"
-      size="small"
-      label-placement="left"
-      label-align="right"
-      ref="formRef"
       :rules="mergedFormRules"
       v-bind="formPropsWithoutRules"
       @submit.prevent="handleSubmit"
@@ -209,19 +286,29 @@ async function handleSubmit(): Promise<void> {
       >
         <div v-if="controlMap">
           <NFormItem
-            v-for="field in fields || []"
+            v-for="field in effectiveFields"
             :key="field.key"
             :label="field.label()"
-          :required="field.required"
+            :required="field.required"
             :path="field.key"
             class="fcurd-form__item"
-            v-bind="field.ui?.formItemProps"
+            v-bind="field.ui?.naive?.formItemProps"
           >
+            <slot
+              v-if="getFieldSlotName(field.key)"
+              :name="getFieldSlotName(field.key)!"
+              :field="field"
+              :model="formModel"
+              :mode="mode"
+              :row="row"
+              :value="formModel[field.key]"
+            />
             <component
-              :is="controlMap[field.type] || controlMap.text"
+              :is="field.ui?.naive?.component || controlMap[field.type] || controlMap.text"
+              v-else
               v-model="formModel[field.key]"
               :field="field"
-              v-bind="field.ui?.naiveProps"
+              v-bind="field.ui?.naive?.controlProps"
             />
           </NFormItem>
         </div>
@@ -235,11 +322,20 @@ async function handleSubmit(): Promise<void> {
           :submit="handleSubmit"
           :reset="initFormModel"
         >
-          <NSpace :size="8" justify="end">
-            <NButton attr-type="button" @click="visible = false">
+          <NSpace
+            :size="8"
+            justify="end"
+          >
+            <NButton
+              attr-type="button"
+              @click="visible = false"
+            >
               取消
             </NButton>
-            <NButton type="primary" attr-type="submit">
+            <NButton
+              type="primary"
+              attr-type="submit"
+            >
               保存
             </NButton>
           </NSpace>
@@ -251,17 +347,18 @@ async function handleSubmit(): Promise<void> {
   <!-- modal 模式：使用 Naive UI 的 NModal -->
   <NModal
     v-else-if="effectiveFormMode === 'modal'"
+    v-bind="props.modalProps"
     v-model:show="visible"
     preset="dialog"
-    :title="typeof title === 'function' ? title({ mode, row }) : title"
+    :title="typeof title === 'function' ? title({ mode, row }) : title || mode === 'edit' ? '编辑' : '创建'"
     class="fcurd-form-modal"
   >
     <NForm
-      class="fcurd-form__body"
+      ref="formRef"
+      class="fcurd-form__body py-2"
       :model="formModel"
       size="small"
       label-placement="top"
-      ref="formRef"
       :rules="mergedFormRules"
       v-bind="formPropsWithoutRules"
       @submit.prevent="handleSubmit"
@@ -273,19 +370,29 @@ async function handleSubmit(): Promise<void> {
       >
         <div v-if="controlMap">
           <NFormItem
-            v-for="field in fields || []"
+            v-for="field in effectiveFields"
             :key="field.key"
             :label="field.label()"
-          :required="field.required"
+            :required="field.required"
             :path="field.key"
             class="fcurd-form__item"
-            v-bind="field.ui?.formItemProps"
+            v-bind="field.ui?.naive?.formItemProps"
           >
+            <slot
+              v-if="getFieldSlotName(field.key)"
+              :name="getFieldSlotName(field.key)!"
+              :field="field"
+              :model="formModel"
+              :mode="mode"
+              :row="row"
+              :value="formModel[field.key]"
+            />
             <component
-              :is="controlMap[field.type] || controlMap.text"
+              :is="field.ui?.naive?.component || controlMap[field.type] || controlMap.text"
+              v-else
               v-model="formModel[field.key]"
               :field="field"
-              v-bind="field.ui?.naiveProps"
+              v-bind="field.ui?.naive?.controlProps"
             />
           </NFormItem>
         </div>
@@ -299,11 +406,20 @@ async function handleSubmit(): Promise<void> {
           :submit="handleSubmit"
           :reset="initFormModel"
         >
-          <NSpace :size="8" justify="end">
-            <NButton attr-type="button" @click="visible = false">
+          <NSpace
+            :size="8"
+            justify="end"
+          >
+            <NButton
+              attr-type="button"
+              @click="visible = false"
+            >
               取消
             </NButton>
-            <NButton type="primary" attr-type="submit">
+            <NButton
+              type="primary"
+              attr-type="submit"
+            >
               保存
             </NButton>
           </NSpace>
@@ -315,20 +431,22 @@ async function handleSubmit(): Promise<void> {
   <!-- drawer 模式：使用 Naive UI 的 NDrawer -->
   <NDrawer
     v-else
+    v-bind="props.drawerProps"
     v-model:show="visible"
     :width="420"
     placement="right"
     class="fcurd-form-drawer"
   >
     <NDrawerContent
+      v-bind="props.drawerContentProps"
       :title="typeof title === 'function' ? title({ mode, row }) : title"
     >
       <NForm
+        ref="formRef"
         class="fcurd-form__body"
         :model="formModel"
         size="small"
         label-placement="top"
-        ref="formRef"
         :rules="mergedFormRules"
         v-bind="formPropsWithoutRules"
         @submit.prevent="handleSubmit"
@@ -340,19 +458,29 @@ async function handleSubmit(): Promise<void> {
         >
           <div v-if="controlMap">
             <NFormItem
-              v-for="field in fields || []"
+              v-for="field in effectiveFields"
               :key="field.key"
               :label="field.label()"
-          :required="field.required"
-            :path="field.key"
+              :required="field.required"
+              :path="field.key"
               class="fcurd-form__item"
-              v-bind="field.ui?.formItemProps"
+              v-bind="field.ui?.naive?.formItemProps"
             >
+              <slot
+                v-if="getFieldSlotName(field.key)"
+                :name="getFieldSlotName(field.key)!"
+                :field="field"
+                :model="formModel"
+                :mode="mode"
+                :row="row"
+                :value="formModel[field.key]"
+              />
               <component
-                :is="controlMap[field.type] || controlMap.text"
+                :is="field.ui?.naive?.component || controlMap[field.type] || controlMap.text"
+                v-else
                 v-model="formModel[field.key]"
                 :field="field"
-                v-bind="field.ui?.naiveProps"
+                v-bind="field.ui?.naive?.controlProps"
               />
             </NFormItem>
           </div>
@@ -366,11 +494,20 @@ async function handleSubmit(): Promise<void> {
             :submit="handleSubmit"
             :reset="initFormModel"
           >
-            <NSpace :size="8" justify="end">
-              <NButton attr-type="button" @click="visible = false">
+            <NSpace
+              :size="8"
+              justify="end"
+            >
+              <NButton
+                attr-type="button"
+                @click="visible = false"
+              >
                 取消
               </NButton>
-              <NButton type="primary" attr-type="submit">
+              <NButton
+                type="primary"
+                attr-type="submit"
+              >
                 保存
               </NButton>
             </NSpace>
@@ -380,4 +517,3 @@ async function handleSubmit(): Promise<void> {
     </NDrawerContent>
   </NDrawer>
 </template>
-

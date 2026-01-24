@@ -2,12 +2,18 @@
   "name": "curd-pro",
   "private": true,
   "version": "0.1.0",
-  "packageManager": "pnpm@9.0.0",
+  "packageManager": "pnpm@10.0.0",
   "scripts": {
-    "build": "echo \"no-op build for now\"",
-    "lint": "echo \"no-op lint for now\""
+    "dev:playground": "pnpm --filter @fcurd/playground dev",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "devDependencies": {
-    "vue-router": "^4.6.0"
+    "@antfu/eslint-config": "^7.2.0",
+    "eslint": "^9.39.2",
+    "typescript": "^5.7.3",
+    "vue": "^3.4.0",
+    "vue-router": "^4.6.0",
+    "vue-tsc": "^3.2.3"
   }
 }

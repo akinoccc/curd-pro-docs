@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { NDatePicker } from 'naive-ui'
 import type { BaseControlProps } from '@fcurd/core'
+import { NDatePicker } from 'naive-ui'
+import { computed } from 'vue'
 
 interface NaiveDateFieldProps extends BaseControlProps<string | null> {
   type?: 'date' | 'datetime'
 }
 
-const modelValue = defineModel<string | null>()
 const props = defineProps<NaiveDateFieldProps>()
-
+const modelValue = defineModel<string | null>()
 const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.naiveProps ?? {},
+  () => props.field.ui?.naive?.controlProps ?? {},
 )
 </script>
 

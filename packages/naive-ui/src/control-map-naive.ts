@@ -1,8 +1,9 @@
 import type { CrudControlMap } from '@fcurd/vue'
-import NaiveTextField from './NaiveTextField.vue'
-import NaiveSelectField from './NaiveSelectField.vue'
 import NaiveDateField from './NaiveDateField.vue'
 import NaiveNumberField from './NaiveNumberField.vue'
+import NaiveSelectField from './NaiveSelectField.vue'
+import NaiveSwitchField from './NaiveSwitchField.vue'
+import NaiveTextField from './NaiveTextField.vue'
 
 export const naiveControlMap: CrudControlMap = {
   text: NaiveTextField,
@@ -11,7 +12,7 @@ export const naiveControlMap: CrudControlMap = {
   date: NaiveDateField,
   datetime: NaiveDateField,
   number: NaiveNumberField,
-  switch: NaiveNumberField,
+  switch: NaiveSwitchField,
   money: NaiveNumberField,
   custom: NaiveTextField,
 }

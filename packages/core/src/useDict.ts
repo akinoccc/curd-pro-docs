@@ -1,6 +1,6 @@
-import { ref } from 'vue'
-import type { DictApi, DictItem } from './models'
 import type { Ref } from 'vue'
+import type { DictApi, DictCenter, DictItem } from './models'
+import { ref } from 'vue'
 
 export interface UseDictLoadResult {
   options: Ref<DictItem[]>
@@ -8,36 +8,77 @@ export interface UseDictLoadResult {
   error: Ref<unknown | null>
 }
 
-export function useDict(dictApi: DictApi) {
-  const cache = new Map<string, Ref<DictItem[]>>()
-  const loadingMap = new Map<string, Ref<boolean>>()
-  const errorMap = new Map<string, Ref<unknown | null>>()
+interface DictEntry {
+  options: Ref<DictItem[]>
+  loading: Ref<boolean>
+  error: Ref<unknown | null>
+  inFlight: Promise<void> | null
+}
 
-  async function load(key: string): Promise<UseDictLoadResult> {
-    if (!cache.has(key)) cache.set(key, ref<DictItem[]>([]))
-    if (!loadingMap.has(key)) loadingMap.set(key, ref(false))
-    if (!errorMap.has(key)) errorMap.set(key, ref<unknown | null>(null))
+export function createDictCenter(dictApi: DictApi): DictCenter {
+  const entries = new Map<string, DictEntry>()
 
-    const optionsRef = cache.get(key)!
-    const loading = loadingMap.get(key)!
-    const error = errorMap.get(key)!
-
-    if (optionsRef.value.length === 0 && !loading.value) {
-      loading.value = true
-      error.value = null
-      try {
-        optionsRef.value = await dictApi.getOptions(key)
-      }
-      catch (e) {
-        error.value = e
-      }
-      finally {
-        loading.value = false
-      }
+  function ensure(key: string): DictEntry {
+    const existing = entries.get(key)
+    if (existing)
+      return existing
+    const created: DictEntry = {
+      options: ref<DictItem[]>([]),
+      loading: ref(false),
+      error: ref<unknown | null>(null),
+      inFlight: null,
     }
-
-    return { options: optionsRef, loading, error }
+    entries.set(key, created)
+    return created
   }
 
-  return { load }
+  async function load(key: string): Promise<UseDictLoadResult> {
+    const entry = ensure(key)
+
+    // 已经有数据：直接返回 refs
+    if (entry.options.value.length > 0)
+      return { options: entry.options, loading: entry.loading, error: entry.error }
+
+    // 正在请求：等待同一个 inFlight（并发去重）
+    if (entry.inFlight) {
+      await entry.inFlight
+      return { options: entry.options, loading: entry.loading, error: entry.error }
+    }
+
+    entry.loading.value = true
+    entry.error.value = null
+
+    entry.inFlight = (async () => {
+      try {
+        entry.options.value = await dictApi.getOptions(key)
+      }
+      catch (e) {
+        entry.error.value = e
+      }
+      finally {
+        entry.loading.value = false
+        entry.inFlight = null
+      }
+    })()
+
+    await entry.inFlight
+    return { options: entry.options, loading: entry.loading, error: entry.error }
+  }
+
+  function invalidate(key?: string): void {
+    if (!key) {
+      entries.clear()
+      return
+    }
+    entries.delete(key)
+  }
+
+  return { load, invalidate }
+}
+
+/**
+ * 兼容旧入口：返回一个新的 DictCenter（但请在 Provider 层复用同一个实例）
+ */
+export function useDict(dictApi: DictApi): DictCenter {
+  return createDictCenter(dictApi)
 }
