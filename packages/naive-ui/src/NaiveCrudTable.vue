@@ -19,7 +19,7 @@ interface ForwardDataTableProps extends Omit<NDataTableProps, 'columns' | 'data'
 interface ForwardPaginationProps extends Omit<NPaginationProps, 'page' | 'pageSize' | 'itemCount'> {}
 
 interface NaiveCrudTableProps<Row = any> {
-  columns?: CrudTableColumn<Row>[]
+  columns?: readonly CrudTableColumn<Row>[]
   showSelection?: boolean
   showActionsColumn?: boolean
   dataTableProps?: ForwardDataTableProps
@@ -93,7 +93,7 @@ const naiveColumns = computed<DataTableColumn[]>(() => {
     // - #cell-xxx（推荐，历史实现）
     // - #cell_xxx（业务侧常见写法）
     const cellSlot = slots[`cell-${field.key}`] ?? slots[`cell_${field.key}`]
-    const naiveColumnProps = column.ui?.naive?.columnProps
+    const naiveColumnProps = (column.ui as any)?.column
     const cellRender = column.cellRender
 
     // 获取当前排序状态（用于高亮当前排序列）

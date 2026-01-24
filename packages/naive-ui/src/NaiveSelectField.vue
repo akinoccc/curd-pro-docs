@@ -13,7 +13,7 @@ const loading = ref(false)
 const error = ref<unknown | null>(null)
 
 const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.naive?.controlProps ?? {},
+  () => props.field.ui?.control ?? {},
 )
 
 watch(

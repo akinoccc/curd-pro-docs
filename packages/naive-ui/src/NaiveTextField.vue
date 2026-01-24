@@ -6,7 +6,7 @@ import { computed } from 'vue'
 const props = defineProps<NaiveTextFieldProps>()
 const modelValue = defineModel<string | null>()
 const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.naive?.controlProps ?? {},
+  () => props.field.ui?.control ?? {},
 )
 
 const inputType = computed(() => {

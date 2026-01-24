@@ -12,7 +12,7 @@ interface NaiveNumberFieldProps extends BaseControlProps<number | null> {
 const props = defineProps<NaiveNumberFieldProps>()
 const modelValue = defineModel<number | null>()
 const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.naive?.controlProps ?? {},
+  () => props.field.ui?.control ?? {},
 )
 </script>
 

@@ -10,7 +10,7 @@ interface NaiveDateRangeFieldProps extends BaseControlProps<[string, string] | n
 const props = defineProps<NaiveDateRangeFieldProps>()
 const modelValue = defineModel<[string, string] | null>()
 const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.naive?.controlProps ?? {},
+  () => props.field.ui?.control ?? {},
 )
 
 const valueTs = computed<[number, number] | null>(() => {

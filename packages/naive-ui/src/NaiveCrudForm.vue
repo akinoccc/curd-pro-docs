@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import type { CrudField, CrudFieldRule } from '@fcurd/core'
+import type { CrudField } from '@fcurd/core'
 import type { FormInst, FormItemRule, FormRules } from 'naive-ui'
-import { normalizeFieldRules } from '@fcurd/core'
 import { CrudControlMapSymbol, CrudFormModelSymbol, CrudFormModeSymbol } from '@fcurd/vue'
 import {
 
@@ -76,10 +75,6 @@ const formModel = reactive<Record<string, any>>({})
 // 向自定义表单控件暴露当前 formModel/mode，便于跨字段联动（例如：选图标时同步设置主题色）
 provide(CrudFormModelSymbol, formModel)
 provide(CrudFormModeSymbol, mode as any)
-const formPropsWithoutRules = computed<Record<string, any>>(() => {
-  const { rules, ...rest } = props.formProps ?? {}
-  return rest
-})
 
 const effectiveFields = computed(() => {
   const list = (props.fields ?? []) as CrudField<any, any>[]
@@ -99,67 +94,6 @@ const effectiveFields = computed(() => {
   })
 })
 
-function toNaiveTriggers(rule: CrudFieldRule<any, any>): ('blur' | 'change' | 'input')[] {
-  const triggers = Array.isArray(rule.trigger) ? rule.trigger : rule.trigger ? [rule.trigger] : []
-  return triggers
-    .filter(
-      (trigger): trigger is 'blur' | 'change' | 'input' =>
-        trigger === 'blur' || trigger === 'change' || trigger === 'input',
-    )
-}
-
-function isEmptyForRequired(value: unknown): boolean {
-  if (value === null || value === undefined)
-    return true
-  if (typeof value === 'string')
-    return value.length === 0
-  if (typeof value === 'number')
-    return Number.isNaN(value)
-  if (Array.isArray(value))
-    return value.length === 0
-  if (value instanceof Set || value instanceof Map)
-    return value.size === 0
-  return false
-}
-
-function mapToNaiveRule(
-  rule: CrudFieldRule<any, any>,
-  field: CrudField<any, any>,
-): FormItemRule {
-  const message = rule.message ?? `${field.label()}为必填项`
-  const triggers = toNaiveTriggers(rule)
-  const baseRule: FormItemRule = {
-    message,
-  }
-  if (triggers.length) {
-    baseRule.trigger = triggers
-  }
-  const validator = rule.validator
-  if (rule.required || validator) {
-    // 统一必填判空逻辑，避免 0/false 等值被误判为空（尤其是数字输入场景）
-    baseRule.validator = async (_r, value) => {
-      if (rule.required && isEmptyForRequired(value))
-        throw new Error(message)
-      if (!validator)
-        return
-      const result = await validator({
-        value,
-        field,
-        model: formModel,
-        mode: mode.value,
-      })
-      if (result === true || result === undefined)
-        return
-      if (result === false)
-        throw new Error(message)
-      if (typeof result === 'string')
-        throw new Error(result)
-      throw new Error(message)
-    }
-  }
-  return baseRule
-}
-
 function mergeRules(builtin: FormRules, external?: FormRules): FormRules {
   const merged: FormRules = external ? { ...external } : {}
   for (const [key, value] of Object.entries(builtin)) {
@@ -171,20 +105,10 @@ function mergeRules(builtin: FormRules, external?: FormRules): FormRules {
   return merged
 }
 
-const builtinFormRules = computed<FormRules>(() => {
-  const rules: FormRules = {}
-  for (const field of effectiveFields.value) {
-    const normalized = normalizeFieldRules(field, mode.value)
-    if (!normalized.length)
-      continue
-    rules[field.key] = normalized.map(rule => mapToNaiveRule(rule, field))
-  }
-  return rules
-})
-
-const mergedFormRules = computed<FormRules>(() =>
-  mergeRules(builtinFormRules.value, props.formProps?.rules as FormRules | undefined),
-)
+function getFormItemProps(field: CrudField<any, any>): Record<string, any> | undefined {
+  const ui: any = field.ui as any
+  return ui?.formItem?.form
+}
 
 function getFieldSlotName(fieldKey: string): string | null {
   // 兼容两种命名：
@@ -275,8 +199,6 @@ async function handleSubmit(): Promise<void> {
       ref="formRef"
       class="fcurd-form__body"
       :model="formModel"
-      :rules="mergedFormRules"
-      v-bind="formPropsWithoutRules"
       @submit.prevent="handleSubmit"
     >
       <slot
@@ -292,7 +214,7 @@ async function handleSubmit(): Promise<void> {
             :required="field.required"
             :path="field.key"
             class="fcurd-form__item"
-            v-bind="field.ui?.naive?.formItemProps"
+            v-bind="getFormItemProps(field)"
           >
             <slot
               v-if="getFieldSlotName(field.key)"
@@ -304,11 +226,11 @@ async function handleSubmit(): Promise<void> {
               :value="formModel[field.key]"
             />
             <component
-              :is="field.ui?.naive?.component || controlMap[field.type] || controlMap.text"
+              :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
               v-else
               v-model="formModel[field.key]"
               :field="field"
-              v-bind="field.ui?.naive?.controlProps"
+              v-bind="(field.ui as any)?.control"
             />
           </NFormItem>
         </div>
@@ -359,8 +281,6 @@ async function handleSubmit(): Promise<void> {
       :model="formModel"
       size="small"
       label-placement="top"
-      :rules="mergedFormRules"
-      v-bind="formPropsWithoutRules"
       @submit.prevent="handleSubmit"
     >
       <slot
@@ -376,7 +296,7 @@ async function handleSubmit(): Promise<void> {
             :required="field.required"
             :path="field.key"
             class="fcurd-form__item"
-            v-bind="field.ui?.naive?.formItemProps"
+            v-bind="getFormItemProps(field)"
           >
             <slot
               v-if="getFieldSlotName(field.key)"
@@ -388,11 +308,11 @@ async function handleSubmit(): Promise<void> {
               :value="formModel[field.key]"
             />
             <component
-              :is="field.ui?.naive?.component || controlMap[field.type] || controlMap.text"
+              :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
               v-else
               v-model="formModel[field.key]"
               :field="field"
-              v-bind="field.ui?.naive?.controlProps"
+              v-bind="(field.ui as any)?.control"
             />
           </NFormItem>
         </div>
@@ -447,8 +367,6 @@ async function handleSubmit(): Promise<void> {
         :model="formModel"
         size="small"
         label-placement="top"
-        :rules="mergedFormRules"
-        v-bind="formPropsWithoutRules"
         @submit.prevent="handleSubmit"
       >
         <slot
@@ -464,7 +382,7 @@ async function handleSubmit(): Promise<void> {
               :required="field.required"
               :path="field.key"
               class="fcurd-form__item"
-              v-bind="field.ui?.naive?.formItemProps"
+              v-bind="getFormItemProps(field)"
             >
               <slot
                 v-if="getFieldSlotName(field.key)"
@@ -476,11 +394,11 @@ async function handleSubmit(): Promise<void> {
                 :value="formModel[field.key]"
               />
               <component
-                :is="field.ui?.naive?.component || controlMap[field.type] || controlMap.text"
+                :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
                 v-else
                 v-model="formModel[field.key]"
                 :field="field"
-                v-bind="field.ui?.naive?.controlProps"
+                v-bind="(field.ui as any)?.control"
               />
             </NFormItem>
           </div>

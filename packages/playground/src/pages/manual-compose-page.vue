@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CrudAction, CrudActionArea, CrudActionContext } from '@fcurd/core'
 import type { DemoRow } from '../lib/memory-crud'
-import { useCrud, useCrudActions, validateFields } from '@fcurd/core'
+import { useCrud, useCrudActions } from '@fcurd/core'
 import {
   naiveControlMap,
   NaiveCrudForm,
@@ -36,7 +36,7 @@ const fields = createDemoFields()
 const tableColumns = createDemoColumns(fields)
 const message = useMessage()
 
-const crud = useCrud<DemoRow>({
+const crud = useCrud({
   adapter: store.adapter,
   debounceMs: 150,
   dedupe: true,
@@ -178,14 +178,7 @@ const ActionBar = defineComponent({
 async function handleSubmit(payload: { mode: 'create' | 'edit', data: Partial<DemoRow> }): Promise<void> {
   try {
     const { mode: submitMode, data } = payload
-    // 用 core 的 validateFields 再跑一遍（演示核心校验能力，不依赖 UI）
-    const result = await validateFields(fields, data as any, { mode: submitMode, trigger: 'submit' })
-    if (!result.valid) {
-      const firstKey = Object.keys(result.errors)[0]
-      const firstMsg = firstKey ? result.errors[firstKey]?.[0] : '校验失败'
-      message.error(firstMsg ?? '校验失败')
-      return
-    }
+    // core 已移除 crud rule 校验：表单校验由 UI 层（NaiveCrudForm + NFormItem.rule）完成
 
     if (submitMode === 'create') {
       await store.adapter.create?.(data as any)
@@ -233,8 +226,8 @@ onMounted(() => {
         useCrudActions
       </NText> 与
       <NText code>
-        validateFields
-      </NText>。
+        NaiveCrudForm
+      </NText> 的表单校验（由 UI 层规则驱动）。
     </NAlert>
 
     <CrudProvider

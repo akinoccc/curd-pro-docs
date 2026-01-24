@@ -75,10 +75,3 @@ export function createDictCenter(dictApi: DictApi): DictCenter {
 
   return { load, invalidate }
 }
-
-/**
- * 兼容旧入口：返回一个新的 DictCenter（但请在 Provider 层复用同一个实例）
- */
-export function useDict(dictApi: DictApi): DictCenter {
-  return createDictCenter(dictApi)
-}

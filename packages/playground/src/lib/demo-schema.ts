@@ -1,29 +1,34 @@
-import type { CrudField } from '@fcurd/core'
+import type { NaiveCrudField } from '@fcurd/naive-ui'
 import type { DemoRow } from './memory-crud'
-import { createNaiveColumns } from '@fcurd/naive-ui'
+import { createNaiveColumns, defineNaiveFields } from '@fcurd/naive-ui'
 
-export function createDemoFields(): CrudField<DemoRow, DemoRow>[] {
-  return [
+export function createDemoFields() {
+  return defineNaiveFields([
     {
       key: 'name',
       label: () => '名称',
       type: 'text',
       required: true,
       visibleIn: { search: true, table: true, form: true },
-      rules: [
-        {
-          trigger: ['change', 'submit'],
-          validator({ value }) {
-            const v = String(value ?? '').trim()
-            if (!v)
-              return true
-            if (v.length < 2)
-              return '名称至少 2 个字符'
-            return true
+      ui: {
+        control: { clearable: true },
+        // 单条规则直接透传到 NFormItem 的 rule
+        formItem: {
+          form: {
+            rule: {
+              trigger: ['change', 'blur', 'input'],
+              validator: async (_r, value) => {
+                const v = String(value ?? '').trim()
+                // required 由 NaiveCrudForm 自动处理（基于 field.required）
+                if (!v)
+                  return
+                if (v.length < 2)
+                  throw new Error('名称至少 2 个字符')
+              },
+            },
           },
         },
-      ],
-      ui: { naive: { controlProps: { clearable: true } } },
+      },
     },
     {
       key: 'status',
@@ -32,7 +37,7 @@ export function createDemoFields(): CrudField<DemoRow, DemoRow>[] {
       required: true,
       dictKey: 'status',
       visibleIn: { search: true, table: true, form: true },
-      ui: { naive: { controlProps: { clearable: true } } },
+      ui: { control: { clearable: true } },
     },
     {
       key: 'category',
@@ -40,7 +45,7 @@ export function createDemoFields(): CrudField<DemoRow, DemoRow>[] {
       type: 'select',
       dictKey: 'category',
       visibleIn: { search: true, table: true, form: true },
-      ui: { naive: { controlProps: { clearable: true } } },
+      ui: { control: { clearable: true } },
     },
     {
       key: 'enabled',
@@ -55,10 +60,7 @@ export function createDemoFields(): CrudField<DemoRow, DemoRow>[] {
       required: true,
       visibleIn: { search: false, table: true, form: true },
       ui: {
-        naive: {
-          controlProps: { min: 0, step: 1, placeholder: '请输入金额' },
-          columnProps: { sorter: 'default' },
-        },
+        control: { min: 0, step: 1, placeholder: '请输入金额' },
       },
     },
     {
@@ -67,10 +69,7 @@ export function createDemoFields(): CrudField<DemoRow, DemoRow>[] {
       type: 'datetime',
       visibleIn: { search: true, table: true, form: false },
       ui: {
-        naive: {
-          columnProps: { sorter: 'default' },
-          controlProps: { clearable: true },
-        },
+        control: { clearable: true },
       },
     },
     {
@@ -85,15 +84,13 @@ export function createDemoFields(): CrudField<DemoRow, DemoRow>[] {
         },
       },
       ui: {
-        naive: {
-          controlProps: { autosize: { minRows: 2, maxRows: 6 }, placeholder: '可选填写' },
-        },
+        control: { autosize: { minRows: 2, maxRows: 6 }, placeholder: '可选填写' },
       },
     },
-  ]
+  ])
 }
 
-export function createDemoColumns(fields: CrudField<DemoRow, DemoRow>[]) {
+export function createDemoColumns(fields: readonly NaiveCrudField<DemoRow, DemoRow>[]) {
   return createNaiveColumns<DemoRow>(fields, {
     overrides: {
       name: { sortable: true, width: 220 },

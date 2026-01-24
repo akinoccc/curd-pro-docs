@@ -13,18 +13,18 @@ type NFormProps = InstanceType<typeof NForm>['$props']
 interface ForwardSearchFormProps extends Omit<NFormProps, 'model'> {}
 
 interface NaiveCrudSearchProps<Row = any> {
-  fields?: CrudField<Row, any>[]
+  fields?: readonly CrudField<Row, any>[]
   formProps?: ForwardSearchFormProps
 }
 
 const props = defineProps<NaiveCrudSearchProps<any>>()
 
 const crud = inject(CrudInstanceSymbol) as UseCrudReturn<any> | undefined
-const providedFields = inject(CrudFieldsSymbol) as CrudField<any, any>[] | undefined
+const providedFields = inject(CrudFieldsSymbol) as readonly CrudField<any, any>[] | undefined
 const controlMap = inject(CrudControlMapSymbol)
 
 const effectiveFields = computed(() => {
-  const all = (props.fields ?? providedFields ?? []) as CrudField<any, any>[]
+  const all = (props.fields ?? providedFields ?? []) as readonly CrudField<any, any>[]
   return all.filter((field) => {
     const visible = field.visibleIn?.search
     if (visible === undefined)
@@ -76,13 +76,13 @@ const { handleSubmit, handleReset } = useCrudSearchRouteSync({
             class="fcurd-search__item"
             :show-feedback="false"
             :show-feedback-wrapper="false"
-            v-bind="field.ui?.naive?.searchItemProps"
+            v-bind="field.ui?.formItem?.search"
           >
             <component
-              :is="field.ui?.naive?.component || controlMap[field.type] || controlMap.text"
+              :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
               v-model="formModel[field.key]"
               :field="field"
-              v-bind="field.ui?.naive?.controlProps"
+              v-bind="(field.ui as any)?.control"
               class="fcurd-search__control"
             />
           </NFormItem>
@@ -137,8 +137,5 @@ const { handleSubmit, handleReset } = useCrudSearchRouteSync({
 .fcurd-search__actions {
   display: flex;
   gap: 8px;
-}
-
-.fcurd-search__control {
 }
 </style>

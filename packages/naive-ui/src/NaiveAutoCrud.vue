@@ -1,4 +1,7 @@
-<script setup lang="ts">
+<script setup
+  lang="ts"
+  generic="Row, RowId extends string | number = string | number, Query extends Record<string, any> = Record<string, any>, CreateInput = Partial<Row>, UpdateInput = Partial<Row>, SortField extends string = string"
+>
 import type {
   CrudAdapter,
   CrudField,
@@ -49,11 +52,18 @@ interface NaiveAutoCrudUiProps {
   }
 }
 
-interface NaiveAutoCrudProps<Row = any> {
-  adapter: CrudAdapter<Row>
-  fields: CrudField<Row, any>[]
-  tableColumns?: CrudTableColumn<Row>[]
-  searchFields?: CrudField<Row, any>[]
+interface NaiveAutoCrudProps<
+  Row = any,
+  RowId extends string | number = string | number,
+  Query extends Record<string, any> = Record<string, any>,
+  CreateInput = Partial<Row>,
+  UpdateInput = Partial<Row>,
+  SortField extends string = string,
+> {
+  adapter: CrudAdapter<Row, RowId, Query, CreateInput, UpdateInput, SortField>
+  fields: readonly CrudField<Row, any>[]
+  tableColumns?: readonly CrudTableColumn<Row>[]
+  searchFields?: readonly CrudField<Row, any>[]
   dictApi?: DictApi
   disableSearch?: boolean
   disableAdd?: boolean
@@ -75,13 +85,15 @@ interface NaiveAutoCrudEmits<Row = any> {
   (e: 'close'): void
 }
 
-const props = withDefaults(defineProps<NaiveAutoCrudProps<any>>(), {
+const props = withDefaults(defineProps<NaiveAutoCrudProps<Row, RowId, Query, CreateInput, UpdateInput, SortField>>(), {
   showSelection: false,
   showActionsColumn: true,
 })
-const emit = defineEmits<NaiveAutoCrudEmits<any>>()
+const emit = defineEmits<NaiveAutoCrudEmits<Row>>()
 
-const crud: UseCrudReturn<any> = useCrud<any>({ adapter: props.adapter })
+const crud: UseCrudReturn<Row, Query, SortField> = useCrud<Row, Query, RowId, CreateInput, UpdateInput, SortField>({
+  adapter: props.adapter,
+})
 const slots = useSlots()
 const forwardedTableSlotNames = computed(() => Object.keys(slots).filter(name => name !== 'row-actions'))
 const forwardedFormSlotNames = computed(() => {
@@ -103,12 +115,12 @@ defineExpose({
 })
 
 const visible = ref(false)
-const editingRow = ref<any | null>(null)
+const editingRow = ref<Row | null>(null)
 
 const mode = computed<'create' | 'edit'>(() => (editingRow.value ? 'edit' : 'create'))
 
 interface RowActionProps {
-  row: any
+  row: Row
 }
 
 const EditAction: FunctionalComponent<RowActionProps> = (p) => {
@@ -132,7 +144,7 @@ const DeleteAction: FunctionalComponent<RowActionProps> = (p) => {
   if (props.disableDelete || !props.adapter.remove)
     return null
 
-  const getId = props.adapter.getId ?? ((row: any) => row?.id as string | number)
+  const getId = props.adapter.getId ?? ((row: any) => row?.id as RowId)
   const rowId = getId(p.row)
 
   return h(
@@ -170,7 +182,7 @@ function openCreate(): void {
 }
 
 function openEdit(row: any): void {
-  editingRow.value = row
+  editingRow.value = row as Row
   visible.value = true
 }
 
@@ -189,7 +201,7 @@ async function handleSubmit(payload: { mode: 'create' | 'edit', data: any }): Pr
       emit('success', { mode: submitMode, data: created })
     }
     if (submitMode === 'edit' && props.adapter.update) {
-      const getId = props.adapter.getId ?? ((row: any) => row?.id as string | number)
+      const getId = props.adapter.getId ?? ((row: any) => row?.id as RowId)
       const id = editingRow.value ? getId(editingRow.value) : undefined
       if (id === undefined) {
         throw new Error('无法获取要更新的记录 ID')
@@ -209,10 +221,6 @@ function handleOpenEvent(payload: { mode: 'create' | 'edit', row?: any | null })
   emit('open', payload.mode, payload.row ?? null)
 }
 
-function handleCloseEvent(): void {
-  emit('close')
-}
-
 function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void {
   emit('formModelReady', model, currentMode)
 }
@@ -225,7 +233,7 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
     :columns="tableColumns"
     :control-map="naiveControlMap"
     :dict-api="dictApi"
-    :get-id="adapter.getId ?? ((row: any) => row?.id as string | number)"
+    :get-id="adapter.getId ?? ((row: any) => row?.id as RowId)"
   >
     <NCard title="列表">
       <template #header-extra>

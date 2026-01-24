@@ -16,7 +16,7 @@ interface CreateNaiveColumnsOptions<Row = any> {
  * 其次使用 overrides，再落到 defaults。
  */
 export function createNaiveColumns<Row = any>(
-  fields: CrudField<Row, any>[],
+  fields: readonly CrudField<Row, any>[],
   options: CreateNaiveColumnsOptions<Row> = {},
 ): CrudTableColumn<Row>[] {
   const { overrides = {}, defaults = {} } = options
@@ -29,16 +29,13 @@ export function createNaiveColumns<Row = any>(
       ...override,
     }
 
-    const baseColumnProps = field.ui?.naive?.columnProps
-    const overrideColumnProps = merged.ui?.naive?.columnProps
-    const columnProps = overrideColumnProps ?? baseColumnProps
-    if (columnProps) {
+    const baseColumn = (field.ui as any)?.column
+    const overrideColumn = (merged.ui as any)?.column
+    const column = overrideColumn ?? baseColumn
+    if (column) {
       merged.ui = {
-        ...(merged.ui ?? {}),
-        naive: {
-          ...(merged.ui?.naive ?? {}),
-          columnProps,
-        },
+        ...((merged.ui ?? {}) as any),
+        column,
       }
     }
 

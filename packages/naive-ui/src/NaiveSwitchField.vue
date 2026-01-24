@@ -8,7 +8,7 @@ interface NaiveSwitchFieldProps extends BaseControlProps<boolean | null> {}
 const props = defineProps<NaiveSwitchFieldProps>()
 const modelValue = defineModel<boolean | null>()
 const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.naive?.controlProps ?? {},
+  () => props.field.ui?.control ?? {},
 )
 </script>
 

@@ -56,60 +56,16 @@ export interface CrudFieldContext<Row = any, FormModel = any> {
   extra?: Record<string, any>
 }
 
-export interface CrudNaiveUi {
+export interface CrudUiExt extends Record<string, any> {
   /**
-   * 控件层 props（会透传给 Naive 的控件组件，例如 NInput/NSelect 等）
+   * UI 扩展位：由具体 UI 适配层（例如 @fcurd/naive-ui）定义结构与类型。
+   * core 不包含任何特定 UI 的配置字段。
+   *
+   * 说明：这里不使用 index signature，以避免对扩展对象施加不必要的约束。
    */
-  controlProps?: Record<string, any>
-  /**
-   * 表格列 props（会透传给 Naive 的 NDataTable column）
-   */
-  columnProps?: Record<string, any>
-  /**
-   * 表单项容器 props（透传给 NFormItem）
-   */
-  formItemProps?: Record<string, any>
-  /**
-   * 搜索项容器 props（透传给 NFormItem）
-   */
-  searchItemProps?: Record<string, any>
-  /**
-   * 自定义渲染组件（覆盖 type）
-   */
-  component?: any
 }
 
-export interface CrudFieldUi {
-  naive?: CrudNaiveUi
-  extra?: Record<string, any>
-}
-
-export interface CrudColumnUi {
-  naive?: Pick<CrudNaiveUi, 'columnProps'>
-  extra?: Record<string, any>
-}
-
-export type CrudRuleTrigger = 'change' | 'blur' | 'input' | 'submit'
-
-export interface CrudRuleContext<Row = any, FormModel = any> {
-  value: any
-  field: CrudField<Row, FormModel>
-  model: Record<string, any>
-  mode: 'create' | 'edit'
-}
-
-export type CrudRuleValidator<Row = any, FormModel = any> = (
-  context: CrudRuleContext<Row, FormModel>,
-) => boolean | string | Promise<boolean | string>
-
-export interface CrudFieldRule<Row = any, FormModel = any> {
-  trigger?: CrudRuleTrigger | CrudRuleTrigger[]
-  required?: boolean
-  message?: string
-  validator?: CrudRuleValidator<Row, FormModel>
-}
-
-export interface CrudField<Row = any, FormModel = any> {
+export interface CrudField<Row = any, FormModel = any, Ui extends CrudUiExt = CrudUiExt> {
   key: string
   label: () => string
   type:
@@ -123,9 +79,8 @@ export interface CrudField<Row = any, FormModel = any> {
     | 'money'
     | 'custom'
   required?: boolean
-  rules?: CrudFieldRule<Row, FormModel>[]
   dictKey?: string
-  ui?: CrudFieldUi
+  ui?: Ui
   visibleIn?: Partial<
     Record<CrudSurface, boolean | ((ctx: CrudFieldContext<Row, FormModel>) => boolean)>
   >
@@ -151,7 +106,7 @@ export function createFieldRegistry<Row, FormModel>(
 // Table column model
 
 export interface CrudTableColumn<Row = any> {
-  field: CrudField<Row, any>
+  field: CrudField<Row, any, any>
   width?: number
   minWidth?: number
   fixed?: 'left' | 'right'
@@ -173,7 +128,7 @@ export interface CrudTableColumn<Row = any> {
   /**
    * UI 透传配置（由具体 UI 适配层消费，例如 Naive 的 columnProps）
    */
-  ui?: CrudColumnUi
+  ui?: CrudUiExt
 }
 
 export interface CrudTableCellContext<Row = any> {

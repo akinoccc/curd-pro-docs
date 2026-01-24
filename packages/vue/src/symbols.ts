@@ -22,9 +22,9 @@ export interface CrudControlMap {
 }
 
 export interface CrudContext<Row = any> {
-  crud: UseCrudReturn<Row>
-  fields?: CrudField<Row, any>[]
-  columns?: CrudTableColumn<Row>[]
+  crud: UseCrudReturn<Row, any, any>
+  fields?: readonly CrudField<Row, any>[]
+  columns?: readonly CrudTableColumn<Row>[]
   actions?: CrudAction<Row>[]
   user?: { roles: string[] }
   extra?: Record<string, any>
@@ -32,9 +32,9 @@ export interface CrudContext<Row = any> {
   dictApi?: DictApi
 }
 
-export const CrudInstanceSymbol: InjectionKey<UseCrudReturn<any>> = Symbol('fcurd:crud')
-export const CrudFieldsSymbol: InjectionKey<CrudField<any, any>[]> = Symbol('fcurd:fields')
-export const CrudColumnsSymbol: InjectionKey<CrudTableColumn<any>[]> = Symbol('fcurd:columns')
+export const CrudInstanceSymbol: InjectionKey<UseCrudReturn<any, any, any>> = Symbol('fcurd:crud')
+export const CrudFieldsSymbol: InjectionKey<readonly CrudField<any, any>[]> = Symbol('fcurd:fields')
+export const CrudColumnsSymbol: InjectionKey<readonly CrudTableColumn<any>[]> = Symbol('fcurd:columns')
 export const CrudActionsSymbol: InjectionKey<UseCrudActionsReturn<any> | CrudAction<any>[]>
   = Symbol('fcurd:actions')
 export const CrudControlMapSymbol: InjectionKey<CrudControlMap> = Symbol('fcurd:controlMap')

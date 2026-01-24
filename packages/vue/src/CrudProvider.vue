@@ -1,4 +1,7 @@
-<script setup lang="ts">
+<script setup
+  lang="ts"
+  generic="Row, Query extends Record<string, any> = Record<string, any>, SortField extends string = string"
+>
 import type {
   CrudAction,
   CrudField,
@@ -27,10 +30,14 @@ import {
   DictCenterSymbol,
 } from './symbols'
 
-interface CrudProviderProps<Row = any> {
-  crud: UseCrudReturn<Row>
-  fields?: CrudField<Row, any>[]
-  columns?: CrudTableColumn<Row>[]
+interface CrudProviderProps<
+  Row = any,
+  Query extends Record<string, any> = Record<string, any>,
+  SortField extends string = string,
+> {
+  crud: UseCrudReturn<Row, Query, SortField>
+  fields?: readonly CrudField<Row, any>[]
+  columns?: readonly CrudTableColumn<Row>[]
   actions?: CrudAction<Row>[] | UseCrudActionsReturn<Row>
   user?: { roles: string[] }
   extra?: Record<string, any>
@@ -40,7 +47,7 @@ interface CrudProviderProps<Row = any> {
   getId?: (row: Row) => string | number
 }
 
-const props = defineProps<CrudProviderProps<any>>()
+const props = defineProps<CrudProviderProps<Row, Query, SortField>>()
 
 const getId = props.getId ?? ((row: any) => row?.id as string | number)
 const selection = ref<Set<string | number>>(new Set())
