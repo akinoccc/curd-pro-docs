@@ -24,6 +24,29 @@ export interface CrudListResult<Row = any> {
   total: number
 }
 
+export interface CrudExportParams<
+  Query extends Record<string, any> = Record<string, any>,
+  SortField extends string = string,
+> {
+  /**
+   * 当前 query（通常包含 search 条件）
+   */
+  query: Query
+  /**
+   * 当前排序（可选）
+   */
+  sort?: CrudSort<SortField> | null
+  /**
+   * 可选：用于取消请求
+   */
+  signal?: AbortSignal
+}
+
+export type CrudExportResult
+  = | Blob
+    | { blob: Blob, filename?: string }
+    | { url: string, filename?: string }
+
 export interface CrudAdapter<
   Row = any,
   RowId extends string | number = string | number,
@@ -36,6 +59,13 @@ export interface CrudAdapter<
   create?: (data: CreateInput) => Promise<Row>
   update?: (id: RowId, data: UpdateInput) => Promise<Row>
   remove?: (id: RowId) => Promise<void>
+  /**
+   * 可选：导出（由业务侧决定导出格式与后端实现）。
+   * 返回值支持：
+   * - Blob / { blob, filename }：直接触发下载
+   * - { url, filename }：使用 URL 触发下载
+   */
+  export?: (params: CrudExportParams<Query, SortField>) => Promise<CrudExportResult>
   /**
    * 从 row 中提取 id（用于 update/remove 等操作）。
    * 如果未提供，默认使用 `row.id`。

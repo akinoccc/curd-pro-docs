@@ -47,8 +47,9 @@ export function useEffectiveFields<Row = any, FormModel = any>(
 
     return list.filter((field) => {
       const visible = field.visibleIn?.[surface]
+      // breaking change: 默认可见（更符合“快速起步”的直觉）
       if (visible === undefined)
-        return false
+        return true
       if (typeof visible === 'boolean')
         return visible
 

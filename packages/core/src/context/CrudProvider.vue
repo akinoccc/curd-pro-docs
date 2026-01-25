@@ -21,6 +21,7 @@ import {
   CrudFieldsSymbol,
   CrudGetIdSymbol,
   CrudInstanceSymbol,
+  CrudSelectedIdsSymbol,
   CrudSelectedRowsSymbol,
   CrudSelectionSymbol,
   CrudUiDriverSymbol,
@@ -47,6 +48,7 @@ const props = defineProps<CrudProviderProps<Row, Query, SortField>>()
 
 const getId = props.getId ?? ((row: any) => row?.id as string | number)
 const selection = ref<Set<string | number>>(new Set())
+const selectedIds = computed<(string | number)[]>(() => Array.from(selection.value))
 const selectedRows = computed<any[]>(() => {
   const ids = selection.value
   const list = props.crud?.rows?.value ?? []
@@ -74,6 +76,7 @@ if (props.actions) {
 }
 
 provide(CrudSelectionSymbol, selection)
+provide(CrudSelectedIdsSymbol, selectedIds)
 provide(CrudSelectedRowsSymbol, selectedRows)
 </script>
 

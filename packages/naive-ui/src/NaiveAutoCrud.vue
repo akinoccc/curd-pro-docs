@@ -12,7 +12,7 @@ import type {
 } from '@fcurd/core'
 import type { DataTableProps, DrawerContentProps, DrawerProps, FormProps, ModalProps, PaginationProps } from 'naive-ui'
 import type { FunctionalComponent } from 'vue'
-import { CrudActionsRenderer, CrudProvider, useCrud } from '@fcurd/core'
+import { createCrudPresetActions, CrudActionButtonsRenderer, CrudProvider, useCrud, useCrudConfig } from '@fcurd/core'
 import { NButton, NCard, NPopconfirm } from 'naive-ui'
 import { computed, h, onMounted, ref, useSlots } from 'vue'
 import { naiveControlMap } from './control-map-naive'
@@ -112,83 +112,23 @@ const editingRow = ref<Row | null>(null)
 
 const mode = computed<'create' | 'edit'>(() => (editingRow.value ? 'edit' : 'create'))
 
-function isActionRegistry(value: any): value is UseCrudActionsReturn<any> {
-  return Boolean(value && typeof value === 'object' && typeof value.list === 'function')
-}
+const crudConfig = useCrudConfig()
 
 const mergedActions = computed<CrudAction<Row>[]>(() => {
-  const defaults: CrudAction<Row>[] = []
-
-  if (!props.disableAdd) {
-    defaults.push({
-      id: 'create',
-      area: 'toolbar',
-      label: '新增',
-      type: 'primary',
-      order: 10,
-      onClick: () => openCreate(),
-    })
-  }
-
-  if (!props.disableEdit) {
-    defaults.push({
-      id: 'edit',
-      area: 'row:after',
-      label: '编辑',
-      type: 'tertiary',
-      order: 10,
-      visible: ctx => Boolean(ctx.row),
-      onClick: (ctx) => {
-        if (ctx.row)
-          openEdit(ctx.row)
-      },
-    })
-  }
-
-  if (!props.disableDelete && props.adapter.remove) {
-    defaults.push({
-      id: 'delete',
-      area: 'row:after',
-      label: '删除',
-      type: 'error',
-      order: 20,
-      confirm: { content: '确定要删除这条记录吗？' },
-      visible: ctx => Boolean(ctx.row),
-      onClick: async (ctx) => {
-        const getId = props.adapter.getId ?? ((row: any) => row?.id as RowId)
-        const row = ctx.row as any
-        if (!row)
-          return
-        const id = getId(row)
-        try {
-          await props.adapter.remove?.(id)
-          await crud.refresh()
-        }
-        catch (err) {
-          emit('error', err)
-        }
-      },
-    })
-  }
-
-  const userList: CrudAction<Row>[] = (() => {
-    if (!props.actions)
-      return []
-    if (Array.isArray(props.actions))
-      return props.actions as CrudAction<Row>[]
-    if (isActionRegistry(props.actions))
-      return props.actions.list() as CrudAction<Row>[]
-    return []
-  })()
-
-  // merge by id: 用户 actions 覆盖默认 actions（同 id）
-  const byId = new Map<string, CrudAction<Row>>()
-  for (const action of defaults)
-    byId.set(action.id, action)
-  for (const action of userList)
-    byId.set(action.id, action)
-
-  return Array.from(byId.values())
+  return createCrudPresetActions<Row, RowId, Query, CreateInput, UpdateInput, SortField>({
+    adapter: props.adapter,
+    crud,
+    openCreate,
+    openEdit,
+    disableAdd: props.disableAdd,
+    disableEdit: props.disableEdit,
+    disableDelete: props.disableDelete,
+    disableExport: props.disableExport,
+    onError: err => emit('error', err),
+    uiDriver: naiveUiDriver,
+    config: crudConfig.value,
+    actions: props.actions as any,
+  })
 })
 
 interface RowActionProps {
@@ -260,6 +200,7 @@ function openEdit(row: any): void {
 
 function handleClose(): void {
   visible.value = false
+  emit('close')
 }
 
 async function handleSubmit(payload: { mode: 'create' | 'edit', data: any }): Promise<void> {
@@ -316,41 +257,10 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
             :crud="crud"
             :open-create="openCreate"
           >
-            <CrudActionsRenderer
-              v-slot="{ actions, ctx }"
+            <CrudActionButtonsRenderer
               :actions="mergedActions"
               area="toolbar"
-            >
-              <template
-                v-for="action in actions"
-                :key="action.id"
-              >
-                <NPopconfirm
-                  v-if="action.confirm"
-                  @positive-click="action.onClick(ctx)"
-                >
-                  <template #trigger>
-                    <NButton
-                      :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                      :tertiary="action.type === 'tertiary'"
-                      :disabled="action.disabled?.(ctx) ?? false"
-                    >
-                      {{ action.label ?? action.id }}
-                    </NButton>
-                  </template>
-                  {{ typeof action.confirm === 'object' ? (action.confirm.content ?? '确定要执行此操作吗？') : '确定要执行此操作吗？' }}
-                </NPopconfirm>
-                <NButton
-                  v-else
-                  :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                  :tertiary="action.type === 'tertiary'"
-                  :disabled="action.disabled?.(ctx) ?? false"
-                  @click="action.onClick(ctx)"
-                >
-                  {{ action.label ?? action.id }}
-                </NButton>
-              </template>
-            </CrudActionsRenderer>
+            />
           </slot>
         </section>
       </template>
@@ -401,81 +311,15 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
               />
             </template>
             <template v-else>
-              <CrudActionsRenderer
-                v-slot="{ actions, ctx }"
+              <CrudActionButtonsRenderer
                 :actions="mergedActions"
                 area="batch"
-              >
-                <template v-if="actions.length">
-                  <template
-                    v-for="action in actions"
-                    :key="action.id"
-                  >
-                    <NPopconfirm
-                      v-if="action.confirm"
-                      @positive-click="action.onClick(ctx)"
-                    >
-                      <template #trigger>
-                        <NButton
-                          :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                          :tertiary="action.type === 'tertiary'"
-                          :disabled="action.disabled?.(ctx) ?? false"
-                        >
-                          {{ action.label ?? action.id }}
-                        </NButton>
-                      </template>
-                      {{ typeof action.confirm === 'object' ? (action.confirm.content ?? '确定要执行此操作吗？') : '确定要执行此操作吗？' }}
-                    </NPopconfirm>
-                    <NButton
-                      v-else
-                      :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                      :tertiary="action.type === 'tertiary'"
-                      :disabled="action.disabled?.(ctx) ?? false"
-                      @click="action.onClick(ctx)"
-                    >
-                      {{ action.label ?? action.id }}
-                    </NButton>
-                  </template>
-                </template>
-              </CrudActionsRenderer>
+              />
 
-              <CrudActionsRenderer
-                v-slot="{ actions, ctx }"
+              <CrudActionButtonsRenderer
                 :actions="mergedActions"
                 area="table:extra"
-              >
-                <template v-if="actions.length">
-                  <template
-                    v-for="action in actions"
-                    :key="action.id"
-                  >
-                    <NPopconfirm
-                      v-if="action.confirm"
-                      @positive-click="action.onClick(ctx)"
-                    >
-                      <template #trigger>
-                        <NButton
-                          :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                          :tertiary="action.type === 'tertiary'"
-                          :disabled="action.disabled?.(ctx) ?? false"
-                        >
-                          {{ action.label ?? action.id }}
-                        </NButton>
-                      </template>
-                      {{ typeof action.confirm === 'object' ? (action.confirm.content ?? '确定要执行此操作吗？') : '确定要执行此操作吗？' }}
-                    </NPopconfirm>
-                    <NButton
-                      v-else
-                      :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                      :tertiary="action.type === 'tertiary'"
-                      :disabled="action.disabled?.(ctx) ?? false"
-                      @click="action.onClick(ctx)"
-                    >
-                      {{ action.label ?? action.id }}
-                    </NButton>
-                  </template>
-                </template>
-              </CrudActionsRenderer>
+              />
             </template>
           </template>
 
@@ -503,83 +347,17 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
               />
             </template>
             <template v-else>
-              <CrudActionsRenderer
-                v-slot="{ actions: beforeActions, ctx: beforeCtx }"
+              <CrudActionButtonsRenderer
                 :actions="mergedActions"
                 area="row:before"
                 :row="row"
-              >
-                <template
-                  v-for="action in beforeActions"
-                  :key="action.id"
-                >
-                  <NPopconfirm
-                    v-if="action.confirm"
-                    @positive-click="action.onClick(beforeCtx)"
-                  >
-                    <template #trigger>
-                      <NButton
-                        :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                        :tertiary="action.type === 'tertiary'"
-                        size="small"
-                        :disabled="action.disabled?.(beforeCtx) ?? false"
-                      >
-                        {{ action.label ?? action.id }}
-                      </NButton>
-                    </template>
-                    {{ typeof action.confirm === 'object' ? (action.confirm.content ?? '确定要执行此操作吗？') : '确定要执行此操作吗？' }}
-                  </NPopconfirm>
-                  <NButton
-                    v-else
-                    :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                    :tertiary="action.type === 'tertiary'"
-                    size="small"
-                    :disabled="action.disabled?.(beforeCtx) ?? false"
-                    @click="action.onClick(beforeCtx)"
-                  >
-                    {{ action.label ?? action.id }}
-                  </NButton>
-                </template>
-              </CrudActionsRenderer>
+              />
 
-              <CrudActionsRenderer
-                v-slot="{ actions, ctx }"
+              <CrudActionButtonsRenderer
                 :actions="mergedActions"
                 area="row:after"
                 :row="row"
-              >
-                <template
-                  v-for="action in actions"
-                  :key="action.id"
-                >
-                  <NPopconfirm
-                    v-if="action.confirm"
-                    @positive-click="action.onClick(ctx)"
-                  >
-                    <template #trigger>
-                      <NButton
-                        size="small"
-                        :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                        :tertiary="action.type === 'tertiary'"
-                        :disabled="action.disabled?.(ctx) ?? false"
-                      >
-                        {{ action.label ?? action.id }}
-                      </NButton>
-                    </template>
-                    {{ typeof action.confirm === 'object' ? (action.confirm.content ?? '确定要执行此操作吗？') : '确定要执行此操作吗？' }}
-                  </NPopconfirm>
-                  <NButton
-                    v-else
-                    :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                    :tertiary="action.type === 'tertiary'"
-                    size="small"
-                    :disabled="action.disabled?.(ctx) ?? false"
-                    @click="action.onClick(ctx)"
-                  >
-                    {{ action.label ?? action.id }}
-                  </NButton>
-                </template>
-              </CrudActionsRenderer>
+              />
             </template>
           </template>
         </NaiveCrudTable>

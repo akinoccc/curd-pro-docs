@@ -1,5 +1,5 @@
-import type { CrudAction, CrudField, CrudTableColumn, UseCrudActionsReturn, UseCrudReturn } from '@fcurd/core'
 import type { ComputedRef, Ref } from 'vue'
+import type { CrudAction, CrudField, CrudTableColumn, UseCrudActionsReturn, UseCrudReturn } from '../crud/models'
 import type { CrudUiDriver } from '../ui/ui-driver'
 import type { CrudControlMap } from './symbols'
 import { computed, inject, ref } from 'vue'
@@ -11,6 +11,7 @@ import {
   CrudFieldsSymbol,
   CrudGetIdSymbol,
   CrudInstanceSymbol,
+  CrudSelectedIdsSymbol,
   CrudSelectedRowsSymbol,
   CrudSelectionSymbol,
   CrudUiDriverSymbol,
@@ -27,7 +28,8 @@ export interface UseCrudContextReturn<Row = any> {
   controlMap?: CrudControlMap
   getId: (row: Row) => string | number
   selection: Ref<Set<string | number>>
-  selectedRows?: ComputedRef<Row[]>
+  selectedIds: ComputedRef<(string | number)[]>
+  selectedRows: ComputedRef<Row[]>
   uiDriver?: CrudUiDriver
 }
 
@@ -44,6 +46,8 @@ export function useCrudContext<Row = any>(): UseCrudContextReturn<Row> {
   const getId = inject(CrudGetIdSymbol, (row: any) => row?.id as string | number) as (row: Row) => string | number
 
   const selection = inject(CrudSelectionSymbol, ref<Set<string | number>>(new Set()))
+  const selectedIdsInjected = inject(CrudSelectedIdsSymbol, undefined) as ComputedRef<(string | number)[]> | undefined
+  const selectedIds = selectedIdsInjected ?? computed<(string | number)[]>(() => Array.from(selection.value))
   const selectedRowsInjected = inject(CrudSelectedRowsSymbol, undefined) as ComputedRef<Row[]> | undefined
   const selectedRows = selectedRowsInjected ?? computed<Row[]>(() => {
     if (!crud)
@@ -63,6 +67,7 @@ export function useCrudContext<Row = any>(): UseCrudContextReturn<Row> {
     controlMap,
     getId,
     selection,
+    selectedIds,
     selectedRows,
     uiDriver,
   }

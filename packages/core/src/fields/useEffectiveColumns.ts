@@ -18,8 +18,9 @@ export function useEffectiveColumns<Row = any>(
     return all.filter((column) => {
       const field = column.field
       const visible = field.visibleIn?.table
+      // breaking change: 默认可见（更符合“快速起步”的直觉）
       if (visible === undefined)
-        return false
+        return true
       if (typeof visible === 'boolean')
         return visible
       const context: CrudFieldContext<Row, any> = {

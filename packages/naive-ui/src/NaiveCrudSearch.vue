@@ -2,12 +2,12 @@
 import type { CrudControlMap, CrudField } from '@fcurd/core'
 import type { FormProps } from 'naive-ui'
 import {
-  CrudActionsRenderer,
+  CrudActionButtonsRenderer,
   CrudControlMapSymbol,
   CrudSearchRenderer,
   useCrudContext,
 } from '@fcurd/core'
-import { NButton, NForm, NFormItem, NPopconfirm, NSpace } from 'naive-ui'
+import { NButton, NForm, NFormItem, NSpace } from 'naive-ui'
 import { inject } from 'vue'
 
 interface NaiveCrudSearchProps<Row = any> {
@@ -80,40 +80,7 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
           </div>
           <div class="fcurd-search__actions">
             <NSpace :size="8">
-              <CrudActionsRenderer
-                v-slot="{ actions, ctx: actionCtx }"
-                area="search"
-              >
-                <template
-                  v-for="action in actions"
-                  :key="action.id"
-                >
-                  <NPopconfirm
-                    v-if="action.confirm"
-                    @positive-click="action.onClick(actionCtx)"
-                  >
-                    <template #trigger>
-                      <NButton
-                        :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                        :tertiary="action.type === 'tertiary'"
-                        :disabled="action.disabled?.(actionCtx) ?? false"
-                      >
-                        {{ action.label ?? action.id }}
-                      </NButton>
-                    </template>
-                    {{ typeof action.confirm === 'object' ? (action.confirm.content ?? '确定要执行此操作吗？') : '确定要执行此操作吗？' }}
-                  </NPopconfirm>
-                  <NButton
-                    v-else
-                    :type="(action.type === 'tertiary' ? undefined : action.type) as any"
-                    :tertiary="action.type === 'tertiary'"
-                    :disabled="action.disabled?.(actionCtx) ?? false"
-                    @click="action.onClick(actionCtx)"
-                  >
-                    {{ action.label ?? action.id }}
-                  </NButton>
-                </template>
-              </CrudActionsRenderer>
+              <CrudActionButtonsRenderer area="search" />
 
               <NButton
                 attr-type="button"

@@ -1,8 +1,10 @@
 import type { CrudTableColumn, CrudUiDriver } from '@fcurd/core'
 import type { DataTableColumn } from 'naive-ui'
-import { NSpace } from 'naive-ui'
+import { createDiscreteApi, NButton, NSpace } from 'naive-ui'
 import { h } from 'vue'
 import { resolveNaiveSurfaceProps } from './controls'
+
+const { dialog } = createDiscreteApi(['dialog'])
 
 export const naiveUiDriver: CrudUiDriver = {
   decodeTableSorter(payload) {
@@ -47,6 +49,89 @@ export const naiveUiDriver: CrudUiDriver = {
     return {
       formItemProps: bySurface,
     }
+  },
+  confirmAction(options) {
+    const { action } = options as any
+    const confirm = action?.confirm
+    if (!confirm)
+      return true
+    const content = confirm === true
+      ? '确定要执行此操作吗？'
+      : (confirm?.content ?? '确定要执行此操作吗？')
+
+    return new Promise<boolean>((resolve) => {
+      let resolved = false
+      function done(value: boolean) {
+        if (resolved)
+          return
+        resolved = true
+        resolve(value)
+      }
+
+      dialog.warning({
+        title: '确认',
+        content,
+        positiveText: '确定',
+        negativeText: '取消',
+        onPositiveClick: () => done(true),
+        onNegativeClick: () => done(false),
+        onClose: () => done(false),
+      })
+    })
+  },
+  handleExportResult(result, options) {
+    if (!result)
+      return
+
+    function downloadUrl(url: string, filename?: string) {
+      if (typeof window === 'undefined')
+        return
+      const a = document.createElement('a')
+      a.href = url
+      if (filename)
+        a.download = filename
+      a.rel = 'noopener'
+      a.target = '_blank'
+      a.click()
+    }
+
+    function downloadBlob(blob: Blob, filename?: string) {
+      if (typeof window === 'undefined')
+        return
+      const url = URL.createObjectURL(blob)
+      downloadUrl(url, filename ?? options?.filename ?? 'export')
+      setTimeout(() => URL.revokeObjectURL(url), 3000)
+    }
+
+    if (result instanceof Blob) {
+      downloadBlob(result, options?.filename)
+      return
+    }
+
+    if ('blob' in result) {
+      downloadBlob(result.blob, result.filename ?? options?.filename)
+      return
+    }
+
+    if ('url' in result) {
+      downloadUrl(result.url, result.filename ?? options?.filename)
+    }
+  },
+  renderAction(options) {
+    const { action, disabled, run } = options as any
+    const isTertiary = action?.type === 'tertiary'
+    const isRowArea = typeof action?.area === 'string' && action.area.startsWith('row:')
+    return h(
+      NButton,
+      {
+        size: isRowArea ? 'small' : undefined,
+        type: isTertiary ? undefined : action?.type,
+        tertiary: isTertiary,
+        disabled,
+        onClick: run,
+      },
+      { default: () => action?.label ?? action?.id },
+    )
   },
   mapTableColumns(options) {
     const {

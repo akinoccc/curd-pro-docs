@@ -75,7 +75,9 @@ const checkedRowKeys = computed<(string | number)[]>({
     <slot
       name="table-actions"
       :selection="ctx.selection"
-      :selected-ids="ctx.selection"
+      :selected-ids="ctx.selectedIds.value"
+      :selected-rows="ctx.selectedRows.value"
+      :crud="ctx.crud"
       :query="ctx.crud?.query"
     />
 

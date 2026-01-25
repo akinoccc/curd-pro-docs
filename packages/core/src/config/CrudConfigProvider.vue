@@ -21,6 +21,26 @@ function mergeCrudConfig(base: CrudConfig, patch?: CrudConfigPatch): CrudConfig 
       ...base.date,
       ...(patch.date ?? {}),
     },
+    actions: {
+      ...base.actions,
+      ...(patch.actions ?? {}),
+      create: {
+        ...base.actions.create,
+        ...(patch.actions?.create ?? {}),
+      },
+      export: {
+        ...base.actions.export,
+        ...(patch.actions?.export ?? {}),
+      },
+      edit: {
+        ...base.actions.edit,
+        ...(patch.actions?.edit ?? {}),
+      },
+      delete: {
+        ...base.actions.delete,
+        ...(patch.actions?.delete ?? {}),
+      },
+    },
   }
 }
 

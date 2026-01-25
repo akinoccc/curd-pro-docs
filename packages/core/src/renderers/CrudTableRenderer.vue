@@ -2,6 +2,7 @@
 import type { CrudTableColumn, UseCrudReturn } from '@fcurd/core'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
+import { useEffectiveColumns } from '../fields/useEffectiveColumns'
 
 interface CrudTableRendererProps<Row = any> {
   columns?: readonly CrudTableColumn<Row>[]
@@ -14,25 +15,8 @@ const ctx = useCrudContext<any>()
 const crud = (props.crud ?? ctx.crud) as UseCrudReturn<any> | undefined
 
 const columns = computed(() => (props.columns ?? ctx.columns ?? []) as CrudTableColumn<any>[])
-
-const effectiveColumns = computed(() => {
-  const all = columns.value
-  return all.filter((column) => {
-    const field = column.field
-    const visible = field.visibleIn?.table
-    if (visible === undefined)
-      return false
-    if (typeof visible === 'boolean')
-      return visible
-    if (!crud)
-      return true
-    return visible({
-      surface: 'table',
-      query: crud.query.value,
-      extra: ctx.extra ?? {},
-      user: ctx.user,
-    } as any)
-  })
+const effectiveColumns = useEffectiveColumns<any>({
+  columns: () => columns.value,
 })
 </script>
 
@@ -41,6 +25,7 @@ const effectiveColumns = computed(() => {
     :crud="crud"
     :columns="effectiveColumns"
     :selection="ctx.selection"
+    :selected-ids="ctx.selectedIds"
     :selected-rows="ctx.selectedRows"
     :get-id="ctx.getId"
   />

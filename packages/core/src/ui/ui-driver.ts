@@ -1,4 +1,12 @@
-import type { CrudField, CrudSort, CrudSurface, CrudTableColumn } from '@fcurd/core'
+import type {
+  CrudAction,
+  CrudActionContext,
+  CrudExportResult,
+  CrudField,
+  CrudSort,
+  CrudSurface,
+  CrudTableColumn,
+} from '@fcurd/core'
 import type { Component, VNodeChild } from 'vue'
 
 export interface CrudControlResolveResult {
@@ -46,6 +54,18 @@ export interface CrudResolveTableColumnOptions<Row = any> {
   slots?: any
 }
 
+export interface CrudRenderActionOptions<Row = any> {
+  action: CrudAction<Row>
+  ctx: CrudActionContext<Row>
+  disabled: boolean
+  run: () => void
+}
+
+export interface CrudConfirmActionOptions<Row = any> {
+  action: CrudAction<Row>
+  ctx: CrudActionContext<Row>
+}
+
 export interface CrudUiDriver {
   /**
    * 解析控件组件与 props 策略
@@ -87,4 +107,26 @@ export interface CrudUiDriver {
    * - Naive NDataTable: sorter = { columnKey, order } | null
    */
   decodeTableSorter?: (payload: any) => CrudSort | null
+
+  /**
+   * 可选：统一渲染 action（按钮/链接/菜单项等），由 UI 适配层决定具体呈现。
+   * - core 会负责 visible/disabled/confirm 的通用逻辑，并提供 `run()` 给 UI 层触发执行。
+   */
+  // NOTE:
+  // pnpm workspace 下可能出现多份 @vue/runtime-core 类型（版本细微差异），
+  // 导致 VNode/VNodeChild 在不同包之间无法互相赋值。
+  // 这里用 any 避免类型污染，同时保持运行时行为稳定。
+  renderAction?: <Row = any>(options: CrudRenderActionOptions<Row>) => any
+
+  /**
+   * 可选：执行前确认交互（用于替代 window.confirm）。
+   * - 返回 true 表示确认继续执行；false 表示取消。
+   */
+  confirmAction?: <Row = any>(options: CrudConfirmActionOptions<Row>) => Promise<boolean> | boolean
+
+  /**
+   * 可选：处理 export 结果（下载/打开链接等 UI 行为）。
+   * - core 不做任何 window/document 相关操作，把下载策略交给 UI driver。
+   */
+  handleExportResult?: (result: CrudExportResult, options?: { filename?: string }) => void | Promise<void>
 }

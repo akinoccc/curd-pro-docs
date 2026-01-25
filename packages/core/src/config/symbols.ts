@@ -46,12 +46,38 @@ export interface CrudDateConfig {
   displayFormat?: string | CrudDateDisplayFormat
 }
 
+export interface CrudPresetActionItemConfig {
+  label?: string
+  order?: number
+}
+
+export interface CrudPresetActionsConfig {
+  create: CrudPresetActionItemConfig
+  export: CrudPresetActionItemConfig & {
+    /**
+     * 默认导出文件名（仅用于 UI driver 下载时的兜底）
+     */
+    defaultFilename?: string
+  }
+  edit: CrudPresetActionItemConfig
+  delete: CrudPresetActionItemConfig & {
+    confirmContent?: string
+  }
+}
+
 export interface CrudConfig {
   date: CrudDateConfig
+  actions: CrudPresetActionsConfig
 }
 
 export interface CrudConfigPatch {
   date?: Partial<CrudDateConfig>
+  actions?: Partial<{
+    create: Partial<CrudPresetActionItemConfig>
+    export: Partial<CrudPresetActionsConfig['export']>
+    edit: Partial<CrudPresetActionItemConfig>
+    delete: Partial<CrudPresetActionsConfig['delete']>
+  }>
 }
 
 export const defaultCrudConfig: CrudConfig = {
@@ -64,6 +90,12 @@ export const defaultCrudConfig: CrudConfig = {
       dateRange: 'yyyy-MM-dd',
       datetimeRange: 'yyyy-MM-dd HH:mm:ss',
     },
+  },
+  actions: {
+    create: { label: '新增', order: 10 },
+    export: { label: '导出', order: 30, defaultFilename: 'export' },
+    edit: { label: '编辑', order: 10 },
+    delete: { label: '删除', order: 20, confirmContent: '确定要删除这条记录吗？' },
   },
 }
 

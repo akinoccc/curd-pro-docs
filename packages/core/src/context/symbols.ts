@@ -1,11 +1,11 @@
+import type { Component, ComputedRef, InjectionKey, Ref } from 'vue'
 import type {
   CrudAction,
   CrudField,
   CrudTableColumn,
   UseCrudActionsReturn,
   UseCrudReturn,
-} from '@fcurd/core'
-import type { Component, ComputedRef, InjectionKey, Ref } from 'vue'
+} from '../crud/models'
 import type { CrudUiDriver } from '../ui/ui-driver'
 
 export interface CrudControlMap {
@@ -42,6 +42,7 @@ export const CrudUserSymbol: InjectionKey<{ roles: string[] } | undefined> = Sym
 export const CrudExtraSymbol: InjectionKey<Record<string, any> | undefined> = Symbol('fcurd:extra')
 export const CrudGetIdSymbol: InjectionKey<(row: any) => string | number> = Symbol('fcurd:getId')
 export const CrudSelectionSymbol: InjectionKey<Ref<Set<string | number>>> = Symbol('fcurd:selection')
+export const CrudSelectedIdsSymbol: InjectionKey<ComputedRef<(string | number)[]>> = Symbol('fcurd:selectedIds')
 export const CrudSelectedRowsSymbol: InjectionKey<ComputedRef<any[]>> = Symbol('fcurd:selectedRows')
 
 // 表单上下文（可选）：仅在某些 UI 适配层（例如 naive-ui）提供
