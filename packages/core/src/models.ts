@@ -74,12 +74,13 @@ export interface CrudField<Row = any, FormModel = any, Ui extends CrudUiExt = Cr
     | 'select'
     | 'date'
     | 'datetime'
+    | 'dateRange'
+    | 'datetimeRange'
     | 'switch'
     | 'number'
     | 'money'
     | 'custom'
   required?: boolean
-  dictKey?: string
   ui?: Ui
   visibleIn?: Partial<
     Record<CrudSurface, boolean | ((ctx: CrudFieldContext<Row, FormModel>) => boolean)>
@@ -162,50 +163,15 @@ export interface CrudAction<Row = any> {
   icon?: any
   order?: number
   type?: 'primary' | 'default' | 'success' | 'warning' | 'error' | 'tertiary'
+  /**
+   * 可选：执行前确认（UI 适配层可自行决定如何展示）
+   * - true：使用 UI 默认文案
+   * - object：提供确认文案
+   */
+  confirm?: boolean | { content?: string }
   visible?: (ctx: CrudActionContext<Row>) => boolean
   disabled?: (ctx: CrudActionContext<Row>) => boolean
   onClick: (ctx: CrudActionContext<Row>) => Promise<void> | void
-}
-
-// Control interfaces (standard props for adapters)
-
-export interface BaseControlProps<Value = any> {
-  'modelValue': Value
-  'onUpdate:modelValue': (value: Value) => void
-  'disabled'?: boolean
-  'readonly'?: boolean
-  'placeholder'?: string
-  'field': CrudField<any, any>
-}
-
-export interface SelectControlProps<Value = string | number>
-  extends BaseControlProps<Value | Value[]> {
-  options: { label: string, value: Value }[]
-  multiple?: boolean
-  clearable?: boolean
-}
-
-// Dict center types
-
-export interface DictItem {
-  label: string
-  value: string | number
-}
-
-export interface DictApi {
-  getOptions: (key: string) => Promise<DictItem[]>
-}
-
-export interface DictCenter {
-  load: (key: string) => Promise<{
-    options: Ref<DictItem[]>
-    loading: Ref<boolean>
-    error: Ref<unknown | null>
-  }>
-  /**
-   * 使缓存失效：传 key 只清某个，不传则清空全部
-   */
-  invalidate: (key?: string) => void
 }
 
 // Basic hooks types re-exported from here for convenience

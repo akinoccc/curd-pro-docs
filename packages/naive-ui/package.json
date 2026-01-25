@@ -7,10 +7,9 @@
   "sideEffects": false,
   "peerDependencies": {
     "vue": "^3.4.0",
-    "naive-ui": "^2.39.0",
+    "naive-ui": "^2.43.2",
     "@fcurd/core": "workspace:*",
-    "@fcurd/vue": "workspace:*",
-    "vue-router": "^4.4.0"
+    "@fcurd/vue": "workspace:*"
   },
   "devDependencies": {
     "vue-router": "^4.6.0"

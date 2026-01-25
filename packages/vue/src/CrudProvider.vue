@@ -6,13 +6,11 @@ import type {
   CrudAction,
   CrudField,
   CrudTableColumn,
-  DictApi,
-  DictCenter,
   UseCrudActionsReturn,
   UseCrudReturn,
 } from '@fcurd/core'
 import type { CrudControlMap } from './symbols'
-import { createDictCenter } from '@fcurd/core'
+import type { CrudUiDriver } from './ui-driver'
 import { computed, provide, ref } from 'vue'
 import {
   CrudActionsSymbol,
@@ -25,9 +23,8 @@ import {
   CrudInstanceSymbol,
   CrudSelectedRowsSymbol,
   CrudSelectionSymbol,
+  CrudUiDriverSymbol,
   CrudUserSymbol,
-  DictApiSymbol,
-  DictCenterSymbol,
 } from './symbols'
 
 interface CrudProviderProps<
@@ -42,8 +39,7 @@ interface CrudProviderProps<
   user?: { roles: string[] }
   extra?: Record<string, any>
   controlMap: CrudControlMap
-  dictApi?: DictApi
-  dictCenter?: DictCenter
+  uiDriver?: CrudUiDriver
   getId?: (row: Row) => string | number
 }
 
@@ -70,15 +66,8 @@ if (props.extra)
 provide(CrudControlMapSymbol, props.controlMap)
 provide(CrudGetIdSymbol, getId)
 
-if (props.dictApi)
-  provide(DictApiSymbol, props.dictApi)
-
-if (props.dictCenter) {
-  provide(DictCenterSymbol, props.dictCenter)
-}
-else if (props.dictApi) {
-  provide(DictCenterSymbol, createDictCenter(props.dictApi))
-}
+if (props.uiDriver)
+  provide(CrudUiDriverSymbol, props.uiDriver)
 
 if (props.actions) {
   provide(CrudActionsSymbol, props.actions as any)

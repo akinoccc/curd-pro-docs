@@ -1,29 +1,26 @@
 <script setup lang="ts">
-import type { BaseControlProps } from '@fcurd/core'
+import type { CrudSurface, NaiveCrudField } from './controls'
 import { NInputNumber } from 'naive-ui'
 import { computed } from 'vue'
+import { resolveNaiveSurfaceProps } from './controls'
 
-interface NaiveNumberFieldProps extends BaseControlProps<number | null> {
-  min?: number
-  max?: number
-  step?: number
+interface NaiveNumberFieldProps {
+  field?: NaiveCrudField<any, any, 'number' | 'money'>
+  surface?: CrudSurface
 }
 
 const props = defineProps<NaiveNumberFieldProps>()
 const modelValue = defineModel<number | null>()
-const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.control ?? {},
-)
+const surface = computed<CrudSurface>(() => props.surface ?? 'form')
+const controlProps = computed<Record<string, any>>(() => {
+  return resolveNaiveSurfaceProps(props.field?.ui?.control as any, surface.value)
+})
 </script>
 
 <template>
   <NInputNumber
     v-model:value="modelValue"
-    :min="props.min"
-    :max="props.max"
-    :step="props.step"
-    :disabled="props.disabled"
-    :placeholder="props.placeholder ?? props.field.label()"
+    :placeholder="(controlProps as any).placeholder ?? field?.label()"
     v-bind="controlProps"
   />
 </template>

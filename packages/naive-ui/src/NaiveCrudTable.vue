@@ -1,217 +1,37 @@
 <script setup lang="ts">
-import type { CrudTableCellContext, CrudTableColumn, UseCrudReturn } from '@fcurd/core'
-import type { DataTableColumn } from 'naive-ui'
-import type { InternalRowData } from 'naive-ui/es/data-table/src/interface'
-import type { VNodeChild } from 'vue'
-import {
-  CrudColumnsSymbol,
-  CrudGetIdSymbol,
-  CrudInstanceSymbol,
-  CrudSelectionSymbol,
-} from '@fcurd/vue'
-import { NCheckbox, NDataTable, NPagination, NSpace } from 'naive-ui'
-import { computed, h, inject, ref, useSlots } from 'vue'
-
-type NDataTableProps = InstanceType<typeof NDataTable>['$props']
-type NPaginationProps = InstanceType<typeof NPagination>['$props']
-
-interface ForwardDataTableProps extends Omit<NDataTableProps, 'columns' | 'data'> {}
-interface ForwardPaginationProps extends Omit<NPaginationProps, 'page' | 'pageSize' | 'itemCount'> {}
+import type { CrudTableColumn } from '@fcurd/core'
+import type { DataTableProps, PaginationProps } from 'naive-ui'
+import { useCrudContext, useCrudTableSorterSync, useCrudTableUiColumns, useEffectiveColumns } from '@fcurd/vue'
+import { NDataTable, NPagination } from 'naive-ui'
+import { computed, useSlots } from 'vue'
 
 interface NaiveCrudTableProps<Row = any> {
   columns?: readonly CrudTableColumn<Row>[]
   showSelection?: boolean
   showActionsColumn?: boolean
-  dataTableProps?: ForwardDataTableProps
-  paginationProps?: ForwardPaginationProps
+  dataTableProps?: DataTableProps
+  paginationProps?: PaginationProps
 }
 
 const props = defineProps<NaiveCrudTableProps<any>>()
 
-const crud = inject(CrudInstanceSymbol) as UseCrudReturn<any> | undefined
-// CrudProvider 提供的是 CrudTableColumn，这里通过扩展类型 NaiveCrudTableColumn 增强能力
-const providedColumns = inject(CrudColumnsSymbol) as CrudTableColumn<any>[] | undefined
-const selection = inject(CrudSelectionSymbol, ref<Set<string | number>>(new Set()))
-const getId = inject(CrudGetIdSymbol, (row: any) => (row as any)?.id as string | number)
-
+const ctx = useCrudContext<any>()
+const { onSorterChange } = useCrudTableSorterSync()
 const slots = useSlots()
 
-const columns = computed(() => (props.columns ?? providedColumns ?? []) as CrudTableColumn<any>[])
-
-const effectiveColumns = computed(() => {
-  const all = columns.value
-  return all.filter((column) => {
-    const field = column.field
-    const visible = field.visibleIn?.table
-    if (visible === undefined)
-      return false
-    if (typeof visible === 'boolean')
-      return visible
-    // 允许在 table 层基于 query / 额外上下文动态决定可见性
-    // 注：这里是“列级别”判断，不涉及具体 row
-    if (!crud)
-      return true
-    return visible({
-      surface: 'table',
-      query: crud.query.value,
-      extra: {},
-    } as any)
-  })
+const effectiveColumns = useEffectiveColumns<any>({
+  columns: () => (props.columns ?? ctx.columns ?? []) as readonly CrudTableColumn<any>[],
 })
 
-function isSelected(row: any): boolean {
-  return selection.value.has(getId(row))
-}
-
-function toggleRow(row: any): void {
-  const id = getId(row)
-  const next = new Set(selection.value)
-  if (next.has(id))
-    next.delete(id)
-  else
-    next.add(id)
-  selection.value = next
-}
-
-function handleSorterChange(sorter: { columnKey: string, order: 'ascend' | 'descend' | false } | null): void {
-  if (!crud)
-    return
-  if (!sorter || sorter.order === false) {
-    crud.setSort(null)
-    return
-  }
-  crud.setSort({
-    field: sorter.columnKey,
-    order: sorter.order,
-  })
-}
-
-const naiveColumns = computed<DataTableColumn[]>(() => {
-  const baseColumns: DataTableColumn[] = effectiveColumns.value.map((column) => {
-    const field = column.field
-    // 兼容两种命名风格：
-    // - #cell-xxx（推荐，历史实现）
-    // - #cell_xxx（业务侧常见写法）
-    const cellSlot = slots[`cell-${field.key}`] ?? slots[`cell_${field.key}`]
-    const naiveColumnProps = (column.ui as any)?.column
-    const cellRender = column.cellRender
-
-    // 获取当前排序状态（用于高亮当前排序列）
-    const currentSort = crud?.sort.value
-    const isCurrentSortField = currentSort?.field === field.key
-    const sortOrder = isCurrentSortField ? currentSort.order : undefined
-
-    // 基础映射：保持 CrudTableColumn 的语义
-    const base: DataTableColumn = {
-      key: field.key,
-      title: field.label(),
-      width: column.width,
-      minWidth: column.minWidth,
-      fixed: column.fixed,
-      sorter: column.sortable ? 'default' : undefined,
-      sortOrder,
-      render(row: InternalRowData, rowIndex: number): VNodeChild {
-        if (cellSlot) {
-          const content = cellSlot({
-            row,
-            field,
-            rowIndex,
-          })
-          return Array.isArray(content) ? content[0] : content
-        }
-        const ctx: CrudTableCellContext<any> = {
-          row: row as any,
-          rowIndex,
-          field,
-          value: (row as any)?.[field.key],
-        }
-
-        if (typeof cellRender === 'function') {
-          const content = cellRender(ctx)
-          return Array.isArray(content) ? content[0] : content
-        }
-
-        return ctx.value as any
-      },
-    }
-
-    // 透传并合并用户提供的 Naive UI 列配置（例如 filters / ellipsis / align / sorter 等）
-    if (naiveColumnProps) {
-      const extra = naiveColumnProps as DataTableColumn
-      return {
-        ...base,
-        ...extra,
-      } as DataTableColumn
-    }
-
-    return base
-  })
-
-  const result: DataTableColumn[] = []
-
-  if (props.showSelection) {
-    result.push({
-      key: '__selection',
-      width: 60,
-      align: 'center',
-      render(row: any) {
-        return h(NCheckbox, {
-          'checked': isSelected(row),
-          'onUpdate:checked': () => toggleRow(row),
-        })
-      },
-    })
-  }
-
-  result.push(...baseColumns)
-
-  // 只有当 showActionsColumn 为 true 时才显示操作列
-  // 当为 false 或 undefined 时，操作列将被隐藏
-  if (props.showActionsColumn === true) {
-    const actionsHeader = slots['actions-header']
-    result.push({
-      key: '__actions',
-      minWidth: 'fit',
-      fixed: 'right',
-      title: () => {
-        if (actionsHeader) {
-          const content = actionsHeader()
-          return Array.isArray(content) ? content[0] : content
-        }
-        return '操作'
-      },
-      align: 'center',
-      render(row: any) {
-        const rowActions = slots['row-actions']
-        if (!rowActions)
-          return null
-        const content = rowActions({ row })
-        const nodes = Array.isArray(content) ? content : [content]
-        // 使用 NSpace 统一为行内操作按钮增加间距
-        return h(
-          NSpace,
-          { size: 8, justify: 'center' },
-          {
-            default: () => nodes,
-          },
-        )
-      },
-    })
-  }
-
-  return result
-})
-
-const mergedDataTableProps = computed<ForwardDataTableProps>(() => {
+const mergedDataTableProps = computed<DataTableProps>(() => {
   return {
     striped: true,
     scrollX: 'max-content',
-    // maxHeight: '480px',
     ...(props.dataTableProps ?? {}),
   }
 })
 
-const mergedPaginationProps = computed<ForwardPaginationProps>(() => {
+const mergedPaginationProps = computed<PaginationProps>(() => {
   return {
     showSizePicker: true,
     pageSizes: [10, 20, 50, 100],
@@ -220,12 +40,17 @@ const mergedPaginationProps = computed<ForwardPaginationProps>(() => {
   }
 })
 
-// 保证传给 NDataTable 的数据是普通数组而不是 ref 对象
+const uiColumnsRef = useCrudTableUiColumns<any>({
+  columns: effectiveColumns as any,
+  slots,
+  showSelection: props.showSelection,
+  showActionsColumn: props.showActionsColumn,
+})
+
+const uiColumns = computed<any[]>(() => uiColumnsRef.value ?? [])
+
 const tableData = computed<any[]>(() => {
-  if (!crud || !crud.rows)
-    return []
-  // useCrud 返回的是 ref，所以这里取 .value
-  return crud.rows?.value ?? []
+  return ctx.crud?.rows?.value ?? []
 })
 </script>
 
@@ -233,29 +58,29 @@ const tableData = computed<any[]>(() => {
   <div class="fcurd-table fcurd-table--naive">
     <slot
       name="table-actions"
-      :selection="selection"
-      :selected-ids="selection"
-      :query="crud?.query"
+      :selection="ctx.selection"
+      :selected-ids="ctx.selection"
+      :query="ctx.crud?.query"
     />
 
     <NDataTable
       v-bind="mergedDataTableProps"
-      :columns="naiveColumns"
+      :columns="uiColumns"
       :data="tableData"
-      @update:sorter="handleSorterChange"
+      @update:sorter="onSorterChange"
     />
 
     <div
-      v-if="crud"
+      v-if="ctx.crud"
       class="fcurd-table__pagination"
     >
       <NPagination
         v-bind="mergedPaginationProps"
-        :page="crud.page.value"
-        :page-size="crud.pageSize.value"
-        :item-count="crud.total.value"
-        @update:page="crud.setPage"
-        @update:page-size="crud.setPageSize"
+        :page="ctx.crud.page.value"
+        :page-size="ctx.crud.pageSize.value"
+        :item-count="ctx.crud.total.value"
+        @update:page="ctx.crud.setPage"
+        @update:page-size="ctx.crud.setPageSize"
       />
     </div>
   </div>

@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from 'vue-router'
 export const routeNames = {
   auto: 'auto',
   manual: 'manual',
-  dict: 'dict',
   routeSync: 'routeSync',
 } as const
 
@@ -20,11 +19,6 @@ export const router = createRouter({
       path: '/manual',
       name: routeNames.manual,
       component: () => import('./pages/manual-compose-page.vue'),
-    },
-    {
-      path: '/dict',
-      name: routeNames.dict,
-      component: () => import('./pages/dict-center-page.vue'),
     },
     {
       path: '/route-sync',

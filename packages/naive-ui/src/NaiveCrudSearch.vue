@@ -1,115 +1,147 @@
 <script setup lang="ts">
-import type { CrudField, UseCrudReturn } from '@fcurd/core'
+import type { CrudField } from '@fcurd/core'
+import type { CrudControlMap } from '@fcurd/vue'
+import type { FormProps } from 'naive-ui'
 import {
+  CrudActionsRenderer,
   CrudControlMapSymbol,
-  CrudFieldsSymbol,
-  CrudInstanceSymbol,
-  useCrudSearchRouteSync,
+  CrudSearchRenderer,
+  useCrudContext,
 } from '@fcurd/vue'
-import { NButton, NForm, NFormItem, NSpace } from 'naive-ui'
-import { computed, inject, reactive } from 'vue'
-
-type NFormProps = InstanceType<typeof NForm>['$props']
-interface ForwardSearchFormProps extends Omit<NFormProps, 'model'> {}
+import { NButton, NForm, NFormItem, NPopconfirm, NSpace } from 'naive-ui'
+import { inject } from 'vue'
 
 interface NaiveCrudSearchProps<Row = any> {
   fields?: readonly CrudField<Row, any>[]
-  formProps?: ForwardSearchFormProps
+  formProps?: FormProps
 }
 
 const props = defineProps<NaiveCrudSearchProps<any>>()
 
-const crud = inject(CrudInstanceSymbol) as UseCrudReturn<any> | undefined
-const providedFields = inject(CrudFieldsSymbol) as readonly CrudField<any, any>[] | undefined
-const controlMap = inject(CrudControlMapSymbol)
+const ctx = useCrudContext<any>()
+const controlMap = inject<CrudControlMap>(CrudControlMapSymbol)
 
-const effectiveFields = computed(() => {
-  const all = (props.fields ?? providedFields ?? []) as readonly CrudField<any, any>[]
-  return all.filter((field) => {
-    const visible = field.visibleIn?.search
-    if (visible === undefined)
-      return false
-    if (typeof visible === 'boolean')
-      return visible
-    if (!crud)
-      return true
-    return visible({
-      surface: 'search',
-      query: crud.query.value,
-      extra: {},
-    })
+function resolveFormItemProps(field: CrudField<any, any>): Record<string, any> {
+  return ctx.uiDriver?.resolveFormItem?.({ surface: 'search', field })?.formItemProps ?? {}
+}
+
+function resolveControl(field: CrudField<any, any>): { component: any, bind: Record<string, any> } {
+  const resolved = ctx.uiDriver?.resolveControl?.({
+    surface: 'search',
+    field,
+    controlMap: controlMap as any,
   })
-})
-
-const formModel = reactive<Record<string, any>>({})
-
-const { handleSubmit, handleReset } = useCrudSearchRouteSync({
-  crud,
-  fields: () => effectiveFields.value,
-  formModel,
-  queryKey: 'search',
-  clearMode: 'null',
-})
+  const component = resolved?.component ?? (controlMap as any)?.[field.type] ?? (controlMap as any)?.text
+  const bind = {
+    ...(resolved?.controlProps ?? {}),
+    ...((resolved?.passField ?? false) ? { field } : {}),
+  }
+  return { component, bind }
+}
 </script>
 
 <template>
   <div class="fcurd-search fcurd-search--naive">
-    <slot
-      :form-model="formModel"
-      :submit="handleSubmit"
-      :reset="handleReset"
+    <CrudSearchRenderer
+      v-slot="{ formModel, fields: effectiveFields, submit, reset }"
+      :fields="props.fields"
     >
-      <NForm
-        v-if="controlMap"
-        class="fcurd-search__auto"
-        :model="formModel"
-        label-placement="left"
-        label-align="right"
-        v-bind="props.formProps"
-        @submit.prevent="handleSubmit"
+      <slot
+        :form-model="formModel"
+        :submit="submit"
+        :reset="reset"
       >
-        <div class="fcurd-search__fields">
-          <NFormItem
-            v-for="field in effectiveFields"
-            :key="field.key"
-            :label="field.label()"
-            class="fcurd-search__item"
-            :show-feedback="false"
-            :show-feedback-wrapper="false"
-            v-bind="field.ui?.formItem?.search"
-          >
-            <component
-              :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
-              v-model="formModel[field.key]"
-              :field="field"
-              v-bind="(field.ui as any)?.control"
-              class="fcurd-search__control"
-            />
-          </NFormItem>
-        </div>
-        <div class="fcurd-search__actions">
-          <NSpace :size="8">
-            <NButton
-              attr-type="button"
-              @click="handleReset"
+        <NForm
+          v-if="controlMap"
+          class="fcurd-search__auto"
+          :model="formModel"
+          label-placement="top"
+          label-align="left"
+          v-bind="props.formProps"
+          @submit.prevent="submit"
+        >
+          <div class="fcurd-search__fields">
+            <NFormItem
+              v-for="field in effectiveFields"
+              :key="field.key"
+              :label="field.label()"
+              class="fcurd-search__item"
+              :show-feedback="false"
+              :show-feedback-wrapper="false"
+              v-bind="resolveFormItemProps(field)"
             >
-              重置
-            </NButton>
-            <NButton
-              type="primary"
-              attr-type="submit"
-              @click="handleSubmit"
-            >
-              查询
-            </NButton>
-          </NSpace>
-        </div>
-      </NForm>
-    </slot>
+              <component
+                :is="resolveControl(field).component"
+                v-model="formModel[field.key]"
+                surface="search"
+                v-bind="resolveControl(field).bind"
+                class="fcurd-search__control"
+              />
+            </NFormItem>
+          </div>
+          <div class="fcurd-search__actions">
+            <NSpace :size="8">
+              <CrudActionsRenderer
+                v-slot="{ actions, ctx: actionCtx }"
+                area="search"
+              >
+                <template
+                  v-for="action in actions"
+                  :key="action.id"
+                >
+                  <NPopconfirm
+                    v-if="action.confirm"
+                    @positive-click="action.onClick(actionCtx)"
+                  >
+                    <template #trigger>
+                      <NButton
+                        :type="(action.type === 'tertiary' ? undefined : action.type) as any"
+                        :tertiary="action.type === 'tertiary'"
+                        :disabled="action.disabled?.(actionCtx) ?? false"
+                      >
+                        {{ action.label ?? action.id }}
+                      </NButton>
+                    </template>
+                    {{ typeof action.confirm === 'object' ? (action.confirm.content ?? '确定要执行此操作吗？') : '确定要执行此操作吗？' }}
+                  </NPopconfirm>
+                  <NButton
+                    v-else
+                    :type="(action.type === 'tertiary' ? undefined : action.type) as any"
+                    :tertiary="action.type === 'tertiary'"
+                    :disabled="action.disabled?.(actionCtx) ?? false"
+                    @click="action.onClick(actionCtx)"
+                  >
+                    {{ action.label ?? action.id }}
+                  </NButton>
+                </template>
+              </CrudActionsRenderer>
+
+              <NButton
+                attr-type="button"
+                @click="reset"
+              >
+                重置
+              </NButton>
+              <NButton
+                type="primary"
+                attr-type="submit"
+                @click="submit"
+              >
+                查询
+              </NButton>
+            </NSpace>
+          </div>
+        </NForm>
+      </slot>
+    </CrudSearchRenderer>
   </div>
 </template>
 
 <style scoped>
+.fcurd-search--naive :deep(.n-form-item-label) {
+  --n-label-font-size: 13px;
+}
+
 .fcurd-search--naive {
   width: 100%;
 }

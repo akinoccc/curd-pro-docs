@@ -4,9 +4,7 @@ import { NaiveAutoCrud } from '@fcurd/naive-ui'
 import { NAlert, NCode, NDivider, NTag, NText } from 'naive-ui'
 import { createDemoColumns, createDemoFields } from '../lib/demo-schema'
 import { createMemoryCrudAdapter } from '../lib/memory-crud'
-import { createMockDictApi } from '../lib/mock-dicts'
 
-const dictApi = createMockDictApi()
 const { adapter } = createMemoryCrudAdapter()
 
 const fields = createDemoFields()
@@ -36,14 +34,13 @@ function statusTagType(status: DemoRow['status']): 'default' | 'success' | 'warn
     >
       这个页面用 <NText code>
         NaiveAutoCrud
-      </NText> 覆盖：搜索（含路由同步）、分页、排序、表单（drawer）、新增/编辑/删除、选择集、slot 自定义渲染、DictCenter 字典加载。
+      </NText> 覆盖：搜索（含路由同步）、分页、排序、表单（drawer）、新增/编辑/删除、选择集、slot 自定义渲染、字典加载。
     </NAlert>
 
     <NaiveAutoCrud
       :adapter="adapter"
       :fields="fields"
       :table-columns="tableColumns"
-      :dict-api="dictApi"
       form-mode="drawer"
       show-selection
       :show-actions-column="true"

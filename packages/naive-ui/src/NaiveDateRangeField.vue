@@ -1,17 +1,21 @@
 <script setup lang="ts">
-import type { BaseControlProps } from '@fcurd/core'
+import type { CrudSurface, NaiveCrudField } from './controls'
 import { NDatePicker } from 'naive-ui'
 import { computed } from 'vue'
+import { resolveNaiveSurfaceProps } from './controls'
 
-interface NaiveDateRangeFieldProps extends BaseControlProps<[string, string] | null> {
-  type?: 'date' | 'datetime'
+interface NaiveDateRangeFieldProps {
+  field?: NaiveCrudField<any, any, 'dateRange'>
+  surface?: CrudSurface
 }
 
 const props = defineProps<NaiveDateRangeFieldProps>()
 const modelValue = defineModel<[string, string] | null>()
-const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.control ?? {},
-)
+
+const surface = computed<CrudSurface>(() => props.surface ?? 'form')
+const controlProps = computed<Record<string, any>>(() => {
+  return resolveNaiveSurfaceProps(props.field?.ui?.control as any, surface.value)
+})
 
 const valueTs = computed<[number, number] | null>(() => {
   if (!modelValue.value || modelValue.value.length !== 2)
@@ -36,8 +40,7 @@ function handleUpdate(ts: [number, number] | null): void {
 <template>
   <NDatePicker
     :value="valueTs"
-    :type="props.type === 'datetime' ? 'datetimerange' : 'daterange'"
-    :disabled="props.disabled"
+    :placeholder="(controlProps as any).placeholder ?? field?.label()"
     clearable
     v-bind="controlProps"
     @update:value="handleUpdate"

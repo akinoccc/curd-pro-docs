@@ -1,53 +1,28 @@
 <script setup lang="ts">
-import type { DictItem } from '@fcurd/core'
-import type { NaiveSelectFieldProps } from './controls'
-import { DictCenterSymbol } from '@fcurd/vue'
+import type { CrudSurface, NaiveCrudField } from './controls'
 import { NSelect } from 'naive-ui'
-import { computed, inject, ref, watch } from 'vue'
+import { computed } from 'vue'
+import { resolveNaiveSurfaceProps } from './controls'
+
+interface NaiveSelectFieldProps {
+  field?: NaiveCrudField<any, any, 'select'>
+  surface?: CrudSurface
+}
 
 const props = defineProps<NaiveSelectFieldProps>()
 const modelValue = defineModel<string | number | (string | number)[] | null>()
-const dictCenter = inject(DictCenterSymbol)
-const optionsRef = ref<DictItem[]>(props.options ?? [])
-const loading = ref(false)
-const error = ref<unknown | null>(null)
 
-const controlProps = computed<Record<string, any>>(
-  () => props.field.ui?.control ?? {},
-)
-
-watch(
-  () => [props.field.dictKey, props.options] as const,
-  async () => {
-    error.value = null
-    if (!props.field.dictKey || !dictCenter) {
-      optionsRef.value = props.options ?? []
-      return
-    }
-    loading.value = true
-    try {
-      const { options, error: dictError } = await dictCenter.load(props.field.dictKey)
-      optionsRef.value = options.value
-      error.value = dictError.value
-    }
-    finally {
-      loading.value = false
-    }
-  },
-  { immediate: true },
-)
+const surface = computed<CrudSurface>(() => props.surface ?? 'form')
+const controlProps = computed<Record<string, any>>(() => {
+  return resolveNaiveSurfaceProps(props.field?.ui?.control as any, surface.value)
+})
 </script>
 
 <template>
   <NSelect
     v-model:value="modelValue"
-    :options="optionsRef"
-    :multiple="props.multiple"
-    :clearable="props.clearable"
-    :disabled="props.disabled"
-    :placeholder="props.placeholder ?? props.field.label()"
-    :loading="loading"
+    :placeholder="(controlProps as any).placeholder ?? props.field?.label()"
     v-bind="controlProps"
-    style="min-width: 120px;"
+    style="min-width: 140px;"
   />
 </template>

@@ -56,10 +56,6 @@ const tabsType = 'line' satisfies TabsProps['type']
                   tab="手搓组合/动作/校验"
                 />
                 <NTabPane
-                  :name="routeNames.dict"
-                  tab="字典中心"
-                />
-                <NTabPane
                   :name="routeNames.routeSync"
                   tab="路由同步"
                 />

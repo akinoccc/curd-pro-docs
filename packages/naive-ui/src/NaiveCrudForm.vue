@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { CrudField } from '@fcurd/core'
-import type { FormInst, FormItemRule, FormRules } from 'naive-ui'
-import { CrudControlMapSymbol, CrudFormModelSymbol, CrudFormModeSymbol } from '@fcurd/vue'
+import type { CrudControlMap } from '@fcurd/vue'
+import type { DrawerContentProps, DrawerProps, FormInst, FormProps, ModalProps } from 'naive-ui'
+import { CrudControlMapSymbol, CrudFormRenderer, resolveSlotName, useCrudContext } from '@fcurd/vue'
 import {
 
   NButton,
@@ -12,19 +13,7 @@ import {
   NModal,
   NSpace,
 } from 'naive-ui'
-import { computed, inject, provide, reactive, ref, useSlots, watch } from 'vue'
-
-type NFormProps = InstanceType<typeof NForm>['$props']
-type NModalProps = InstanceType<typeof NModal>['$props']
-type NDrawerProps = InstanceType<typeof NDrawer>['$props']
-type NDrawerContentProps = InstanceType<typeof NDrawerContent>['$props']
-
-interface ForwardCrudFormProps extends Omit<NFormProps, 'model' | 'rules'> {
-  rules?: FormRules
-}
-interface ForwardModalProps extends Omit<NModalProps, 'show'> {}
-interface ForwardDrawerProps extends Omit<NDrawerProps, 'show'> {}
-interface ForwardDrawerContentProps extends Omit<NDrawerContentProps, 'title'> {}
+import { computed, inject, ref, useSlots, watch } from 'vue'
 
 interface NaiveCrudFormProps<Row = any> {
   modelValue?: boolean
@@ -34,10 +23,10 @@ interface NaiveCrudFormProps<Row = any> {
   layout?: any
   title?: string | ((payload: { mode: 'create' | 'edit', row?: Row | null }) => string)
   resetOnClose?: boolean
-  formProps?: ForwardCrudFormProps
-  modalProps?: ForwardModalProps
-  drawerProps?: ForwardDrawerProps
-  drawerContentProps?: ForwardDrawerContentProps
+  formProps?: FormProps
+  modalProps?: ModalProps
+  drawerProps?: DrawerProps
+  drawerContentProps?: DrawerContentProps
 }
 
 interface NaiveCrudFormEmits<Row = any> {
@@ -53,7 +42,8 @@ interface NaiveCrudFormEmits<Row = any> {
 const props = defineProps<NaiveCrudFormProps<any>>()
 const emit = defineEmits<NaiveCrudFormEmits<any>>()
 
-const controlMap = inject(CrudControlMapSymbol)
+const ctx = useCrudContext<any>()
+const controlMap = inject<CrudControlMap>(CrudControlMapSymbol)
 const formRef = ref<FormInst | null>(null)
 const slots = useSlots()
 
@@ -70,80 +60,6 @@ const mode = computed<'create' | 'edit'>(() => (props.row ? 'edit' : 'create'))
 
 const effectiveFormMode = computed<'modal' | 'drawer' | 'inline'>(() => props.formMode ?? 'modal')
 
-const formModel = reactive<Record<string, any>>({})
-
-// 向自定义表单控件暴露当前 formModel/mode，便于跨字段联动（例如：选图标时同步设置主题色）
-provide(CrudFormModelSymbol, formModel)
-provide(CrudFormModeSymbol, mode as any)
-
-const effectiveFields = computed(() => {
-  const list = (props.fields ?? []) as CrudField<any, any>[]
-  return list.filter((field) => {
-    const visible = field.visibleIn?.form
-    if (visible === undefined)
-      return false
-    if (typeof visible === 'boolean')
-      return visible
-    return visible({
-      surface: 'form',
-      row: props.row ?? undefined,
-      formModel,
-      query: {},
-      extra: {},
-    })
-  })
-})
-
-function mergeRules(builtin: FormRules, external?: FormRules): FormRules {
-  const merged: FormRules = external ? { ...external } : {}
-  for (const [key, value] of Object.entries(builtin)) {
-    merged[key] = [
-      ...((external?.[key] as FormItemRule[]) ?? []),
-      ...(value as FormItemRule[]),
-    ]
-  }
-  return merged
-}
-
-function getFormItemProps(field: CrudField<any, any>): Record<string, any> | undefined {
-  const ui: any = field.ui as any
-  return ui?.formItem?.form
-}
-
-function getFieldSlotName(fieldKey: string): string | null {
-  // 兼容两种命名：
-  // - #field-xxx（推荐）
-  // - #field_xxx（业务侧常见写法）
-  const candidates = [
-    `field-${fieldKey}`,
-    `field_${fieldKey}`,
-  ]
-  for (const name of candidates) {
-    if (slots[name])
-      return name
-  }
-  return null
-}
-
-function initFormModel(): void {
-  Object.keys(formModel).forEach((key) => {
-    delete formModel[key]
-  })
-  if (props.row) {
-    Object.assign(formModel, props.row)
-  }
-  formRef.value?.restoreValidation()
-  emit('formModelReady', formModel as any, mode.value)
-}
-
-watch(
-  () => props.row,
-  () => {
-    initFormModel()
-  },
-  { immediate: true },
-)
-
 watch(
   () => visible.value,
   (value) => {
@@ -152,8 +68,8 @@ watch(
     }
     else {
       emit('close')
-      if (props.resetOnClose)
-        initFormModel()
+      // resetOnClose 的语义：关闭后恢复初始表单模型
+      // 由 renderless 组件提供 initFormModel，这里在 template 内绑定
     }
   },
 )
@@ -170,209 +86,63 @@ async function validateOnSubmit(): Promise<boolean> {
   }
 }
 
-async function handleSubmit(): Promise<void> {
-  const valid = await validateOnSubmit()
-  if (!valid)
-    return
-  emit('submit', { mode: mode.value, data: { ...formModel } })
+function resolveFormItemProps(field: CrudField<any, any>): Record<string, any> {
+  return ctx.uiDriver?.resolveFormItem?.({ surface: 'form', field })?.formItemProps ?? {}
+}
+
+function resolveControl(field: CrudField<any, any>): { component: any, bind: Record<string, any> } {
+  const resolved = ctx.uiDriver?.resolveControl?.({
+    surface: 'form',
+    field,
+    controlMap: controlMap as any,
+  })
+  const component = resolved?.component ?? (controlMap as any)?.[field.type] ?? (controlMap as any)?.text
+  const bind = {
+    ...(resolved?.controlProps ?? {}),
+    ...((resolved?.passField ?? false) ? { field } : {}),
+  }
+  return { component, bind }
 }
 
 // success/error 由上层调用 adapter 后再 emit 回来，这里只提供事件占位
 </script>
 
 <template>
-  <!-- inline 模式：直接渲染在页面中 -->
-  <div
-    v-if="effectiveFormMode === 'inline'"
-    class="fcurd-form fcurd-form--naive"
+  <CrudFormRenderer
+    v-slot="{ formModel, fields: effectiveFields, initFormModel }"
+    :row="row"
+    :fields="fields as any"
+    @form-model-ready="(model, m) => emit('formModelReady', model, m)"
   >
-    <header
-      v-if="title"
-      class="fcurd-form__header"
+    <!-- inline 模式：直接渲染在页面中 -->
+    <div
+      v-if="effectiveFormMode === 'inline'"
+      class="fcurd-form fcurd-form--naive"
     >
-      <h3 class="fcurd-form__title">
-        {{ typeof title === 'function' ? title({ mode, row }) : title }}
-      </h3>
-    </header>
-
-    <NForm
-      ref="formRef"
-      class="fcurd-form__body"
-      :model="formModel"
-      @submit.prevent="handleSubmit"
-    >
-      <slot
-        :form-model="formModel"
-        :mode="mode"
-        :submit="handleSubmit"
+      <header
+        v-if="title"
+        class="fcurd-form__header"
       >
-        <div v-if="controlMap">
-          <NFormItem
-            v-for="field in effectiveFields"
-            :key="field.key"
-            :label="field.label()"
-            :required="field.required"
-            :path="field.key"
-            class="fcurd-form__item"
-            v-bind="getFormItemProps(field)"
-          >
-            <slot
-              v-if="getFieldSlotName(field.key)"
-              :name="getFieldSlotName(field.key)!"
-              :field="field"
-              :model="formModel"
-              :mode="mode"
-              :row="row"
-              :value="formModel[field.key]"
-            />
-            <component
-              :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
-              v-else
-              v-model="formModel[field.key]"
-              :field="field"
-              v-bind="(field.ui as any)?.control"
-            />
-          </NFormItem>
-        </div>
-      </slot>
+        <h3 class="fcurd-form__title">
+          {{ typeof title === 'function' ? title({ mode, row }) : title }}
+        </h3>
+      </header>
 
-      <footer class="fcurd-form__footer">
-        <slot
-          name="footer"
-          :mode="mode"
-          :submitting="false"
-          :submit="handleSubmit"
-          :reset="initFormModel"
-        >
-          <NSpace
-            :size="8"
-            justify="end"
-          >
-            <NButton
-              attr-type="button"
-              @click="visible = false"
-            >
-              取消
-            </NButton>
-            <NButton
-              type="primary"
-              attr-type="submit"
-            >
-              保存
-            </NButton>
-          </NSpace>
-        </slot>
-      </footer>
-    </NForm>
-  </div>
-
-  <!-- modal 模式：使用 Naive UI 的 NModal -->
-  <NModal
-    v-else-if="effectiveFormMode === 'modal'"
-    v-bind="props.modalProps"
-    v-model:show="visible"
-    preset="dialog"
-    :title="typeof title === 'function' ? title({ mode, row }) : title || mode === 'edit' ? '编辑' : '创建'"
-    class="fcurd-form-modal"
-  >
-    <NForm
-      ref="formRef"
-      class="fcurd-form__body py-2"
-      :model="formModel"
-      size="small"
-      label-placement="top"
-      @submit.prevent="handleSubmit"
-    >
-      <slot
-        :form-model="formModel"
-        :mode="mode"
-        :submit="handleSubmit"
-      >
-        <div v-if="controlMap">
-          <NFormItem
-            v-for="field in effectiveFields"
-            :key="field.key"
-            :label="field.label()"
-            :required="field.required"
-            :path="field.key"
-            class="fcurd-form__item"
-            v-bind="getFormItemProps(field)"
-          >
-            <slot
-              v-if="getFieldSlotName(field.key)"
-              :name="getFieldSlotName(field.key)!"
-              :field="field"
-              :model="formModel"
-              :mode="mode"
-              :row="row"
-              :value="formModel[field.key]"
-            />
-            <component
-              :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
-              v-else
-              v-model="formModel[field.key]"
-              :field="field"
-              v-bind="(field.ui as any)?.control"
-            />
-          </NFormItem>
-        </div>
-      </slot>
-
-      <footer class="fcurd-form__footer">
-        <slot
-          name="footer"
-          :mode="mode"
-          :submitting="false"
-          :submit="handleSubmit"
-          :reset="initFormModel"
-        >
-          <NSpace
-            :size="8"
-            justify="end"
-          >
-            <NButton
-              attr-type="button"
-              @click="visible = false"
-            >
-              取消
-            </NButton>
-            <NButton
-              type="primary"
-              attr-type="submit"
-            >
-              保存
-            </NButton>
-          </NSpace>
-        </slot>
-      </footer>
-    </NForm>
-  </NModal>
-
-  <!-- drawer 模式：使用 Naive UI 的 NDrawer -->
-  <NDrawer
-    v-else
-    v-bind="props.drawerProps"
-    v-model:show="visible"
-    :width="420"
-    placement="right"
-    class="fcurd-form-drawer"
-  >
-    <NDrawerContent
-      v-bind="props.drawerContentProps"
-      :title="typeof title === 'function' ? title({ mode, row }) : title"
-    >
       <NForm
         ref="formRef"
         class="fcurd-form__body"
         :model="formModel"
-        size="small"
-        label-placement="top"
-        @submit.prevent="handleSubmit"
+        v-bind="formProps"
+        @submit.prevent="async () => {
+          const valid = await validateOnSubmit()
+          if (!valid) return
+          emit('submit', { mode, data: { ...formModel } })
+        }"
       >
         <slot
           :form-model="formModel"
           :mode="mode"
-          :submit="handleSubmit"
+          :submit="() => emit('submit', { mode, data: { ...formModel } })"
         >
           <div v-if="controlMap">
             <NFormItem
@@ -382,11 +152,11 @@ async function handleSubmit(): Promise<void> {
               :required="field.required"
               :path="field.key"
               class="fcurd-form__item"
-              v-bind="getFormItemProps(field)"
+              v-bind="resolveFormItemProps(field)"
             >
               <slot
-                v-if="getFieldSlotName(field.key)"
-                :name="getFieldSlotName(field.key)!"
+                v-if="resolveSlotName(slots, { prefix: 'field', key: field.key })"
+                :name="resolveSlotName(slots, { prefix: 'field', key: field.key })!"
                 :field="field"
                 :model="formModel"
                 :mode="mode"
@@ -394,11 +164,11 @@ async function handleSubmit(): Promise<void> {
                 :value="formModel[field.key]"
               />
               <component
-                :is="(field.ui as any)?.component || controlMap[field.type] || controlMap.text"
+                :is="resolveControl(field).component"
                 v-else
                 v-model="formModel[field.key]"
-                :field="field"
-                v-bind="(field.ui as any)?.control"
+                surface="form"
+                v-bind="resolveControl(field).bind"
               />
             </NFormItem>
           </div>
@@ -409,8 +179,8 @@ async function handleSubmit(): Promise<void> {
             name="footer"
             :mode="mode"
             :submitting="false"
-            :submit="handleSubmit"
-            :reset="initFormModel"
+            :submit="() => emit('submit', { mode, data: { ...formModel } })"
+            :reset="() => { initFormModel(); formRef?.restoreValidation?.() }"
           >
             <NSpace
               :size="8"
@@ -432,6 +202,193 @@ async function handleSubmit(): Promise<void> {
           </slot>
         </footer>
       </NForm>
-    </NDrawerContent>
-  </NDrawer>
+    </div>
+
+    <!-- modal 模式：使用 Naive UI 的 NModal -->
+    <NModal
+      v-else-if="effectiveFormMode === 'modal'"
+      v-bind="props.modalProps"
+      v-model:show="visible"
+      preset="dialog"
+      :title="typeof title === 'function' ? title({ mode, row }) : title || mode === 'edit' ? '编辑' : '创建'"
+      class="fcurd-form-modal"
+      @after-leave="() => {
+        if (props.resetOnClose) {
+          initFormModel()
+          formRef?.restoreValidation?.()
+        }
+      }"
+    >
+      <NForm
+        ref="formRef"
+        class="fcurd-form__body py-2"
+        :model="formModel"
+        v-bind="formProps"
+        @submit.prevent="async () => {
+          const valid = await validateOnSubmit()
+          if (!valid) return
+          emit('submit', { mode, data: { ...formModel } })
+        }"
+      >
+        <slot
+          :form-model="formModel"
+          :mode="mode"
+          :submit="() => emit('submit', { mode, data: { ...formModel } })"
+        >
+          <div v-if="controlMap">
+            <NFormItem
+              v-for="field in effectiveFields"
+              :key="field.key"
+              :label="field.label()"
+              :required="field.required"
+              :path="field.key"
+              class="fcurd-form__item"
+              v-bind="resolveFormItemProps(field)"
+            >
+              <slot
+                v-if="resolveSlotName(slots, { prefix: 'field', key: field.key })"
+                :name="resolveSlotName(slots, { prefix: 'field', key: field.key })!"
+                :field="field"
+                :model="formModel"
+                :mode="mode"
+                :row="row"
+                :value="formModel[field.key]"
+              />
+              <component
+                :is="resolveControl(field).component"
+                v-else
+                v-model="formModel[field.key]"
+                surface="form"
+                v-bind="resolveControl(field).bind"
+              />
+            </NFormItem>
+          </div>
+        </slot>
+
+        <footer class="fcurd-form__footer">
+          <slot
+            name="footer"
+            :mode="mode"
+            :submitting="false"
+            :submit="() => emit('submit', { mode, data: { ...formModel } })"
+            :reset="() => { initFormModel(); formRef?.restoreValidation?.() }"
+          >
+            <NSpace
+              :size="8"
+              justify="end"
+            >
+              <NButton
+                attr-type="button"
+                @click="visible = false"
+              >
+                取消
+              </NButton>
+              <NButton
+                type="primary"
+                attr-type="submit"
+              >
+                保存
+              </NButton>
+            </NSpace>
+          </slot>
+        </footer>
+      </NForm>
+    </NModal>
+
+    <!-- drawer 模式：使用 Naive UI 的 NDrawer -->
+    <NDrawer
+      v-else
+      v-bind="props.drawerProps"
+      v-model:show="visible"
+      :width="420"
+      placement="right"
+      class="fcurd-form-drawer"
+      @after-leave="() => {
+        if (props.resetOnClose) {
+          initFormModel()
+          formRef?.restoreValidation?.()
+        }
+      }"
+    >
+      <NDrawerContent
+        v-bind="props.drawerContentProps"
+        :title="typeof title === 'function' ? title({ mode, row }) : title"
+      >
+        <NForm
+          ref="formRef"
+          class="fcurd-form__body"
+          :model="formModel"
+          v-bind="formProps"
+          @submit.prevent="async () => {
+            const valid = await validateOnSubmit()
+            if (!valid) return
+            emit('submit', { mode, data: { ...formModel } })
+          }"
+        >
+          <slot
+            :form-model="formModel"
+            :mode="mode"
+            :submit="() => emit('submit', { mode, data: { ...formModel } })"
+          >
+            <div v-if="controlMap">
+              <NFormItem
+                v-for="field in effectiveFields"
+                :key="field.key"
+                :label="field.label()"
+                :required="field.required"
+                :path="field.key"
+                class="fcurd-form__item"
+                v-bind="resolveFormItemProps(field)"
+              >
+                <slot
+                  v-if="resolveSlotName(slots, { prefix: 'field', key: field.key })"
+                  :name="resolveSlotName(slots, { prefix: 'field', key: field.key })!"
+                  :field="field"
+                  :model="formModel"
+                  :mode="mode"
+                  :row="row"
+                  :value="formModel[field.key]"
+                />
+                <component
+                  :is="resolveControl(field).component"
+                  v-else
+                  v-model="formModel[field.key]"
+                  surface="form"
+                  v-bind="resolveControl(field).bind"
+                />
+              </NFormItem>
+            </div>
+          </slot>
+
+          <footer class="fcurd-form__footer">
+            <slot
+              name="footer"
+              :mode="mode"
+              :submitting="false"
+              :submit="() => emit('submit', { mode, data: { ...formModel } })"
+              :reset="() => { initFormModel(); formRef?.restoreValidation?.() }"
+            >
+              <NSpace
+                :size="8"
+                justify="end"
+              >
+                <NButton
+                  attr-type="button"
+                  @click="visible = false"
+                >
+                  取消
+                </NButton>
+                <NButton
+                  type="primary"
+                  attr-type="submit"
+                >
+                  保存
+                </NButton>
+              </NSpace>
+            </slot>
+          </footer>
+        </NForm>
+      </NDrawerContent>
+    </NDrawer>
+  </CrudFormRenderer>
 </template>

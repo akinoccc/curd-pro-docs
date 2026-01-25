@@ -1,6 +1,7 @@
 export * from './control-map-naive'
 export * from './controls'
 export { createNaiveColumns } from './createNaiveColumns'
+export * from './naive-ui-driver'
 export { default as NaiveAutoCrud } from './NaiveAutoCrud.vue'
 export { default as NaiveCrudForm } from './NaiveCrudForm.vue'
 export { default as NaiveCrudSearch } from './NaiveCrudSearch.vue'

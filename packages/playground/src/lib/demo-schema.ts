@@ -1,6 +1,19 @@
 import type { NaiveCrudField } from '@fcurd/naive-ui'
+import type { SelectOption } from 'naive-ui'
 import type { DemoRow } from './memory-crud'
 import { createNaiveColumns, defineNaiveFields } from '@fcurd/naive-ui'
+
+const statusOptions: SelectOption[] = [
+  { label: '草稿', value: 'draft' },
+  { label: '启用', value: 'enabled' },
+  { label: '禁用', value: 'disabled' },
+]
+
+const categoryOptions: SelectOption[] = [
+  { label: '分类 A', value: 'A' },
+  { label: '分类 B', value: 'B' },
+  { label: '分类 C', value: 'C' },
+]
 
 export function createDemoFields() {
   return defineNaiveFields([
@@ -35,17 +48,15 @@ export function createDemoFields() {
       label: () => '状态',
       type: 'select',
       required: true,
-      dictKey: 'status',
       visibleIn: { search: true, table: true, form: true },
-      ui: { control: { clearable: true } },
+      ui: { control: { clearable: true, options: statusOptions } },
     },
     {
       key: 'category',
       label: () => '分类',
       type: 'select',
-      dictKey: 'category',
       visibleIn: { search: true, table: true, form: true },
-      ui: { control: { clearable: true } },
+      ui: { control: { clearable: true, options: categoryOptions } },
     },
     {
       key: 'enabled',

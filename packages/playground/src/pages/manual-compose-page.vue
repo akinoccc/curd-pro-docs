@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CrudAction, CrudActionArea, CrudActionContext } from '@fcurd/core'
+import type { CrudAction, CrudActionArea, CrudActionContext, UseCrudActionsReturn } from '@fcurd/core'
 import type { DemoRow } from '../lib/memory-crud'
 import { useCrud, useCrudActions } from '@fcurd/core'
 import {
@@ -27,9 +27,7 @@ import {
 import { computed, defineComponent, h, inject, onMounted, ref } from 'vue'
 import { createDemoColumns, createDemoFields } from '../lib/demo-schema'
 import { createDemoRows, createMemoryCrudAdapter } from '../lib/memory-crud'
-import { createMockDictApi } from '../lib/mock-dicts'
 
-const dictApi = createMockDictApi()
 const store = createMemoryCrudAdapter(createDemoRows(89))
 
 const fields = createDemoFields()
@@ -112,8 +110,11 @@ const ActionBar = defineComponent({
   },
   setup(props) {
     const message = useMessage()
-    const injected = inject(CrudActionsSymbol, null)
-    const injectedCrud = inject(CrudInstanceSymbol, null) as any
+    const injected = inject(CrudActionsSymbol) as
+      | UseCrudActionsReturn<DemoRow>
+      | CrudAction<DemoRow>[]
+      | undefined
+    const injectedCrud = inject(CrudInstanceSymbol) as any
     const selectedRows = inject(CrudSelectedRowsSymbol, computed(() => [] as DemoRow[]))
     const selection = inject(CrudSelectionSymbol, ref(new Set<string | number>()))
 
@@ -238,7 +239,6 @@ onMounted(() => {
       :user="{ roles: ['admin'] }"
       :extra="{ from: 'manual-page' }"
       :control-map="naiveControlMap"
-      :dict-api="dictApi"
       :get-id="(row: DemoRow) => row.id"
     >
       <NCard>

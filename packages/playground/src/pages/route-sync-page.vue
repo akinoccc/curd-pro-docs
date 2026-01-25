@@ -5,10 +5,8 @@ import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { createDemoColumns, createDemoFields } from '../lib/demo-schema'
 import { createMemoryCrudAdapter } from '../lib/memory-crud'
-import { createMockDictApi } from '../lib/mock-dicts'
 
 const route = useRoute()
-const dictApi = createMockDictApi()
 const { adapter } = createMemoryCrudAdapter()
 
 const fields = createDemoFields()
@@ -51,7 +49,6 @@ const searchQueryRaw = computed(() => {
         :adapter="adapter"
         :fields="fields"
         :table-columns="tableColumns"
-        :dict-api="dictApi"
         form-mode="modal"
         :show-actions-column="true"
       />
