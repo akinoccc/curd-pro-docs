@@ -4,6 +4,7 @@ export const routeNames = {
   auto: 'auto',
   manual: 'manual',
   routeSync: 'routeSync',
+  config: 'config',
 } as const
 
 export const router = createRouter({
@@ -24,6 +25,11 @@ export const router = createRouter({
       path: '/route-sync',
       name: routeNames.routeSync,
       component: () => import('./pages/route-sync-page.vue'),
+    },
+    {
+      path: '/config',
+      name: routeNames.config,
+      component: () => import('./pages/config-provider-page.vue'),
     },
   ],
 })

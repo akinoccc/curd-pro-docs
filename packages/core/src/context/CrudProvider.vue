@@ -8,9 +8,9 @@ import type {
   CrudTableColumn,
   UseCrudActionsReturn,
   UseCrudReturn,
-} from '@fcurd/core'
-import type { CrudControlMap } from './symbols'
+} from '../crud/models'
 import type { CrudUiDriver } from '../ui/ui-driver'
+import type { CrudControlMap } from './symbols'
 import { computed, provide, ref } from 'vue'
 import {
   CrudActionsSymbol,
@@ -50,7 +50,7 @@ const selection = ref<Set<string | number>>(new Set())
 const selectedRows = computed<any[]>(() => {
   const ids = selection.value
   const list = props.crud?.rows?.value ?? []
-  return list.filter(row => ids.has(getId(row)))
+  return list.filter((row: any) => ids.has(getId(row)))
 })
 
 provide(CrudInstanceSymbol, props.crud)
@@ -80,5 +80,3 @@ provide(CrudSelectedRowsSymbol, selectedRows)
 <template>
   <slot />
 </template>
-
-

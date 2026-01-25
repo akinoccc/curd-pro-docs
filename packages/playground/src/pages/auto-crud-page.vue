@@ -10,11 +10,12 @@ const { adapter } = createMemoryCrudAdapter()
 const fields = createDemoFields()
 const tableColumns = createDemoColumns(fields)
 
-function formatDate(iso: string): string {
-  const ts = Date.parse(iso)
-  if (!Number.isFinite(ts))
-    return String(iso ?? '')
-  return new Date(ts).toLocaleString()
+function formatDate(value: number | string): string {
+  if (typeof value === 'number' && Number.isFinite(value))
+    return new Date(value).toLocaleString()
+  if (typeof value === 'string')
+    return value
+  return String(value ?? '')
 }
 
 function statusTagType(status: DemoRow['status']): 'default' | 'success' | 'warning' | 'error' {

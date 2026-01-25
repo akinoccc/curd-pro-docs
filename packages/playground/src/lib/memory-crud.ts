@@ -8,7 +8,7 @@ export interface DemoRow {
   status: 'draft' | 'enabled' | 'disabled'
   category: 'A' | 'B' | 'C'
   enabled: boolean
-  createdAt: string // ISO
+  createdAt: number // timestamp(ms)
   remark?: string | null
 }
 
@@ -19,7 +19,7 @@ export interface DemoQuery {
     status?: DemoRow['status'] | null
     category?: DemoRow['category'] | null
     enabled?: boolean | null
-    createdAt?: [string, string] | null
+    createdAt?: [number, number] | null
   }
 }
 
@@ -75,9 +75,9 @@ function filterRows(rows: DemoRow[], query: Record<string, any>): DemoRow[] {
       return false
     if (createdAt && createdAt.length === 2) {
       const [start, end] = createdAt
-      const s = start ? Date.parse(start) : Number.NaN
-      const e = end ? Date.parse(end) : Number.NaN
-      const ts = Date.parse(row.createdAt)
+      const s = typeof start === 'number' ? start : Number.NaN
+      const e = typeof end === 'number' ? end : Number.NaN
+      const ts = row.createdAt
       if (Number.isFinite(s) && ts < s)
         return false
       if (Number.isFinite(e) && ts > e)
@@ -102,7 +102,7 @@ export function createDemoRows(count = 137): DemoRow[] {
     const status = statuses[id % statuses.length]
     const category = categories[id % categories.length]
     const enabled = status === 'enabled'
-    const createdAt = new Date(base.getTime() - id * 36 * 60 * 1000).toISOString()
+    const createdAt = base.getTime() - id * 36 * 60 * 1000
     rows.push({
       id,
       name: `示例数据 ${id}`,
@@ -162,7 +162,7 @@ export function createMemoryCrudAdapter(initial?: DemoRow[]): {
         status: ((data as any)?.status ?? 'draft') as DemoRow['status'],
         category: ((data as any)?.category ?? 'A') as DemoRow['category'],
         enabled: Boolean((data as any)?.enabled ?? false),
-        createdAt: new Date().toISOString(),
+        createdAt: Date.now(),
         remark: ((data as any)?.remark ?? null) as any,
       }
       db = [row, ...db]

@@ -59,6 +59,10 @@ const tabsType = 'line' satisfies TabsProps['type']
                   :name="routeNames.routeSync"
                   tab="路由同步"
                 />
+                <NTabPane
+                  :name="routeNames.config"
+                  tab="ConfigProvider"
+                />
               </NTabs>
             </div>
           </NLayoutHeader>

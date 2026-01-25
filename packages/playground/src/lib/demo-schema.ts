@@ -77,7 +77,7 @@ export function createDemoFields() {
     {
       key: 'createdAt',
       label: () => '创建时间',
-      type: 'datetime',
+      type: 'datetimeRange',
       visibleIn: { search: true, table: true, form: false },
       ui: {
         control: { clearable: true },
