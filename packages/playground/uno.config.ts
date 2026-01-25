@@ -2,7 +2,6 @@
 import {
   defineConfig,
   presetAttributify,
-  presetIcons,
   presetTypography,
   presetWebFonts,
   presetWind3,

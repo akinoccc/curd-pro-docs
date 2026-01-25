@@ -57,5 +57,3 @@ const effectiveActions = computed<CrudAction<any>[]>(() => {
     :ctx="actionContext"
   />
 </template>
-
-
