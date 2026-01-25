@@ -45,5 +45,3 @@ const effectiveColumns = computed(() => {
     :get-id="ctx.getId"
   />
 </template>
-
-

@@ -3,8 +3,8 @@ import type { CrudField, UseCrudReturn } from '@fcurd/core'
 import type { CrudSearchCodec } from '../search/useCrudSearchRouteSync'
 import { reactive } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
-import { useCrudSearchRouteSync } from '../search/useCrudSearchRouteSync'
 import { useEffectiveFields } from '../fields/useEffectiveFields'
+import { useCrudSearchRouteSync } from '../search/useCrudSearchRouteSync'
 
 interface CrudSearchRendererProps<Row = any> {
   /**
@@ -65,5 +65,3 @@ const { handleSubmit, handleReset } = useCrudSearchRouteSync({
     :reset="handleReset"
   />
 </template>
-
-

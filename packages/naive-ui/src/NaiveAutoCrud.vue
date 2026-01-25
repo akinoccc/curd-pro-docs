@@ -12,11 +12,7 @@ import type {
 } from '@fcurd/core'
 import type { DataTableProps, DrawerContentProps, DrawerProps, FormProps, ModalProps, PaginationProps } from 'naive-ui'
 import type { FunctionalComponent } from 'vue'
-import { useCrud } from '@fcurd/core'
-import {
-  CrudActionsRenderer,
-  CrudProvider,
-} from '@fcurd/core'
+import { CrudActionsRenderer, CrudProvider, useCrud } from '@fcurd/core'
 import { NButton, NCard, NPopconfirm } from 'naive-ui'
 import { computed, h, onMounted, ref, useSlots } from 'vue'
 import { naiveControlMap } from './control-map-naive'

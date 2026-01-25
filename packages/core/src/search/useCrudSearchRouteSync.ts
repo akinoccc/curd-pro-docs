@@ -225,5 +225,3 @@ export function useCrudSearchRouteSync<Row = any>(options: UseCrudSearchRouteSyn
     handleReset,
   }
 }
-
-

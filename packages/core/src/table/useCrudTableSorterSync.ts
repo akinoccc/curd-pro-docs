@@ -40,5 +40,3 @@ export function useCrudTableSorterSync(): UseCrudTableSorterSyncReturn {
     sort: (ctx.crud?.sort as any) ?? undefined,
   }
 }
-
-

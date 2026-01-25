@@ -25,11 +25,11 @@ export interface CrudDateConfig {
   /**
    * 日期字段值类型
    * - timestamp：number（可通过 unit 指定 ms/s）
-   * - yyyy-mm-dd：string（例如 2026-01-26）
+   * - string：string（遵循具体 UI 组件的默认 value / formattedValue 格式）
    *
    * 说明：该配置仅决定“回传（v-model）”的值格式，不影响控件展示。
    */
-  valueType: 'timestamp' | 'yyyy-mm-dd'
+  valueType: 'timestamp' | 'string'
   /**
    * timestamp 单位
    * - ms：毫秒（默认，与 JS Date / Naive NDatePicker 一致）

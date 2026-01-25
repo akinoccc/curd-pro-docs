@@ -88,5 +88,3 @@ export interface CrudUiDriver {
    */
   decodeTableSorter?: (payload: any) => CrudSort | null
 }
-
-

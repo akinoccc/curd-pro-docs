@@ -58,5 +58,3 @@ const effectiveFields = useEffectiveFields<any, any>({
     :init-form-model="initFormModel"
   />
 </template>
-
-

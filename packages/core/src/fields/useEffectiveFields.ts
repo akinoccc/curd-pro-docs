@@ -65,5 +65,3 @@ export function useEffectiveFields<Row = any, FormModel = any>(
     }) as CrudField<Row, FormModel, any>[]
   })
 }
-
-

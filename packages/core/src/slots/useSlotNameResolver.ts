@@ -27,5 +27,3 @@ export function resolveSlotName(slots: any, options: SlotNameResolverOptions): s
   }
   return null
 }
-
-

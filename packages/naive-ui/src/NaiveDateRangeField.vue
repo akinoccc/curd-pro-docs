@@ -52,12 +52,24 @@ function parseYmdToMsLocal(ymd: string): number | null {
   return Number.isFinite(ms) ? ms : null
 }
 
-function formatMsToYmdLocal(ms: number): string {
-  const dt = new Date(ms)
-  const y = dt.getFullYear()
-  const m = String(dt.getMonth() + 1).padStart(2, '0')
-  const d = String(dt.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+function parseDefaultStringToMsLocal(value: string): number | null {
+  const asYmd = parseYmdToMsLocal(value)
+  if (asYmd !== null)
+    return asYmd
+  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/)
+  if (!m)
+    return null
+  const year = Number(m[1])
+  const month = Number(m[2])
+  const day = Number(m[3])
+  const hour = Number(m[4])
+  const minute = Number(m[5])
+  const second = m[6] ? Number(m[6]) : 0
+  if (![year, month, day, hour, minute, second].every(Number.isFinite))
+    return null
+  const dt = new Date(year, month - 1, day, hour, minute, second, 0)
+  const ms = dt.getTime()
+  return Number.isFinite(ms) ? ms : null
 }
 
 const valueMs = computed<[number, number] | null>(() => {
@@ -66,21 +78,23 @@ const valueMs = computed<[number, number] | null>(() => {
     return null
   const [start, end] = v as any
 
-  // 输入支持：timestamp(number tuple) 或 yyyy-mm-dd(string tuple)
+  // 输入支持：
+  // - timestamp(number tuple)
+  // - string tuple（遵循 UI 组件默认格式；这里做“默认格式”的有限解析）
   const sMs: number | null = typeof start === 'number'
     ? (Number.isFinite(start) ? (unit.value === 's' ? start * 1000 : start) : null)
-    : (typeof start === 'string' ? parseYmdToMsLocal(start) : null)
+    : (typeof start === 'string' ? parseDefaultStringToMsLocal(start) : null)
 
   const eMs: number | null = typeof end === 'number'
     ? (Number.isFinite(end) ? (unit.value === 's' ? end * 1000 : end) : null)
-    : (typeof end === 'string' ? parseYmdToMsLocal(end) : null)
+    : (typeof end === 'string' ? parseDefaultStringToMsLocal(end) : null)
 
   if (sMs === null || eMs === null)
     return null
   return [sMs, eMs]
 })
 
-function handleUpdate(ts: [number, number] | null): void {
+function handleUpdateValue(ts: [number, number] | null): void {
   if (!ts || ts.length !== 2) {
     modelValue.value = null
     return
@@ -92,14 +106,22 @@ function handleUpdate(ts: [number, number] | null): void {
   }
 
   // 回写永远按 ConfigProvider 配置的输出格式
-  if (valueType.value === 'yyyy-mm-dd') {
-    modelValue.value = [formatMsToYmdLocal(start), formatMsToYmdLocal(end)]
+  if (valueType.value === 'string')
     return
-  }
 
   modelValue.value = unit.value === 's'
     ? [Math.floor(start / 1000), Math.floor(end / 1000)]
     : [start, end]
+}
+
+function handleUpdateFormatted(value: [string, string] | null): void {
+  if (valueType.value !== 'string')
+    return
+  if (!value || value.length !== 2) {
+    modelValue.value = null
+    return
+  }
+  modelValue.value = [value[0], value[1]]
 }
 </script>
 
@@ -111,6 +133,7 @@ function handleUpdate(ts: [number, number] | null): void {
     :placeholder="(controlProps as any).placeholder ?? field?.label()"
     clearable
     v-bind="controlProps"
-    @update:value="handleUpdate"
+    @update:value="handleUpdateValue"
+    @update:formatted-value="handleUpdateFormatted"
   />
 </template>

@@ -51,12 +51,28 @@ function parseYmdToMsLocal(ymd: string): number | null {
   return Number.isFinite(ms) ? ms : null
 }
 
-function formatMsToYmdLocal(ms: number): string {
-  const dt = new Date(ms)
-  const y = dt.getFullYear()
-  const m = String(dt.getMonth() + 1).padStart(2, '0')
-  const d = String(dt.getDate()).padStart(2, '0')
-  return `${y}-${m}-${d}`
+function parseDefaultStringToMsLocal(value: string): number | null {
+  // date：默认 formatted-value 通常是 yyyy-MM-dd
+  const asYmd = parseYmdToMsLocal(value)
+  if (asYmd !== null)
+    return asYmd
+
+  // datetime：默认 formatted-value 可能是 yyyy-MM-dd HH:mm 或 yyyy-MM-dd HH:mm:ss
+  // 这里做一个轻量解析（本地时区），不要求特定格式配置。
+  const m = value.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/)
+  if (!m)
+    return null
+  const year = Number(m[1])
+  const month = Number(m[2])
+  const day = Number(m[3])
+  const hour = Number(m[4])
+  const minute = Number(m[5])
+  const second = m[6] ? Number(m[6]) : 0
+  if (![year, month, day, hour, minute, second].every(Number.isFinite))
+    return null
+  const dt = new Date(year, month - 1, day, hour, minute, second, 0)
+  const ms = dt.getTime()
+  return Number.isFinite(ms) ? ms : null
 }
 
 const valueMs = computed<number | null>(() => {
@@ -64,33 +80,39 @@ const valueMs = computed<number | null>(() => {
   if (v === null || v === undefined)
     return null
 
-  // 输入支持：timestamp(number) 或 yyyy-mm-dd(string)
+  // 输入支持：
+  // - timestamp(number)
+  // - string（遵循 UI 组件默认格式；这里做“默认格式”的有限解析）
   if (typeof v === 'number' && Number.isFinite(v)) {
     // 认为 number 按配置 unit 表示（历史上也可能是 ms；但这里优先保证“按配置输出”一致性）
     return unit.value === 's' ? v * 1000 : v
   }
 
   if (typeof v === 'string') {
-    const ms = parseYmdToMsLocal(v)
+    const ms = parseDefaultStringToMsLocal(v)
     return ms
   }
 
   return null
 })
 
-function handleUpdate(ts: number | null): void {
+function handleUpdateValue(ts: number | null): void {
   if (typeof ts !== 'number' || !Number.isFinite(ts)) {
     modelValue.value = null
     return
   }
 
   // 回写永远按 ConfigProvider 配置的输出格式
-  if (valueType.value === 'yyyy-mm-dd') {
-    modelValue.value = formatMsToYmdLocal(ts)
+  if (valueType.value === 'string')
     return
-  }
 
   modelValue.value = unit.value === 's' ? Math.floor(ts / 1000) : ts
+}
+
+function handleUpdateFormatted(value: string | null): void {
+  if (valueType.value !== 'string')
+    return
+  modelValue.value = value ?? null
 }
 </script>
 
@@ -102,6 +124,7 @@ function handleUpdate(ts: number | null): void {
     :placeholder="(controlProps as any).placeholder ?? field?.label()"
     clearable
     v-bind="controlProps"
-    @update:value="handleUpdate"
+    @update:value="handleUpdateValue"
+    @update:formatted-value="handleUpdateFormatted"
   />
 </template>

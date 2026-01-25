@@ -32,5 +32,3 @@ export function useEffectiveColumns<Row = any>(
     }) as CrudTableColumn<Row>[]
   })
 }
-
-
