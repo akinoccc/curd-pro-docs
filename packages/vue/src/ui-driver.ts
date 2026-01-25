@@ -63,6 +63,11 @@ export interface CrudUiDriver {
     columns: readonly CrudTableColumn<Row>[]
     sort?: CrudSort | null
     showSelection?: boolean
+    /**
+     * selection 列的配置透传（不同 UI 框架可以自行解释）
+     * - Naive: DataTableColumn(type='selection') 的配置，例如 multiple/disabled
+     */
+    selectionColumn?: Record<string, any>
     showActionsColumn?: boolean
     selection?: { value: Set<string | number> }
     getId?: (row: any) => string | number

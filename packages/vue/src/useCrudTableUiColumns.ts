@@ -8,6 +8,7 @@ export interface UseCrudTableUiColumnsOptions<Row = any> {
   columns: ComputedRef<CrudTableColumn<Row>[]>
   slots?: any
   showSelection?: boolean
+  selectionColumn?: Record<string, any>
   showActionsColumn?: boolean
 }
 
@@ -69,6 +70,7 @@ export function useCrudTableUiColumns<Row = any>(
       columns,
       sort: (ctx.crud?.sort.value ?? null) as any,
       showSelection: options.showSelection,
+      selectionColumn: options.selectionColumn,
       showActionsColumn: options.showActionsColumn,
       selection: ctx.selection,
       getId: ctx.getId as any,

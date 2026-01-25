@@ -29,6 +29,11 @@ interface NaiveAutoCrudUiProps {
   table?: {
     dataTableProps?: DataTableProps
     paginationProps?: PaginationProps
+    /**
+     * Naive selection 列透传配置：
+     * - 例如 { multiple: false, disabled: (row) => boolean }
+     */
+    selectionColumn?: Record<string, any>
   }
   search?: {
     formProps?: FormProps
@@ -378,6 +383,7 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
         <NaiveCrudTable
           :columns="tableColumns"
           :show-selection="showSelection"
+          :selection-column="ui?.table?.selectionColumn"
           :show-actions-column="showActionsColumn"
           :data-table-props="ui?.table?.dataTableProps"
           :pagination-props="ui?.table?.paginationProps"

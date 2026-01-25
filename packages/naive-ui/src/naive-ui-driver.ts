@@ -1,7 +1,7 @@
 import type { CrudTableColumn } from '@fcurd/core'
 import type { CrudUiDriver } from '@fcurd/vue'
 import type { DataTableColumn } from 'naive-ui'
-import { NCheckbox, NSpace } from 'naive-ui'
+import { NSpace } from 'naive-ui'
 import { h } from 'vue'
 import { resolveNaiveSurfaceProps } from './controls'
 
@@ -54,9 +54,8 @@ export const naiveUiDriver: CrudUiDriver = {
       columns,
       sort,
       showSelection,
+      selectionColumn,
       showActionsColumn,
-      selection,
-      getId,
       renderActionsHeader,
       renderRowActions,
       renderCell,
@@ -93,35 +92,14 @@ export const naiveUiDriver: CrudUiDriver = {
 
     const result: DataTableColumn[] = []
 
-    if (showSelection && selection && getId) {
-      const sel = selection
-      const gid = getId
-
-      function isSelected(row: any): boolean {
-        return sel.value.has(gid(row))
-      }
-
-      function toggleRow(row: any): void {
-        const id = gid(row)
-        const next = new Set(sel.value)
-        if (next.has(id))
-          next.delete(id)
-        else
-          next.add(id)
-        sel.value = next
-      }
-
+    if (showSelection) {
+      // 使用 Naive UI 原生 selection 列：
+      // - 勾选状态由 <NDataTable v-model:checked-row-keys> 驱动（见 NaiveCrudTable.vue）
+      // - selectionColumn 允许透传 multiple/disabled 等配置
       result.push({
-        key: '__selection',
-        width: 60,
-        align: 'center',
-        render: ((row: any) => {
-          return h(NCheckbox, {
-            'checked': isSelected(row),
-            'onUpdate:checked': () => toggleRow(row),
-          })
-        }) as any,
-      })
+        type: 'selection',
+        ...(selectionColumn ?? {}),
+      } as any)
     }
 
     result.push(...baseColumns)
@@ -131,9 +109,9 @@ export const naiveUiDriver: CrudUiDriver = {
         key: '__actions',
         minWidth: 80,
         fixed: 'right',
-        title: (renderActionsHeader ? () => renderActionsHeader() : '操作') as any,
-        align: 'center',
-        render: ((row: any) => {
+        title: renderActionsHeader ? () => renderActionsHeader() : '操作' as any,
+        align: 'left',
+        render: (row: any) => {
           if (!renderRowActions)
             return null
           const content = renderRowActions(row)
@@ -143,7 +121,7 @@ export const naiveUiDriver: CrudUiDriver = {
             { size: 8, justify: 'center' },
             { default: () => nodes },
           )
-        }) as any,
+        },
       })
     }
 

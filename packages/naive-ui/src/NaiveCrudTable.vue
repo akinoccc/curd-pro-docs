@@ -8,6 +8,11 @@ import { computed, useSlots } from 'vue'
 interface NaiveCrudTableProps<Row = any> {
   columns?: readonly CrudTableColumn<Row>[]
   showSelection?: boolean
+  /**
+   * Naive selection 列透传配置：
+   * - 例如 { multiple: false, disabled: (row) => boolean }
+   */
+  selectionColumn?: Record<string, any>
   showActionsColumn?: boolean
   dataTableProps?: DataTableProps
   paginationProps?: PaginationProps
@@ -26,7 +31,8 @@ const effectiveColumns = useEffectiveColumns<any>({
 const mergedDataTableProps = computed<DataTableProps>(() => {
   return {
     striped: true,
-    scrollX: 'max-content',
+    // 开启 selection 时，默认使用 crud.getId 作为 rowKey（业务侧可在 dataTableProps.rowKey 覆盖）
+    ...(props.showSelection ? { rowKey: (props.dataTableProps as any)?.rowKey ?? ((row: any) => ctx.getId(row)) } : {}),
     ...(props.dataTableProps ?? {}),
   }
 })
@@ -44,6 +50,7 @@ const uiColumnsRef = useCrudTableUiColumns<any>({
   columns: effectiveColumns as any,
   slots,
   showSelection: props.showSelection,
+  selectionColumn: props.selectionColumn,
   showActionsColumn: props.showActionsColumn,
 })
 
@@ -51,6 +58,15 @@ const uiColumns = computed<any[]>(() => uiColumnsRef.value ?? [])
 
 const tableData = computed<any[]>(() => {
   return ctx.crud?.rows?.value ?? []
+})
+
+const checkedRowKeys = computed<(string | number)[]>({
+  get() {
+    return Array.from(ctx.selection.value)
+  },
+  set(keys) {
+    ctx.selection.value = new Set(keys)
+  },
 })
 </script>
 
@@ -65,6 +81,7 @@ const tableData = computed<any[]>(() => {
 
     <NDataTable
       v-bind="mergedDataTableProps"
+      v-model:checked-row-keys="checkedRowKeys"
       :columns="uiColumns"
       :data="tableData"
       @update:sorter="onSorterChange"
@@ -106,14 +123,15 @@ const tableData = computed<any[]>(() => {
 /* 使用 data-col-key="__actions" 来精确选择操作列 */
 .n-data-table-th[data-col-key="__actions"].n-data-table-th--fixed-right,
 .n-data-table-td[data-col-key="__actions"].n-data-table-td--fixed-right {
-  border-left: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.04) !important;
+  width: fit-content;
+  /* border-left: 1px solid rgba(0, 0, 0, 0.08) !important; */
+  /* box-shadow: -2px 0 4px rgba(0, 0, 0, 0.04) !important; */
 }
 
 /* 暗色主题适配 */
 :root[data-theme="dark"] .n-data-table-th[data-col-key="__actions"].n-data-table-th--fixed-right,
 :root[data-theme="dark"] .n-data-table-td[data-col-key="__actions"].n-data-table-td--fixed-right {
-  border-left-color: rgba(255, 255, 255, 0.1) !important;
-  box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2) !important;
+  /* border-left-color: rgba(255, 255, 255, 0.1) !important; */
+  /* box-shadow: -2px 0 4px rgba(0, 0, 0, 0.2) !important; */
 }
 </style>
