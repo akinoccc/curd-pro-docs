@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import type { CrudField } from '@fcurd/core'
-import type { CrudControlMap } from '@fcurd/vue'
+import type { CrudControlMap, CrudField } from '@fcurd/core'
 import type { DrawerContentProps, DrawerProps, FormInst, FormProps, ModalProps } from 'naive-ui'
-import { CrudControlMapSymbol, CrudFormRenderer, resolveSlotName, useCrudContext } from '@fcurd/vue'
+import { CrudControlMapSymbol, CrudFormRenderer, resolveSlotName, useCrudContext } from '@fcurd/core'
 import {
 
   NButton,

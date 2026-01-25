@@ -6,7 +6,7 @@ import type {
   UseCrudActionsReturn,
 } from '@fcurd/core'
 import { computed } from 'vue'
-import { useCrudContext } from '../useCrudContext'
+import { useCrudContext } from '../context/useCrudContext'
 
 interface CrudActionsRendererProps<Row = any> {
   actions?: CrudAction<Row>[] | UseCrudActionsReturn<Row>
@@ -57,3 +57,5 @@ const effectiveActions = computed<CrudAction<any>[]>(() => {
     :ctx="actionContext"
   />
 </template>
+
+

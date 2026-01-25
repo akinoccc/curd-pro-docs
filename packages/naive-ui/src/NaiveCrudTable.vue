@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CrudTableColumn } from '@fcurd/core'
 import type { DataTableProps, PaginationProps } from 'naive-ui'
-import { useCrudContext, useCrudTableSorterSync, useCrudTableUiColumns, useEffectiveColumns } from '@fcurd/vue'
+import { useCrudContext, useCrudTableSorterSync, useCrudTableUiColumns, useEffectiveColumns } from '@fcurd/core'
 import { NDataTable, NPagination } from 'naive-ui'
 import { computed, useSlots } from 'vue'
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { CrudTableColumn, UseCrudReturn } from '@fcurd/core'
 import { computed } from 'vue'
-import { useCrudContext } from '../useCrudContext'
+import { useCrudContext } from '../context/useCrudContext'
 
 interface CrudTableRendererProps<Row = any> {
   columns?: readonly CrudTableColumn<Row>[]
@@ -45,3 +45,5 @@ const effectiveColumns = computed(() => {
     :get-id="ctx.getId"
   />
 </template>
+
+

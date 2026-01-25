@@ -1,8 +1,8 @@
 import type { CrudTableColumn } from '@fcurd/core'
 import type { ComputedRef, VNodeChild } from 'vue'
 import { computed } from 'vue'
-import { useCrudContext } from './useCrudContext'
-import { resolveSlotName } from './useSlotNameResolver'
+import { useCrudContext } from '../context/useCrudContext'
+import { resolveSlotName } from '../slots/useSlotNameResolver'
 
 export interface UseCrudTableUiColumnsOptions<Row = any> {
   columns: ComputedRef<CrudTableColumn<Row>[]>
@@ -95,3 +95,5 @@ export function useCrudTableUiColumns<Row = any>(
     })
   })
 }
+
+

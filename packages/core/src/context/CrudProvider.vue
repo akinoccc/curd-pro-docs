@@ -10,7 +10,7 @@ import type {
   UseCrudReturn,
 } from '@fcurd/core'
 import type { CrudControlMap } from './symbols'
-import type { CrudUiDriver } from './ui-driver'
+import type { CrudUiDriver } from '../ui/ui-driver'
 import { computed, provide, ref } from 'vue'
 import {
   CrudActionsSymbol,
@@ -80,3 +80,5 @@ provide(CrudSelectedRowsSymbol, selectedRows)
 <template>
   <slot />
 </template>
+
+

@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import type { CrudField } from '@fcurd/core'
-import type { CrudControlMap } from '@fcurd/vue'
+import type { CrudControlMap, CrudField } from '@fcurd/core'
 import type { FormProps } from 'naive-ui'
 import {
   CrudActionsRenderer,
   CrudControlMapSymbol,
   CrudSearchRenderer,
   useCrudContext,
-} from '@fcurd/vue'
+} from '@fcurd/core'
 import { NButton, NForm, NFormItem, NPopconfirm, NSpace } from 'naive-ui'
 import { inject } from 'vue'
 

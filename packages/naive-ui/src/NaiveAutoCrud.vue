@@ -16,7 +16,7 @@ import { useCrud } from '@fcurd/core'
 import {
   CrudActionsRenderer,
   CrudProvider,
-} from '@fcurd/vue'
+} from '@fcurd/core'
 import { NButton, NCard, NPopconfirm } from 'naive-ui'
 import { computed, h, onMounted, ref, useSlots } from 'vue'
 import { naiveControlMap } from './control-map-naive'

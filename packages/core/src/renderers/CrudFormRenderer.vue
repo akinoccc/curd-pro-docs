@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { CrudField } from '@fcurd/core'
 import { computed, provide, reactive, watch } from 'vue'
-import { CrudFormModelSymbol, CrudFormModeSymbol } from '../symbols'
-import { useCrudContext } from '../useCrudContext'
-import { useEffectiveFields } from '../useEffectiveFields'
+import { CrudFormModelSymbol, CrudFormModeSymbol } from '../context/symbols'
+import { useCrudContext } from '../context/useCrudContext'
+import { useEffectiveFields } from '../fields/useEffectiveFields'
 
 interface CrudFormRendererProps<Row = any> {
   row?: Row | null
@@ -58,3 +58,5 @@ const effectiveFields = useEffectiveFields<any, any>({
     :init-form-model="initFormModel"
   />
 </template>
+
+

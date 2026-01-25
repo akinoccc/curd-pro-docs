@@ -1,5 +1,4 @@
-import type { CrudTableColumn } from '@fcurd/core'
-import type { CrudUiDriver } from '@fcurd/vue'
+import type { CrudTableColumn, CrudUiDriver } from '@fcurd/core'
 import type { DataTableColumn } from 'naive-ui'
 import { NSpace } from 'naive-ui'
 import { h } from 'vue'

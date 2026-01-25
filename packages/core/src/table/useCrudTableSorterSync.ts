@@ -1,7 +1,7 @@
 import type { CrudSort } from '@fcurd/core'
 import type { Ref } from 'vue'
 import { computed } from 'vue'
-import { useCrudContext } from './useCrudContext'
+import { useCrudContext } from '../context/useCrudContext'
 
 export interface UseCrudTableSorterSyncReturn {
   onSorterChange: (payload: any) => void
@@ -40,3 +40,5 @@ export function useCrudTableSorterSync(): UseCrudTableSorterSyncReturn {
     sort: (ctx.crud?.sort as any) ?? undefined,
   }
 }
+
+

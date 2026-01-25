@@ -6,7 +6,7 @@ import type {
   UseCrudReturn,
 } from '@fcurd/core'
 import type { Component, ComputedRef, InjectionKey, Ref } from 'vue'
-import type { CrudUiDriver } from './ui-driver'
+import type { CrudUiDriver } from '../ui/ui-driver'
 
 export interface CrudControlMap {
   text: Component
@@ -50,3 +50,5 @@ export const CrudFormModeSymbol: InjectionKey<Ref<'create' | 'edit'> | undefined
 
 // UI Driver（可选）：用于把渲染策略集中到一个适配点
 export const CrudUiDriverSymbol: InjectionKey<CrudUiDriver | undefined> = Symbol('fcurd:uiDriver')
+
+

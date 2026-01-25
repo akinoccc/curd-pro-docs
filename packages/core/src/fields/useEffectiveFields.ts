@@ -1,7 +1,7 @@
 import type { CrudField, CrudFieldContext, CrudSurface } from '@fcurd/core'
 import type { ComputedRef } from 'vue'
 import { computed } from 'vue'
-import { useCrudContext } from './useCrudContext'
+import { useCrudContext } from '../context/useCrudContext'
 
 export interface UseEffectiveFieldsOptions<Row = any, FormModel = any> {
   surface: CrudSurface
@@ -65,3 +65,5 @@ export function useEffectiveFields<Row = any, FormModel = any>(
     }) as CrudField<Row, FormModel, any>[]
   })
 }
+
+

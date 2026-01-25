@@ -14,7 +14,6 @@ export default defineConfig({
     alias: {
       // 直接指向源码，确保 .vue 能被 Vite 处理并支持 HMR
       '@fcurd/core': path.resolve(here, '../core/src'),
-      '@fcurd/vue': path.resolve(here, '../vue/src'),
       '@fcurd/naive-ui': path.resolve(here, '../naive-ui/src'),
     },
   },

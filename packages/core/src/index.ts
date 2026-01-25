@@ -1,3 +1,20 @@
-export * from './models'
-export * from './useCrud'
-export * from './useCrudActions'
+export * from './crud/models'
+export * from './crud/useCrud'
+export * from './crud/useCrudActions'
+
+// UI + Context + Renderers (按功能划分目录，但对外 API 不变)
+export { default as CrudProvider } from './context/CrudProvider.vue'
+export { default as CrudActionsRenderer } from './renderers/CrudActionsRenderer.vue'
+export { default as CrudFormRenderer } from './renderers/CrudFormRenderer.vue'
+export { default as CrudSearchRenderer } from './renderers/CrudSearchRenderer.vue'
+export { default as CrudTableRenderer } from './renderers/CrudTableRenderer.vue'
+
+export * from './context/symbols'
+export * from './ui/ui-driver'
+export * from './context/useCrudContext'
+export * from './search/useCrudSearchRouteSync'
+export * from './table/useCrudTableSorterSync'
+export * from './table/useCrudTableUiColumns'
+export * from './fields/useEffectiveColumns'
+export * from './fields/useEffectiveFields'
+export * from './slots/useSlotNameResolver'

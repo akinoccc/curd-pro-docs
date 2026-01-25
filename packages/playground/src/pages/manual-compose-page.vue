@@ -1,20 +1,21 @@
 <script setup lang="ts">
 import type { CrudAction, CrudActionArea, CrudActionContext, UseCrudActionsReturn } from '@fcurd/core'
 import type { DemoRow } from '../lib/memory-crud'
-import { useCrud, useCrudActions } from '@fcurd/core'
-import {
-  naiveControlMap,
-  NaiveCrudForm,
-  NaiveCrudSearch,
-  NaiveCrudTable,
-} from '@fcurd/naive-ui'
 import {
   CrudActionsSymbol,
   CrudInstanceSymbol,
   CrudProvider,
   CrudSelectedRowsSymbol,
   CrudSelectionSymbol,
-} from '@fcurd/vue'
+  useCrud,
+  useCrudActions,
+} from '@fcurd/core'
+import {
+  naiveControlMap,
+  NaiveCrudForm,
+  NaiveCrudSearch,
+  NaiveCrudTable,
+} from '@fcurd/naive-ui'
 import {
   NAlert,
   NButton,

@@ -1,4 +1,4 @@
-import type { CrudControlMap } from '@fcurd/vue'
+import type { CrudControlMap } from '@fcurd/core'
 import NaiveDateField from './NaiveDateField.vue'
 import NaiveNumberField from './NaiveNumberField.vue'
 import NaiveSelectField from './NaiveSelectField.vue'

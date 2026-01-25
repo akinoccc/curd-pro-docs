@@ -1,7 +1,7 @@
 import type { CrudFieldContext, CrudTableColumn } from '@fcurd/core'
 import type { ComputedRef } from 'vue'
 import { computed } from 'vue'
-import { useCrudContext } from './useCrudContext'
+import { useCrudContext } from '../context/useCrudContext'
 
 export interface UseEffectiveColumnsOptions<Row = any> {
   columns?: () => readonly CrudTableColumn<Row>[]
@@ -32,3 +32,5 @@ export function useEffectiveColumns<Row = any>(
     }) as CrudTableColumn<Row>[]
   })
 }
+
+
