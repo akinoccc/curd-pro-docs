@@ -29,8 +29,8 @@ const tabsType = 'line' satisfies TabsProps['type']
             bordered
             style="padding: 12px 16px"
           >
-            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%;">
-              <div style="display: flex; flex-direction: column; gap: 2px; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+              <div style="display: flex; flex-direction: column; gap: 2px; width: 200px;">
                 <NText strong>
                   @fcurd playground
                 </NText>
@@ -50,10 +50,6 @@ const tabsType = 'line' satisfies TabsProps['type']
                 <NTabPane
                   :name="routeNames.auto"
                   tab="Auto CRUD"
-                />
-                <NTabPane
-                  :name="routeNames.manual"
-                  tab="手搓组合/动作/校验"
                 />
                 <NTabPane
                   :name="routeNames.routeSync"

@@ -17,11 +17,6 @@ export const router = createRouter({
       component: () => import('./pages/auto-crud-page.vue'),
     },
     {
-      path: '/manual',
-      name: routeNames.manual,
-      component: () => import('./pages/manual-compose-page.vue'),
-    },
-    {
       path: '/route-sync',
       name: routeNames.routeSync,
       component: () => import('./pages/route-sync-page.vue'),

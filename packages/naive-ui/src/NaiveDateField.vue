@@ -121,7 +121,7 @@ function handleUpdateFormatted(value: string | null): void {
     :value="valueMs"
     :type="type"
     :format="displayFormat"
-    :placeholder="(controlProps as any).placeholder ?? field?.label()"
+    :placeholder="field?.label()"
     clearable
     v-bind="controlProps"
     @update:value="handleUpdateValue"
