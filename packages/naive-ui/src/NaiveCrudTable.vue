@@ -72,14 +72,16 @@ const checkedRowKeys = computed<(string | number)[]>({
 
 <template>
   <div class="fcurd-table fcurd-table--naive">
-    <slot
-      name="table-actions"
-      :selection="ctx.selection"
-      :selected-ids="ctx.selectedIds.value"
-      :selected-rows="ctx.selectedRows.value"
-      :crud="ctx.crud"
-      :query="ctx.crud?.query"
-    />
+    <div class="fcurd-table__actions">
+      <slot
+        name="table-actions"
+        :selection="ctx.selection"
+        :selected-ids="ctx.selectedIds.value"
+        :selected-rows="ctx.selectedRows.value"
+        :crud="ctx.crud"
+        :query="ctx.crud?.query"
+      />
+    </div>
 
     <NDataTable
       v-bind="mergedDataTableProps"
@@ -121,6 +123,12 @@ const checkedRowKeys = computed<(string | number)[]>({
 </style>
 
 <style>
+.fcurd-table__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 /* 为固定的操作列添加左边框和阴影，以区分非固定列 */
 /* 使用 data-col-key="__actions" 来精确选择操作列 */
 .n-data-table-th[data-col-key="__actions"].n-data-table-th--fixed-right,

@@ -11,7 +11,7 @@ import type {
 } from '../crud/models'
 import type { CrudUiDriver } from '../ui/ui-driver'
 import type { CrudControlMap } from './symbols'
-import { computed, provide, ref } from 'vue'
+import { computed, provide, ref, shallowRef, watch } from 'vue'
 import {
   CrudActionsSymbol,
   CrudColumnsSymbol,
@@ -49,11 +49,46 @@ const props = defineProps<CrudProviderProps<Row, Query, SortField>>()
 const getId = props.getId ?? ((row: any) => row?.id as string | number)
 const selection = ref<Set<string | number>>(new Set())
 const selectedIds = computed<(string | number)[]>(() => Array.from(selection.value))
-const selectedRows = computed<any[]>(() => {
+
+// 跨分页 selection：保存 row 快照
+const selectedRowMap = shallowRef<Map<string | number, Row>>(new Map())
+
+function syncSelectedRowMap(): void {
   const ids = selection.value
+  const map = selectedRowMap.value
+
+  // 移除取消勾选的
+  for (const id of Array.from(map.keys())) {
+    if (!ids.has(id))
+      map.delete(id)
+  }
+
+  // 用当前页 rows 补齐/更新已勾选项
   const list = props.crud?.rows?.value ?? []
-  return list.filter((row: any) => ids.has(getId(row)))
+  for (const row of list as any[]) {
+    const id = getId(row as any)
+    if (ids.has(id))
+      map.set(id, row as any)
+  }
+}
+
+watch(
+  [selectedIds, () => props.crud?.rows?.value],
+  () => syncSelectedRowMap(),
+  { immediate: true, deep: false },
+)
+
+const selectedRows = computed<any[]>(() => {
+  const map = selectedRowMap.value
+  return selectedIds.value
+    .map(id => map.get(id))
+    .filter(Boolean) as any[]
 })
+
+function clearSelection(): void {
+  selection.value = new Set()
+  selectedRowMap.value.clear()
+}
 
 provide(CrudInstanceSymbol, props.crud)
 if (props.fields)
@@ -62,8 +97,13 @@ if (props.columns)
   provide(CrudColumnsSymbol, props.columns as CrudTableColumn<any>[])
 if (props.user)
   provide(CrudUserSymbol, props.user)
-if (props.extra)
-  provide(CrudExtraSymbol, props.extra)
+provide(CrudExtraSymbol, {
+  ...(props.extra ?? {}),
+  selection,
+  selectedIds,
+  selectedRows,
+  clearSelection,
+})
 
 provide(CrudControlMapSymbol, props.controlMap)
 provide(CrudGetIdSymbol, getId)

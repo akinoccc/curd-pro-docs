@@ -1,5 +1,5 @@
-import type { CrudField, UseCrudReturn } from '@fcurd/core'
 import type { LocationQueryRaw } from 'vue-router'
+import type { CrudField, UseCrudReturn } from '../crud/models'
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 

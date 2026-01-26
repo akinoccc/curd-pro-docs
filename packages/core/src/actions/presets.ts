@@ -118,6 +118,23 @@ export function createCrudPresetActions<
 
   const defaults: CrudAction<Row>[] = []
 
+  // refresh
+  defaults.push({
+    id: 'refresh',
+    area: 'toolbar',
+    label: '刷新',
+    type: 'default',
+    order: 5,
+    onClick: async () => {
+      try {
+        await crud.refresh()
+      }
+      catch (err) {
+        onError?.(err)
+      }
+    },
+  })
+
   if (!disableAdd) {
     defaults.push({
       id: 'create',
@@ -192,6 +209,86 @@ export function createCrudPresetActions<
           const id = getId(row)
           await adapter.remove?.(id)
           await crud.refresh()
+        }
+        catch (err) {
+          onError?.(err)
+        }
+      },
+    })
+  }
+
+  // batch: clear selection
+  defaults.push({
+    id: 'clearSelection',
+    area: 'batch',
+    label: '清空勾选',
+    type: 'default',
+    order: 5,
+    visible: ctx => (ctx.selectedRows?.length ?? 0) > 0,
+    disabled: ctx => (ctx.selectedRows?.length ?? 0) === 0,
+    onClick: async (ctx) => {
+      const extra: any = ctx.extra ?? {}
+      if (typeof extra.clearSelection === 'function')
+        await extra.clearSelection()
+    },
+  })
+
+  // batch: delete
+  if (adapter.remove) {
+    defaults.push({
+      id: 'batchDelete',
+      area: 'batch',
+      label: '批量删除',
+      type: 'error',
+      order: 20,
+      confirm: { content: '确定要删除选中的记录吗？' },
+      visible: ctx => (ctx.selectedRows?.length ?? 0) > 0,
+      disabled: ctx => (ctx.selectedRows?.length ?? 0) === 0,
+      onClick: async (ctx) => {
+        try {
+          const rows = ctx.selectedRows ?? []
+          const getId = adapter.getId ?? ((r: any) => r?.id as RowId)
+          // 顺序删除：更稳（不考虑兼容性，但仍尽量避免并发打爆后端）
+          for (const row of rows) {
+            const id = getId(row)
+            await adapter.remove?.(id)
+          }
+          await crud.refresh()
+          const extra: any = ctx.extra ?? {}
+          if (typeof extra.clearSelection === 'function')
+            await extra.clearSelection()
+        }
+        catch (err) {
+          onError?.(err)
+        }
+      },
+    })
+  }
+
+  // batch: export (same semantics as toolbar export)
+  if (adapter.export) {
+    defaults.push({
+      id: 'batchExport',
+      area: 'batch',
+      label: '批量导出',
+      type: 'default',
+      order: 30,
+      visible: ctx => (ctx.selectedRows?.length ?? 0) > 0,
+      onClick: async () => {
+        try {
+          const result = await adapter.export?.({
+            query: crud.query.value as Query,
+            sort: crud.sort.value as CrudSort<SortField> | null,
+          })
+          if (!result)
+            return
+          if (onExportResult) {
+            await onExportResult(result as CrudExportResult)
+            return
+          }
+          if (uiDriver?.handleExportResult) {
+            await uiDriver.handleExportResult(result as CrudExportResult, { filename: exportFilename })
+          }
         }
         catch (err) {
           onError?.(err)

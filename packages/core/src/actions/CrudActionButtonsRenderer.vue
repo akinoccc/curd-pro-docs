@@ -75,6 +75,7 @@ async function confirmIfNeeded(action: CrudAction<any>, currentCtx: CrudActionCo
 
   if (typeof window === 'undefined')
     return false
+  // eslint-disable-next-line no-alert
   return window.confirm(getConfirmContent(action))
 }
 
@@ -145,5 +146,3 @@ const ActionItem = defineComponent({
     </template>
   </slot>
 </template>
-
-

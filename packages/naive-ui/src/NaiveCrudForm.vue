@@ -85,6 +85,29 @@ async function validateOnSubmit(): Promise<boolean> {
   }
 }
 
+function buildSubmitData(
+  submitMode: 'create' | 'edit',
+  formModel: Record<string, any>,
+  changedData: Record<string, any>,
+): Record<string, any> {
+  // create：提交全量（符合直觉）
+  if (submitMode === 'create')
+    return { ...formModel }
+  // edit：默认只提交变更字段（不考虑兼容性）
+  return { ...(changedData ?? {}) }
+}
+
+function emitSubmit(
+  submitMode: 'create' | 'edit',
+  formModel: Record<string, any>,
+  changedData: Record<string, any>,
+): void {
+  emit('submit', {
+    mode: submitMode,
+    data: buildSubmitData(submitMode, formModel, changedData),
+  })
+}
+
 function resolveFormItemProps(field: CrudField<any, any>): Record<string, any> {
   return ctx.uiDriver?.resolveFormItem?.({ surface: 'form', field })?.formItemProps ?? {}
 }
@@ -108,7 +131,7 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
 
 <template>
   <CrudFormRenderer
-    v-slot="{ formModel, fields: effectiveFields, initFormModel }"
+    v-slot="{ formModel, fields: effectiveFields, initFormModel, dirty, changedKeys, changedData, resetSnapshot }"
     :row="row"
     :fields="fields as any"
     @form-model-ready="(model, m) => emit('formModelReady', model, m)"
@@ -135,13 +158,17 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
         @submit.prevent="async () => {
           const valid = await validateOnSubmit()
           if (!valid) return
-          emit('submit', { mode, data: { ...formModel } })
+          emitSubmit(mode, formModel, changedData)
         }"
       >
         <slot
           :form-model="formModel"
           :mode="mode"
-          :submit="() => emit('submit', { mode, data: { ...formModel } })"
+          :dirty="dirty"
+          :changed-keys="changedKeys"
+          :changed-data="changedData"
+          :reset-snapshot="resetSnapshot"
+          :submit="() => emitSubmit(mode, formModel, changedData)"
         >
           <div v-if="controlMap">
             <NFormItem
@@ -178,7 +205,11 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
             name="footer"
             :mode="mode"
             :submitting="false"
-            :submit="() => emit('submit', { mode, data: { ...formModel } })"
+            :dirty="dirty"
+            :changed-keys="changedKeys"
+            :changed-data="changedData"
+            :reset-snapshot="resetSnapshot"
+            :submit="() => emitSubmit(mode, formModel, changedData)"
             :reset="() => { initFormModel(); formRef?.restoreValidation?.() }"
           >
             <NSpace
@@ -226,13 +257,17 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
         @submit.prevent="async () => {
           const valid = await validateOnSubmit()
           if (!valid) return
-          emit('submit', { mode, data: { ...formModel } })
+          emitSubmit(mode, formModel, changedData)
         }"
       >
         <slot
           :form-model="formModel"
           :mode="mode"
-          :submit="() => emit('submit', { mode, data: { ...formModel } })"
+          :dirty="dirty"
+          :changed-keys="changedKeys"
+          :changed-data="changedData"
+          :reset-snapshot="resetSnapshot"
+          :submit="() => emitSubmit(mode, formModel, changedData)"
         >
           <div v-if="controlMap">
             <NFormItem
@@ -269,7 +304,11 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
             name="footer"
             :mode="mode"
             :submitting="false"
-            :submit="() => emit('submit', { mode, data: { ...formModel } })"
+            :dirty="dirty"
+            :changed-keys="changedKeys"
+            :changed-data="changedData"
+            :reset-snapshot="resetSnapshot"
+            :submit="() => emitSubmit(mode, formModel, changedData)"
             :reset="() => { initFormModel(); formRef?.restoreValidation?.() }"
           >
             <NSpace
@@ -321,13 +360,17 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
           @submit.prevent="async () => {
             const valid = await validateOnSubmit()
             if (!valid) return
-            emit('submit', { mode, data: { ...formModel } })
+            emitSubmit(mode, formModel, changedData)
           }"
         >
           <slot
             :form-model="formModel"
             :mode="mode"
-            :submit="() => emit('submit', { mode, data: { ...formModel } })"
+            :dirty="dirty"
+            :changed-keys="changedKeys"
+            :changed-data="changedData"
+            :reset-snapshot="resetSnapshot"
+            :submit="() => emitSubmit(mode, formModel, changedData)"
           >
             <div v-if="controlMap">
               <NFormItem
@@ -364,7 +407,11 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
               name="footer"
               :mode="mode"
               :submitting="false"
-              :submit="() => emit('submit', { mode, data: { ...formModel } })"
+              :dirty="dirty"
+              :changed-keys="changedKeys"
+              :changed-data="changedData"
+              :reset-snapshot="resetSnapshot"
+              :submit="() => emitSubmit(mode, formModel, changedData)"
               :reset="() => { initFormModel(); formRef?.restoreValidation?.() }"
             >
               <NSpace
