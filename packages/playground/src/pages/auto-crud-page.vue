@@ -25,6 +25,30 @@ function statusTagType(status: DemoRow['status']): 'default' | 'success' | 'warn
     return 'warning'
   return 'error'
 }
+
+function categoryTagType(category: DemoRow['category']): 'default' | 'info' | 'success' | 'warning' {
+  if (category === 'A')
+    return 'info'
+  if (category === 'B')
+    return 'success'
+  return 'warning'
+}
+
+function categoryLabel(category: DemoRow['category']): string {
+  if (category === 'A')
+    return '分类 A'
+  if (category === 'B')
+    return '分类 B'
+  return '分类 C'
+}
+
+function statusLabel(status: DemoRow['status']): string {
+  if (status === 'enabled')
+    return '启用'
+  if (status === 'draft')
+    return '草稿'
+  return '禁用'
+}
 </script>
 
 <template>
@@ -35,7 +59,7 @@ function statusTagType(status: DemoRow['status']): 'default' | 'success' | 'warn
     >
       这个页面用 <NText code>
         NaiveAutoCrud
-      </NText> 覆盖：搜索（含路由同步）、分页、排序、表单（drawer）、新增/编辑/删除、选择集、slot 自定义渲染、字典加载。
+      </NText> 覆盖：搜索（含路由同步）、分页、排序、表单（drawer）、新增/编辑/删除、导出、选择集、slot 自定义渲染、字典加载。
     </NAlert>
 
     <NaiveAutoCrud
@@ -57,7 +81,16 @@ function statusTagType(status: DemoRow['status']): 'default' | 'success' | 'warn
           :type="statusTagType(row.status)"
           size="small"
         >
-          {{ row.status }}
+          {{ statusLabel(row.status) }}
+        </NTag>
+      </template>
+
+      <template #cell-category="{ row }">
+        <NTag
+          :type="categoryTagType(row.category)"
+          size="small"
+        >
+          {{ categoryLabel(row.category) }}
         </NTag>
       </template>
 

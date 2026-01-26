@@ -1,7 +1,7 @@
 import type { NaiveCrudField } from '@fcurd/naive-ui'
 import type { SelectOption } from 'naive-ui'
 import type { DemoRow } from './memory-crud'
-import { createNaiveColumns, defineNaiveFields } from '@fcurd/naive-ui'
+import { cellBooleanTag, cellEnumTag, cellMoney, createNaiveColumns, defineNaiveFields } from '@fcurd/naive-ui'
 
 const statusOptions: SelectOption[] = [
   { label: '草稿', value: 'draft' },
@@ -105,11 +105,23 @@ export function createDemoColumns(fields: readonly NaiveCrudField<DemoRow, DemoR
   return createNaiveColumns<DemoRow>(fields, {
     overrides: {
       name: { sortable: true, width: 220 },
-      status: { width: 120 },
+      status: {
+        width: 120,
+        cellRender: cellEnumTag({
+          options: statusOptions,
+          typeMap: { draft: 'warning', enabled: 'success', disabled: 'error' },
+        }),
+      },
       category: { width: 120 },
-      enabled: { width: 90 },
+      enabled: {
+        width: 90,
+        cellRender: cellBooleanTag({ trueText: '启用', falseText: '关闭' }),
+      },
       createdAt: { width: 220 },
-      amount: { width: 120 },
+      amount: {
+        width: 120,
+        cellRender: cellMoney({ currency: 'CNY' }),
+      },
     },
     defaults: {
       // minWidth: 120,

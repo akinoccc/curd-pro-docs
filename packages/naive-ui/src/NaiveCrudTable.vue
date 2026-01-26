@@ -2,7 +2,7 @@
 import type { CrudTableColumn } from '@fcurd/core'
 import type { DataTableProps, PaginationProps } from 'naive-ui'
 import { useCrudContext, useCrudTableSorterSync, useCrudTableUiColumns, useEffectiveColumns } from '@fcurd/core'
-import { NDataTable, NPagination } from 'naive-ui'
+import { NDataTable, NPagination, NText } from 'naive-ui'
 import { computed, useSlots } from 'vue'
 
 interface NaiveCrudTableProps<Row = any> {
@@ -60,6 +60,10 @@ const tableData = computed<any[]>(() => {
   return ctx.crud?.rows?.value ?? []
 })
 
+const selectedCount = computed<number>(() => {
+  return ctx.selectedIds.value.length
+})
+
 const checkedRowKeys = computed<(string | number)[]>({
   get() {
     return Array.from(ctx.selection.value)
@@ -81,6 +85,15 @@ const checkedRowKeys = computed<(string | number)[]>({
         :crud="ctx.crud"
         :query="ctx.crud?.query"
       />
+    </div>
+
+    <div
+      v-if="showSelection && selectedCount > 0"
+      class="fcurd-table__selection-count"
+    >
+      <NText depth="3">
+        已选择 {{ selectedCount }} 项
+      </NText>
     </div>
 
     <NDataTable
@@ -110,6 +123,10 @@ const checkedRowKeys = computed<(string | number)[]>({
 <style scoped>
 .fcurd-table--naive {
   width: 100%;
+}
+
+.fcurd-table__selection-count {
+  margin: -4px 0 8px;
 }
 
 .fcurd-table__pagination {

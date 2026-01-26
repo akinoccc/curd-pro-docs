@@ -91,6 +91,60 @@ function nextId(list: DemoRow[]): number {
   return list.reduce((max, row) => Math.max(max, row.id), 0) + 1
 }
 
+function pad2(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+function formatExportFilename(prefix: string, ext: string): string {
+  const d = new Date()
+  const y = d.getFullYear()
+  const m = pad2(d.getMonth() + 1)
+  const day = pad2(d.getDate())
+  const hh = pad2(d.getHours())
+  const mm = pad2(d.getMinutes())
+  const ss = pad2(d.getSeconds())
+  return `${prefix}-${y}${m}${day}-${hh}${mm}${ss}.${ext}`
+}
+
+function escapeCsvCell(value: unknown): string {
+  const raw = value === null || value === undefined ? '' : String(value)
+  // CSV 需要对包含特殊字符的字段加引号，并转义引号为双引号
+  const escaped = raw.replaceAll('"', '""')
+  const shouldQuote = /[",\r\n]/.test(escaped)
+  return shouldQuote ? `"${escaped}"` : escaped
+}
+
+function toCsv(rows: DemoRow[]): string {
+  const header: Array<{ key: keyof DemoRow, label: string }> = [
+    { key: 'id', label: 'ID' },
+    { key: 'name', label: '名称' },
+    { key: 'amount', label: '金额' },
+    { key: 'status', label: '状态' },
+    { key: 'category', label: '分类' },
+    { key: 'enabled', label: '启用' },
+    { key: 'createdAt', label: '创建时间' },
+    { key: 'remark', label: '备注' },
+  ]
+
+  const lines: string[] = []
+  lines.push(header.map(h => escapeCsvCell(h.label)).join(','))
+
+  for (const row of rows) {
+    const cells = header.map(({ key }) => {
+      if (key === 'createdAt') {
+        const ts = row.createdAt
+        const text = typeof ts === 'number' && Number.isFinite(ts) ? new Date(ts).toLocaleString() : String(ts ?? '')
+        return escapeCsvCell(text)
+      }
+      return escapeCsvCell((row as any)[key])
+    })
+    lines.push(cells.join(','))
+  }
+
+  // Excel 兼容：加 UTF-8 BOM
+  return `\uFEFF${lines.join('\r\n')}\r\n`
+}
+
 export function createDemoRows(count = 137): DemoRow[] {
   const base = new Date()
   const statuses: DemoRow['status'][] = ['draft', 'enabled', 'disabled']
@@ -151,6 +205,19 @@ export function createMemoryCrudAdapter(initial?: DemoRow[]): {
       return {
         items: sorted.slice(start, end),
         total: sorted.length,
+      }
+    },
+    async export(params) {
+      // 模拟导出延迟 + 支持 abort（与 list 行为一致）
+      await sleep(180, params.signal)
+
+      const filtered = filterRows(db, params.query as any)
+      const sorted = sortRows(filtered, params.sort as any)
+      const csv = toCsv(sorted)
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+      return {
+        blob,
+        filename: formatExportFilename('demo-export', 'csv'),
       }
     },
     async create(data): Promise<DemoRow> {
