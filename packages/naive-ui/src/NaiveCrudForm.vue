@@ -311,7 +311,7 @@ function resolveControl(field: CrudField<any, any>): { component: any, bind: Rec
     >
       <NDrawerContent
         v-bind="props.drawerContentProps"
-        :title="typeof title === 'function' ? title({ mode, row }) : title"
+        :title="typeof title === 'function' ? title({ mode, row }) : title || mode === 'edit' ? '编辑' : '创建'"
       >
         <NForm
           ref="formRef"

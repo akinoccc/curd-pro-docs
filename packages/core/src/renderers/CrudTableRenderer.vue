@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CrudTableColumn, UseCrudReturn } from '@fcurd/core'
+import type { CrudTableColumn, UseCrudReturn } from '../crud/models'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 import { useEffectiveColumns } from '../fields/useEffectiveColumns'

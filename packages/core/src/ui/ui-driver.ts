@@ -1,3 +1,4 @@
+import type { Component, VNodeChild } from 'vue'
 import type {
   CrudAction,
   CrudActionContext,
@@ -6,8 +7,7 @@ import type {
   CrudSort,
   CrudSurface,
   CrudTableColumn,
-} from '@fcurd/core'
-import type { Component, VNodeChild } from 'vue'
+} from '../crud/models'
 
 export interface CrudControlResolveResult {
   component?: Component | any
