@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CrudField } from '@fcurd/core'
+import type { CrudField } from '../crud/models'
 import { computed, provide, reactive, watch } from 'vue'
 import { CrudFormModelSymbol, CrudFormModeSymbol } from '../context/symbols'
 import { useCrudContext } from '../context/useCrudContext'
