@@ -405,8 +405,6 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
 }
 
 .fcurd-page__search {
-  margin-top: 12px;
-  margin-bottom: 12px;
   padding: 12px;
 }
 
