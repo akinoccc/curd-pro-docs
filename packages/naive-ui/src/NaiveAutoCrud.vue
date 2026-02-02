@@ -8,12 +8,11 @@ import type {
   CrudField,
   CrudTableColumn,
   UseCrudActionsReturn,
-  UseCrudReturn,
 } from '@fcurd/core'
 import type { DataTableProps, DrawerContentProps, DrawerProps, FormProps, ModalProps, PaginationProps } from 'naive-ui'
 import type { FunctionalComponent } from 'vue'
-import { createCrudPresetActions, CrudActionButtonsRenderer, CrudProvider, useCrud, useCrudConfig } from '@fcurd/core'
-import { NButton, NCard, NPopconfirm } from 'naive-ui'
+import { CrudActionButtonsRenderer, CrudProvider, useCrudConfig, useCrudController } from '@fcurd/core'
+import { NCard } from 'naive-ui'
 import { computed, h, onMounted, ref, useSlots } from 'vue'
 import { naiveControlMap } from './control-map-naive'
 import { naiveUiDriver } from './naive-ui-driver'
@@ -81,9 +80,6 @@ const props = withDefaults(defineProps<NaiveAutoCrudProps<Row, RowId, Query, Cre
 })
 const emit = defineEmits<NaiveAutoCrudEmits<Row>>()
 
-const crud: UseCrudReturn<Row, Query, SortField> = useCrud<Row, Query, RowId, CreateInput, UpdateInput, SortField>({
-  adapter: props.adapter,
-})
 const slots = useSlots()
 const forwardedTableSlotNames = computed(() => {
   const excluded = new Set(['row-actions', 'table-actions', 'actions-header'])
@@ -95,98 +91,12 @@ const forwardedFormSlotNames = computed(() => {
   )
 })
 
-onMounted(() => {
-  void crud.refresh()
-})
-
-// 允许业务侧在不侵入 slot 的情况下刷新列表/写查询
-// （例如：操作按钮在外部组件里触发、或 mutation 成功后需要刷新）
-defineExpose({
-  crud,
-  refresh: crud.refresh,
-  setQuery: crud.setQuery,
-})
-
 const visible = ref(false)
 const editingRow = ref<Row | null>(null)
 
 const mode = computed<'create' | 'edit'>(() => (editingRow.value ? 'edit' : 'create'))
 
 const crudConfig = useCrudConfig()
-
-const mergedActions = computed<CrudAction<Row>[]>(() => {
-  return createCrudPresetActions<Row, RowId, Query, CreateInput, UpdateInput, SortField>({
-    adapter: props.adapter,
-    crud,
-    openCreate,
-    openEdit,
-    disableAdd: props.disableAdd,
-    disableEdit: props.disableEdit,
-    disableDelete: props.disableDelete,
-    disableExport: props.disableExport,
-    onError: err => emit('error', err),
-    uiDriver: naiveUiDriver,
-    config: crudConfig.value,
-    actions: props.actions as any,
-  })
-})
-
-interface RowActionProps {
-  row: Row
-}
-
-const EditAction: FunctionalComponent<RowActionProps> = (p) => {
-  if (props.disableEdit)
-    return null
-
-  return h(
-    NButton,
-    {
-      tertiary: true,
-      size: 'small',
-      onClick: () => openEdit(p.row),
-    },
-    {
-      default: () => '编辑',
-    },
-  )
-}
-
-const DeleteAction: FunctionalComponent<RowActionProps> = (p) => {
-  if (props.disableDelete || !props.adapter.remove)
-    return null
-
-  const getId = props.adapter.getId ?? ((row: any) => row?.id as RowId)
-  const rowId = getId(p.row)
-
-  return h(
-    NPopconfirm,
-    {
-      onPositiveClick: () => {
-        void props.adapter
-          .remove?.(rowId)
-          .then(() => crud.refresh())
-          .catch((err) => {
-            emit('error', err)
-          })
-      },
-    },
-    {
-      trigger: () => h(
-        NButton,
-        {
-          tertiary: true,
-          type: 'error',
-          size: 'small',
-        },
-        {
-          default: () => '删除',
-        },
-      ),
-      default: () => '确定要删除这条记录吗？',
-    },
-  )
-}
 
 function openCreate(): void {
   editingRow.value = null
@@ -196,6 +106,52 @@ function openCreate(): void {
 function openEdit(row: any): void {
   editingRow.value = row as Row
   visible.value = true
+}
+
+const controller = useCrudController<Row, RowId, Query, CreateInput, UpdateInput, SortField>({
+  adapter: props.adapter,
+  fields: props.fields,
+  columns: props.tableColumns,
+  actions: props.actions as any,
+  config: crudConfig.value,
+  openCreate,
+  openEdit,
+  disableAdd: props.disableAdd,
+  disableEdit: props.disableEdit,
+  disableDelete: props.disableDelete,
+  disableExport: props.disableExport,
+})
+
+const crud = controller.crud
+
+onMounted(() => {
+  void crud.refresh()
+})
+
+// 允许业务侧在不侵入 slot 的情况下刷新列表/写查询
+defineExpose({
+  controller,
+  crud,
+  refresh: crud.refresh,
+  setQuery: crud.setQuery,
+})
+
+interface RowActionProps {
+  row: Row
+}
+
+const EditAction: FunctionalComponent<RowActionProps> = (p) => {
+  const a = (controller.actions.value as CrudAction<Row>[]).find(x => x.id === 'edit')
+  if (!a)
+    return null
+  return h(CrudActionButtonsRenderer as any, { actions: [a], area: a.area, row: p.row } as any)
+}
+
+const DeleteAction: FunctionalComponent<RowActionProps> = (p) => {
+  const a = (controller.actions.value as CrudAction<Row>[]).find(x => x.id === 'delete')
+  if (!a)
+    return null
+  return h(CrudActionButtonsRenderer as any, { actions: [a], area: a.area, row: p.row } as any)
 }
 
 function handleClose(): void {
@@ -241,13 +197,11 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
 
 <template>
   <CrudProvider
-    :crud="crud"
-    :fields="fields"
-    :columns="tableColumns"
-    :actions="mergedActions"
+    :controller="controller"
     :control-map="naiveControlMap"
     :ui-driver="naiveUiDriver"
     :get-id="adapter.getId ?? ((row: any) => row?.id as RowId)"
+    :extra="{ onError: (err: any) => emit('error', err) }"
   >
     <NCard title="列表">
       <template #header-extra>
@@ -257,10 +211,7 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
             :crud="crud"
             :open-create="openCreate"
           >
-            <CrudActionButtonsRenderer
-              :actions="mergedActions"
-              area="toolbar"
-            />
+            <CrudActionButtonsRenderer area="toolbar" />
           </slot>
         </section>
       </template>
@@ -311,15 +262,9 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
               />
             </template>
             <template v-else>
-              <CrudActionButtonsRenderer
-                :actions="mergedActions"
-                area="batch"
-              />
+              <CrudActionButtonsRenderer area="batch" />
 
-              <CrudActionButtonsRenderer
-                :actions="mergedActions"
-                area="table:extra"
-              />
+              <CrudActionButtonsRenderer area="table:extra" />
             </template>
           </template>
 
@@ -348,13 +293,11 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
             </template>
             <template v-else>
               <CrudActionButtonsRenderer
-                :actions="mergedActions"
                 area="row:before"
                 :row="row"
               />
 
               <CrudActionButtonsRenderer
-                :actions="mergedActions"
                 area="row:after"
                 :row="row"
               />

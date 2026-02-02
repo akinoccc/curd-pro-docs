@@ -2,12 +2,10 @@ import type { CrudConfig } from '../config/symbols'
 import type {
   CrudAction,
   CrudAdapter,
-  CrudExportResult,
   CrudSort,
   UseCrudActionsReturn,
   UseCrudReturn,
 } from '../crud/models'
-import type { CrudUiDriver } from '../ui/ui-driver'
 
 export interface CreateCrudPresetActionsOptions<
   Row = any,
@@ -30,21 +28,6 @@ export interface CreateCrudPresetActionsOptions<
   disableEdit?: boolean
   disableDelete?: boolean
   disableExport?: boolean
-
-  /**
-   * 当内部默认 action 执行失败时的错误出口（推荐接到 UI toast/notification）
-   */
-  onError?: (error: unknown) => void
-
-  /**
-   * export 执行成功后的结果交由上层处理（下载/打开链接/提示等）
-   */
-  onExportResult?: (result: CrudExportResult) => void | Promise<void>
-
-  /**
-   * 可选：UI driver（用于处理 export 下载等 UI 行为）
-   */
-  uiDriver?: CrudUiDriver
 
   /**
    * 可选：全局配置（来自 CrudConfigProvider）
@@ -97,9 +80,6 @@ export function createCrudPresetActions<
     disableEdit,
     disableDelete,
     disableExport,
-    onError,
-    onExportResult,
-    uiDriver,
     config,
   } = options
 
@@ -125,14 +105,7 @@ export function createCrudPresetActions<
     label: '刷新',
     type: 'default',
     order: 5,
-    onClick: async () => {
-      try {
-        await crud.refresh()
-      }
-      catch (err) {
-        onError?.(err)
-      }
-    },
+    onClick: () => crud.refresh(),
   })
 
   if (!disableAdd) {
@@ -153,26 +126,12 @@ export function createCrudPresetActions<
       label: exportLabel,
       type: 'default',
       order: exportOrder,
-      onClick: async () => {
-        try {
-          const result = await adapter.export?.({
-            query: crud.query.value as Query,
-            sort: crud.sort.value as CrudSort<SortField> | null,
-          })
-          if (!result)
-            return
-          if (onExportResult) {
-            await onExportResult(result as CrudExportResult)
-            return
-          }
-          if (uiDriver?.handleExportResult) {
-            await uiDriver.handleExportResult(result as CrudExportResult, { filename: exportFilename })
-          }
-        }
-        catch (err) {
-          onError?.(err)
-        }
-      },
+      result: 'export',
+      meta: { filename: exportFilename },
+      onClick: () => adapter.export?.({
+        query: crud.query.value as Query,
+        sort: crud.sort.value as CrudSort<SortField> | null,
+      }),
     })
   }
 
@@ -201,18 +160,13 @@ export function createCrudPresetActions<
       confirm: { content: deleteConfirmContent },
       visible: ctx => Boolean(ctx.row),
       onClick: async (ctx) => {
-        try {
-          const row = ctx.row
-          if (!row)
-            return
-          const getId = adapter.getId ?? ((r: any) => r?.id as RowId)
-          const id = getId(row)
-          await adapter.remove?.(id)
-          await crud.refresh()
-        }
-        catch (err) {
-          onError?.(err)
-        }
+        const row = ctx.row
+        if (!row)
+          return
+        const getId = adapter.getId ?? ((r: any) => r?.id as RowId)
+        const id = getId(row)
+        await adapter.remove?.(id)
+        await crud.refresh()
       },
     })
   }
@@ -226,10 +180,9 @@ export function createCrudPresetActions<
     order: 5,
     visible: ctx => (ctx.selectedRows?.length ?? 0) > 0,
     disabled: ctx => (ctx.selectedRows?.length ?? 0) === 0,
-    onClick: async (ctx) => {
+    onClick: (ctx) => {
       const extra: any = ctx.extra ?? {}
-      if (typeof extra.clearSelection === 'function')
-        await extra.clearSelection()
+      return typeof extra.clearSelection === 'function' ? extra.clearSelection() : undefined
     },
   })
 
@@ -245,22 +198,17 @@ export function createCrudPresetActions<
       visible: ctx => (ctx.selectedRows?.length ?? 0) > 0,
       disabled: ctx => (ctx.selectedRows?.length ?? 0) === 0,
       onClick: async (ctx) => {
-        try {
-          const rows = ctx.selectedRows ?? []
-          const getId = adapter.getId ?? ((r: any) => r?.id as RowId)
-          // 顺序删除：更稳（不考虑兼容性，但仍尽量避免并发打爆后端）
-          for (const row of rows) {
-            const id = getId(row)
-            await adapter.remove?.(id)
-          }
-          await crud.refresh()
-          const extra: any = ctx.extra ?? {}
-          if (typeof extra.clearSelection === 'function')
-            await extra.clearSelection()
+        const rows = ctx.selectedRows ?? []
+        const getId = adapter.getId ?? ((r: any) => r?.id as RowId)
+        // Sequential delete to avoid concurrent spikes.
+        for (const row of rows) {
+          const id = getId(row)
+          await adapter.remove?.(id)
         }
-        catch (err) {
-          onError?.(err)
-        }
+        await crud.refresh()
+        const extra: any = ctx.extra ?? {}
+        if (typeof extra.clearSelection === 'function')
+          await extra.clearSelection()
       },
     })
   }
@@ -274,26 +222,12 @@ export function createCrudPresetActions<
       type: 'default',
       order: 30,
       visible: ctx => (ctx.selectedRows?.length ?? 0) > 0,
-      onClick: async () => {
-        try {
-          const result = await adapter.export?.({
-            query: crud.query.value as Query,
-            sort: crud.sort.value as CrudSort<SortField> | null,
-          })
-          if (!result)
-            return
-          if (onExportResult) {
-            await onExportResult(result as CrudExportResult)
-            return
-          }
-          if (uiDriver?.handleExportResult) {
-            await uiDriver.handleExportResult(result as CrudExportResult, { filename: exportFilename })
-          }
-        }
-        catch (err) {
-          onError?.(err)
-        }
-      },
+      result: 'export',
+      meta: { filename: exportFilename },
+      onClick: () => adapter.export?.({
+        query: crud.query.value as Query,
+        sort: crud.sort.value as CrudSort<SortField> | null,
+      }),
     })
   }
 

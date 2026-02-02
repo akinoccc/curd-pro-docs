@@ -7,6 +7,7 @@ import type {
 } from '../crud/models'
 import { computed, defineComponent, h } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
+import { useCrudActionRunner } from './useCrudActionRunner'
 
 interface CrudActionButtonsRendererProps<Row = any> {
   actions?: CrudAction<Row>[] | UseCrudActionsReturn<Row>
@@ -33,64 +34,20 @@ const actionContext = computed<CrudActionContext<any>>(() => {
   }
 })
 
-const effectiveActions = computed<CrudAction<any>[]>(() => {
-  const source = actionsSource.value
-  const area = props.area
-  const list: CrudAction<any>[] = isActionRegistry(source)
-    ? source.list(area)
-    : Array.isArray(source)
-      ? (area ? source.filter(a => a.area === area) : source)
-      : []
-
-  const currentCtx = actionContext.value
-  return list.filter((action) => {
-    if (typeof action.visible === 'function')
-      return Boolean(action.visible(currentCtx))
-    return true
-  })
+const { actions: effectiveActions, run } = useCrudActionRunner<any>({
+  actions: actionsSource as any,
+  area: props.area,
+  ctx: actionContext as any,
+  uiDriver: ctx.uiDriver,
+  onError: (err) => {
+    // Prefer app-level handler if provided via ctx.extra.
+    const extra: any = ctx.extra ?? {}
+    if (typeof extra.onError === 'function')
+      extra.onError(err)
+    else
+      console.error(err) // eslint-disable-line no-console
+  },
 })
-
-function getConfirmContent(action: CrudAction<any>): string {
-  if (!action.confirm)
-    return ''
-  if (action.confirm === true)
-    return '确定要执行此操作吗？'
-  return action.confirm.content ?? '确定要执行此操作吗？'
-}
-
-async function confirmIfNeeded(action: CrudAction<any>, currentCtx: CrudActionContext<any>): Promise<boolean> {
-  if (!action.confirm)
-    return true
-
-  const driver = ctx.uiDriver
-  if (driver?.confirmAction) {
-    try {
-      const result = await driver.confirmAction({ action, ctx: currentCtx })
-      return Boolean(result)
-    }
-    catch {
-      return false
-    }
-  }
-
-  if (typeof window === 'undefined')
-    return false
-  // eslint-disable-next-line no-alert
-  return window.confirm(getConfirmContent(action))
-}
-
-async function runAction(action: CrudAction<any>): Promise<void> {
-  const currentCtx = actionContext.value
-  const disabled = action.disabled?.(currentCtx) ?? false
-  if (disabled)
-    return
-
-  const ok = await confirmIfNeeded(action, currentCtx)
-  if (!ok)
-    return
-
-  await action.onClick(currentCtx)
-}
 
 const ActionItem = defineComponent({
   name: 'CrudActionButtonItem',
@@ -110,7 +67,7 @@ const ActionItem = defineComponent({
           ctx: currentCtx,
           disabled,
           run: () => {
-            void runAction(action)
+            void run(action)
           },
         } as any)
       }
@@ -122,7 +79,7 @@ const ActionItem = defineComponent({
           type: 'button',
           disabled,
           onClick: () => {
-            void runAction(action)
+            void run(action)
           },
         },
         action.label ?? action.id,
@@ -136,13 +93,16 @@ const ActionItem = defineComponent({
   <slot
     :actions="effectiveActions"
     :ctx="actionContext"
-    :run="runAction"
+    :run="run"
   >
     <template
-      v-for="action in effectiveActions"
-      :key="action.id"
+      v-for="(action, index) in effectiveActions"
+      :key="action?.id ?? index"
     >
-      <ActionItem :action="action" />
+      <ActionItem
+        v-if="action"
+        :action="action"
+      />
     </template>
   </slot>
 </template>

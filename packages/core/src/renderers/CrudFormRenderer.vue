@@ -4,8 +4,13 @@ import { computed, provide, reactive, ref, watch } from 'vue'
 import { CrudFormModelSymbol, CrudFormModeSymbol } from '../context/symbols'
 import { useCrudContext } from '../context/useCrudContext'
 import { useEffectiveFields } from '../fields/useEffectiveFields'
+import type { CrudController } from '../controller/useCrudController'
 
 interface CrudFormRendererProps<Row = any> {
+  /**
+   * Optional: explicitly provide controller (no Provider needed).
+   */
+  controller?: CrudController<Row, any, any>
   row?: Row | null
   fields?: readonly CrudField<Row, Row>[]
 }
@@ -17,7 +22,7 @@ interface CrudFormRendererEmits<Row = any> {
 const props = defineProps<CrudFormRendererProps<any>>()
 const emit = defineEmits<CrudFormRendererEmits<any>>()
 
-const ctx = useCrudContext<any>()
+const ctx = useCrudContext<any>({ controller: props.controller as any })
 
 const mode = computed<'create' | 'edit'>(() => (props.row ? 'edit' : 'create'))
 
@@ -79,6 +84,7 @@ watch(
 
 const effectiveFields = useEffectiveFields<any, any>({
   surface: 'form',
+  controller: props.controller as any,
   fields: () => (props.fields ?? ctx.fields ?? []) as readonly CrudField<any, any>[],
   row: () => (props.row ?? undefined) as any,
   formModel: () => formModel,

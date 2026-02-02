@@ -2,15 +2,20 @@ import type { CrudFieldContext, CrudTableColumn } from '@fcurd/core'
 import type { ComputedRef } from 'vue'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
+import type { CrudController } from '../controller/useCrudController'
 
 export interface UseEffectiveColumnsOptions<Row = any> {
+  /**
+   * Optional: explicitly provide controller (no Provider needed).
+   */
+  controller?: CrudController<Row, any, any>
   columns?: () => readonly CrudTableColumn<Row>[]
 }
 
 export function useEffectiveColumns<Row = any>(
   options: UseEffectiveColumnsOptions<Row> = {},
 ): ComputedRef<CrudTableColumn<Row>[]> {
-  const ctx = useCrudContext<Row>()
+  const ctx = useCrudContext<Row>({ controller: options.controller as any })
   const columnsSource = options.columns ?? (() => (ctx.columns ?? []) as readonly CrudTableColumn<Row>[])
 
   return computed(() => {

@@ -2,6 +2,7 @@
 import type { DemoRow } from '../lib/memory-crud'
 import { NaiveAutoCrud } from '@fcurd/naive-ui'
 import { NAlert, NCode, NDivider, NTag, NText } from 'naive-ui'
+import { computed, ref } from 'vue'
 import { createDemoColumns, createDemoFields } from '../lib/demo-schema'
 import { createMemoryCrudAdapter } from '../lib/memory-crud'
 
@@ -9,6 +10,12 @@ const { adapter } = createMemoryCrudAdapter()
 
 const fields = createDemoFields()
 const tableColumns = createDemoColumns(fields)
+
+const crudRef = ref<any>(null)
+const selectedCount = computed(() => {
+  const ids = crudRef.value?.controller?.selectedIds?.value
+  return Array.isArray(ids) ? ids.length : 0
+})
 
 function formatDate(value: number | string): string {
   if (typeof value === 'number' && Number.isFinite(value))
@@ -63,6 +70,7 @@ function statusLabel(status: DemoRow['status']): string {
     </NAlert>
 
     <NaiveAutoCrud
+      ref="crudRef"
       :adapter="adapter"
       :fields="fields"
       :table-columns="tableColumns"
@@ -74,6 +82,9 @@ function statusLabel(status: DemoRow['status']): string {
         <NDivider style="margin: 8px 0">
           自定义内容（beforeTable slot）
         </NDivider>
+        <NText depth="3">
+          已勾选：{{ selectedCount }}
+        </NText>
       </template>
 
       <template #cell-status="{ row }">

@@ -5,8 +5,13 @@ import { reactive } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 import { useEffectiveFields } from '../fields/useEffectiveFields'
 import { useCrudSearchRouteSync } from '../search/useCrudSearchRouteSync'
+import type { CrudController } from '../controller/useCrudController'
 
 interface CrudSearchRendererProps<Row = any> {
+  /**
+   * Optional: explicitly provide controller (no Provider needed).
+   */
+  controller?: CrudController<Row, any, any>
   /**
    * 搜索字段来源（未传则使用 CrudProvider 注入的 fields）
    */
@@ -35,11 +40,12 @@ interface CrudSearchRendererProps<Row = any> {
 
 const props = defineProps<CrudSearchRendererProps<any>>()
 
-const ctx = useCrudContext<any>()
+const ctx = useCrudContext<any>({ controller: props.controller as any })
 const crud = (props.crud ?? ctx.crud) as UseCrudReturn<any> | undefined
 
 const effectiveFields = useEffectiveFields<any, any>({
   surface: 'search',
+  controller: props.controller as any,
   fields: () => (props.fields ?? ctx.fields ?? []) as readonly CrudField<any, any>[],
   query: () => (crud?.query.value ?? {}) as Record<string, any>,
 })

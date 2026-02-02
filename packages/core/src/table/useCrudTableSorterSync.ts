@@ -2,14 +2,15 @@ import type { CrudSort } from '@fcurd/core'
 import type { Ref } from 'vue'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
+import type { CrudController } from '../controller/useCrudController'
 
 export interface UseCrudTableSorterSyncReturn {
   onSorterChange: (payload: any) => void
   sort: Ref<CrudSort | null> | undefined
 }
 
-export function useCrudTableSorterSync(): UseCrudTableSorterSyncReturn {
-  const ctx = useCrudContext<any>()
+export function useCrudTableSorterSync(options: { controller?: CrudController<any, any, any> } = {}): UseCrudTableSorterSyncReturn {
+  const ctx = useCrudContext<any>({ controller: options.controller as any })
 
   const sort = computed(() => (ctx.crud?.sort.value ?? null) as CrudSort | null) as any
 

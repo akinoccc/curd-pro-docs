@@ -11,6 +11,8 @@ const here = fileURLToPath(new URL('.', import.meta.url))
 export default defineConfig({
   plugins: [vue(), UnoCSS()],
   resolve: {
+    // Ensure linked workspace packages share the same Vue runtime instance.
+    dedupe: ['vue', 'vue-router'],
     alias: {
       // 直接指向源码，确保 .vue 能被 Vite 处理并支持 HMR
       '@fcurd/core': path.resolve(here, '../core/src'),

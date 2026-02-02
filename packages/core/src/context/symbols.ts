@@ -7,6 +7,7 @@ import type {
   UseCrudReturn,
 } from '../crud/models'
 import type { CrudUiDriver } from '../ui/ui-driver'
+import type { CrudController } from '../controller/useCrudController'
 
 export interface CrudControlMap {
   text: Component
@@ -33,6 +34,7 @@ export interface CrudContext<Row = any> {
 }
 
 export const CrudInstanceSymbol: InjectionKey<UseCrudReturn<any, any, any>> = Symbol('fcurd:crud')
+export const CrudControllerSymbol: InjectionKey<CrudController<any, any, any> | undefined> = Symbol('fcurd:controller')
 export const CrudFieldsSymbol: InjectionKey<readonly CrudField<any, any>[]> = Symbol('fcurd:fields')
 export const CrudColumnsSymbol: InjectionKey<readonly CrudTableColumn<any>[]> = Symbol('fcurd:columns')
 export const CrudActionsSymbol: InjectionKey<UseCrudActionsReturn<any> | CrudAction<any>[]>

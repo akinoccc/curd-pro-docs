@@ -3,9 +3,14 @@ import type { ComputedRef, VNodeChild } from 'vue'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 import { resolveSlotName } from '../slots/useSlotNameResolver'
+import type { CrudController } from '../controller/useCrudController'
 
 export interface UseCrudTableUiColumnsOptions<Row = any> {
   columns: ComputedRef<CrudTableColumn<Row>[]>
+  /**
+   * Optional: explicitly provide controller (no Provider needed).
+   */
+  controller?: CrudController<Row, any, any>
   slots?: any
   showSelection?: boolean
   selectionColumn?: Record<string, any>
@@ -15,7 +20,7 @@ export interface UseCrudTableUiColumnsOptions<Row = any> {
 export function useCrudTableUiColumns<Row = any>(
   options: UseCrudTableUiColumnsOptions<Row>,
 ): ComputedRef<any[]> {
-  const ctx = useCrudContext<Row>()
+  const ctx = useCrudContext<Row>({ controller: options.controller as any })
 
   return computed(() => {
     const driver = ctx.uiDriver

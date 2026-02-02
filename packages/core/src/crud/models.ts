@@ -194,6 +194,15 @@ export interface CrudAction<Row = any> {
   order?: number
   type?: 'primary' | 'default' | 'success' | 'warning' | 'error' | 'tertiary'
   /**
+   * Optional action result kind for post-process.
+   * - 'export': runner may hand result to uiDriver.handleExportResult
+   */
+  result?: 'export'
+  /**
+   * Optional metadata for UI/runner.
+   */
+  meta?: Record<string, any>
+  /**
    * 可选：执行前确认（UI 适配层可自行决定如何展示）
    * - true：使用 UI 默认文案
    * - object：提供确认文案
@@ -201,7 +210,7 @@ export interface CrudAction<Row = any> {
   confirm?: boolean | { content?: string }
   visible?: (ctx: CrudActionContext<Row>) => boolean
   disabled?: (ctx: CrudActionContext<Row>) => boolean
-  onClick: (ctx: CrudActionContext<Row>) => Promise<void> | void
+  onClick: (ctx: CrudActionContext<Row>) => Promise<unknown> | unknown
 }
 
 // Basic hooks types re-exported from here for convenience
