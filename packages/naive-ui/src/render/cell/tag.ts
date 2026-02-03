@@ -62,7 +62,7 @@ export interface CellEnumLabelOptions extends CellRenderFactoryOptions {
   /**
    * options（可直接复用 naive-ui 的 SelectOption 结构）
    */
-  options?: readonly { value?: any, label?: any }[]
+  options?: { value?: any, label?: any }[]
 }
 
 /**

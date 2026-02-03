@@ -1,9 +1,9 @@
-import type { CrudTableColumn } from '@fcurd/core'
 import type { ComputedRef, VNodeChild } from 'vue'
+import type { CrudTableColumn } from '../crud/models'
+import type { CrudRuntime } from '../runtime/types'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 import { resolveSlotName } from '../slots/useSlotNameResolver'
-import type { CrudRuntime } from '../runtime/types'
 
 export interface UseCrudTableUiColumnsOptions<Row = any> {
   columns: ComputedRef<CrudTableColumn<Row>[]>

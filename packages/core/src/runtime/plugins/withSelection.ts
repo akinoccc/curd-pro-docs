@@ -1,6 +1,6 @@
+import type { CrudPlugin } from '../types'
 import { computed } from 'vue'
 import { useCrudSelection } from '../../selection/useCrudSelection'
-import type { CrudPlugin } from '../types'
 
 export function withSelection<Row = any>(): CrudPlugin<Row, any, any, any, any, any> {
   return (runtime) => {
@@ -24,5 +24,3 @@ export function withSelection<Row = any>(): CrudPlugin<Row, any, any, any, any, 
     }
   }
 }
-
-

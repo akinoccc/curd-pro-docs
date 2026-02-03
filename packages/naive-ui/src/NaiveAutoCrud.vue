@@ -50,9 +50,9 @@ interface NaiveAutoCrudProps<
   SortField extends string = string,
 > {
   adapter: CrudAdapter<Row, RowId, Query, CreateInput, UpdateInput, SortField>
-  fields: readonly CrudField<Row, any>[]
-  tableColumns?: readonly CrudTableColumn<Row>[]
-  searchFields?: readonly CrudField<Row, any>[]
+  fields: CrudField<Row, any>[]
+  tableColumns?: CrudTableColumn<Row>[]
+  searchFields?: CrudField<Row, any>[]
   actions?: CrudAction<Row>[] | UseCrudActionsReturn<Row>
   disableSearch?: boolean
   disableAdd?: boolean

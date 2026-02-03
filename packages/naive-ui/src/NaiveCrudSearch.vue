@@ -4,13 +4,13 @@ import type { FormProps } from 'naive-ui'
 import {
   CrudActionButtonsRenderer,
   CrudSearchRenderer,
-  useCrudUiResolvers,
   useCrudContext,
+  useCrudUiResolvers,
 } from '@fcurd/core'
 import { NButton, NForm, NFormItem, NSpace } from 'naive-ui'
 
 interface NaiveCrudSearchProps<Row = any> {
-  fields?: readonly CrudField<Row, any>[]
+  fields?: CrudField<Row, any>[]
   formProps?: FormProps
 }
 

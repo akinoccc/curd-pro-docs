@@ -1,10 +1,10 @@
-import { ref } from 'vue'
 import type { CrudConfig } from '../config/symbols'
-import type { CrudAdapter, CrudField, CrudTableColumn } from '../crud/models'
-import { useCrud } from '../crud/useCrud'
 import type { CrudControlMap } from '../context/symbols'
+import type { CrudAdapter, CrudField, CrudTableColumn } from '../crud/models'
 import type { CrudUiDriver } from '../ui/ui-driver'
 import type { CrudRuntime } from './types'
+import { ref } from 'vue'
+import { useCrud } from '../crud/useCrud'
 
 export interface CreateCrudRuntimeOptions<
   Row = any,
@@ -15,8 +15,8 @@ export interface CreateCrudRuntimeOptions<
   SortField extends string = string,
 > {
   adapter: CrudAdapter<Row, RowId, Query, CreateInput, UpdateInput, SortField>
-  fields: readonly CrudField<Row, any>[]
-  columns?: readonly CrudTableColumn<Row>[]
+  fields: CrudField<Row, any>[]
+  columns?: CrudTableColumn<Row>[]
 
   // Pass-through for useCrud
   initialQuery?: Query
@@ -62,7 +62,7 @@ export function createCrudRuntime<
     adapter: options.adapter,
     crud,
     fields: options.fields,
-    columns: ref((options.columns ?? []) as readonly CrudTableColumn<Row>[]),
+    columns: ref((options.columns ?? []) as CrudTableColumn<Row>[]),
     getId,
     config: options.config,
     user: options.user,
@@ -76,5 +76,3 @@ export function createCrudRuntime<
 
   return runtime
 }
-
-

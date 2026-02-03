@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import type { CrudTableColumn } from '@fcurd/core'
-import type { DataTableProps, PaginationProps } from 'naive-ui'
+import type { DataTableColumn, DataTableProps, PaginationProps } from 'naive-ui'
 import { useCrudContext, useCrudTableSorterSync, useCrudTableUiColumns, useEffectiveColumns } from '@fcurd/core'
 import { NDataTable, NPagination, NText } from 'naive-ui'
 import { computed, useSlots } from 'vue'
 
 interface NaiveCrudTableProps<Row = any> {
-  columns?: readonly CrudTableColumn<Row>[]
+  columns?: CrudTableColumn<Row>[]
   showSelection?: boolean
   /**
    * Naive selection 列透传配置：
@@ -25,7 +25,7 @@ const { onSorterChange } = useCrudTableSorterSync()
 const slots = useSlots()
 
 const effectiveColumns = useEffectiveColumns<any>({
-  columns: () => (props.columns ?? ctx.columns ?? []) as readonly CrudTableColumn<any>[],
+  columns: () => (props.columns ?? ctx.columns ?? []),
 })
 
 const mergedDataTableProps = computed<DataTableProps>(() => {
@@ -47,14 +47,14 @@ const mergedPaginationProps = computed<PaginationProps>(() => {
 })
 
 const uiColumnsRef = useCrudTableUiColumns<any>({
-  columns: effectiveColumns as any,
+  columns: effectiveColumns,
   slots,
   showSelection: props.showSelection,
   selectionColumn: props.selectionColumn,
   showActionsColumn: props.showActionsColumn,
 })
 
-const uiColumns = computed<any[]>(() => uiColumnsRef.value ?? [])
+const uiColumns = computed<DataTableColumn[]>(() => uiColumnsRef.value ?? [])
 
 const tableData = computed<any[]>(() => {
   return ctx.crud?.rows?.value ?? []

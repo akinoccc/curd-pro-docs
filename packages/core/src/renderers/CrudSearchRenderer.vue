@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import type { CrudField, UseCrudReturn } from '@fcurd/core'
+import type { CrudField, UseCrudReturn } from '../crud/models'
+import type { CrudRuntime } from '../runtime/types'
 import type { CrudSearchCodec } from '../search/useCrudSearchRouteSync'
 import { reactive } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 import { useEffectiveFields } from '../fields/useEffectiveFields'
 import { useCrudSearchRouteSync } from '../search/useCrudSearchRouteSync'
-import type { CrudRuntime } from '../runtime/types'
 
 interface CrudSearchRendererProps<Row = any> {
   /**
@@ -15,7 +15,7 @@ interface CrudSearchRendererProps<Row = any> {
   /**
    * 搜索字段来源（未传则使用 CrudProvider 注入的 fields）
    */
-  fields?: readonly CrudField<Row, any>[]
+  fields?: CrudField<Row, any>[]
   /**
    * 可选：外部传入 reactive formModel（便于业务侧持有引用）
    */
@@ -46,7 +46,7 @@ const crud = (props.crud ?? ctx.crud) as UseCrudReturn<any> | undefined
 const effectiveFields = useEffectiveFields<any, any>({
   surface: 'search',
   runtime: props.runtime as any,
-  fields: () => (props.fields ?? ctx.fields ?? []) as readonly CrudField<any, any>[],
+  fields: () => (props.fields ?? ctx.fields ?? []) as CrudField<any, any>[],
   query: () => (crud?.query.value ?? {}) as Record<string, any>,
 })
 
@@ -54,7 +54,7 @@ const formModel = (props.formModel ?? reactive<Record<string, any>>({})) as Reco
 
 const { handleSubmit, handleReset } = useCrudSearchRouteSync({
   crud,
-  fields: () => effectiveFields.value as CrudField<any, any>[],
+  fields: () => effectiveFields.value,
   formModel,
   queryKey: props.queryKey ?? 'search',
   clearMode: props.clearMode ?? 'null',

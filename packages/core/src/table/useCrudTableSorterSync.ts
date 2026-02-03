@@ -1,8 +1,8 @@
-import type { CrudSort } from '@fcurd/core'
 import type { Ref } from 'vue'
+import type { CrudSort } from '../crud/models'
+import type { CrudRuntime } from '../runtime/types'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
-import type { CrudRuntime } from '../runtime/types'
 
 export interface UseCrudTableSorterSyncReturn {
   onSorterChange: (payload: any) => void

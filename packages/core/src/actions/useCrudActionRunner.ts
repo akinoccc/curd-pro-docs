@@ -1,7 +1,7 @@
 import type { ComputedRef } from 'vue'
-import { computed } from 'vue'
-import type { CrudAction, CrudActionContext, CrudActionArea, UseCrudActionsReturn } from '../crud/models'
+import type { CrudAction, CrudActionArea, CrudActionContext, UseCrudActionsReturn } from '../crud/models'
 import type { CrudUiDriver } from '../ui/ui-driver'
+import { computed } from 'vue'
 
 export interface CrudActionSource<Row = any> {
   actions?: CrudAction<Row>[] | UseCrudActionsReturn<Row> | ComputedRef<CrudAction<Row>[]>
@@ -48,10 +48,10 @@ export function useCrudActionRunner<Row = any>(
     return list
       .filter(Boolean)
       .filter((action) => {
-      if (typeof action.visible === 'function')
-        return Boolean(action.visible(currentCtx as any))
-      return true
-    })
+        if (typeof action.visible === 'function')
+          return Boolean(action.visible(currentCtx as any))
+        return true
+      })
   })
 
   async function confirmIfNeeded(action: CrudAction<Row>, currentCtx: CrudActionContext<Row>): Promise<boolean> {
@@ -98,5 +98,3 @@ export function useCrudActionRunner<Row = any>(
     run,
   }
 }
-
-

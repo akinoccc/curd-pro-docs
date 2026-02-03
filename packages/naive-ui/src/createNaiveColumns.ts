@@ -21,7 +21,7 @@ interface CreateNaiveColumnsOptions<Row = any> {
  * - `CrudTableColumn.ui` 在 core 中是“UI 透传位”，Naive 适配层会把它透传到 DataTableColumn。
  */
 export function createNaiveColumns<Row = any>(
-  fields: readonly CrudField<Row, any>[],
+  fields: CrudField<Row, any>[],
   options: CreateNaiveColumnsOptions<Row> = {},
 ): CrudTableColumn<Row>[] {
   const { overrides = {}, defaults = {} } = options

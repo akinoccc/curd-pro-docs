@@ -93,7 +93,7 @@ export function defineNaiveField<Row = any, FormModel = any, TType extends CrudF
 export function defineNaiveFields<
   Row = any,
   FormModel = any,
-  const Fields extends readonly NaiveCrudFieldUnion<Row, FormModel>[] = readonly NaiveCrudFieldUnion<Row, FormModel>[],
+  const Fields extends NaiveCrudFieldUnion<Row, FormModel>[] = NaiveCrudFieldUnion<Row, FormModel>[],
 >(
   fields: Fields,
 ): Fields {

@@ -21,8 +21,8 @@ export interface CrudRuntime<
   adapter: CrudAdapter<Row, RowId, Query, CreateInput, UpdateInput, SortField>
   crud: UseCrudReturn<Row, Query, SortField>
 
-  fields: readonly CrudField<Row, any>[]
-  columns: Ref<readonly CrudTableColumn<Row>[]>
+  fields: CrudField<Row, any>[]
+  columns: Ref<CrudTableColumn<Row>[]>
   getId: (row: Row) => RowId
 
   // Optional global configuration (from CrudConfigProvider)

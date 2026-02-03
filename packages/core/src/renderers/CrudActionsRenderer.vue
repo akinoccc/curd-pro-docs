@@ -1,9 +1,5 @@
 <script setup lang="ts">
-import type {
-  CrudAction,
-  CrudActionArea,
-  CrudActionContext,
-} from '@fcurd/core'
+import type { CrudAction, CrudActionArea, CrudActionContext } from '../crud/models'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 

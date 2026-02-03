@@ -1,8 +1,8 @@
-import type { CrudField, CrudFieldContext, CrudSurface } from '@fcurd/core'
 import type { ComputedRef } from 'vue'
+import type { CrudField, CrudFieldContext, CrudSurface } from '../crud/models'
+import type { CrudRuntime } from '../runtime/types'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
-import type { CrudRuntime } from '../runtime/types'
 
 export interface UseEffectiveFieldsOptions<Row = any, FormModel = any> {
   surface: CrudSurface
@@ -13,7 +13,7 @@ export interface UseEffectiveFieldsOptions<Row = any, FormModel = any> {
   /**
    * 字段来源（props 优先，未传则使用 CrudProvider 注入的 fields）
    */
-  fields?: () => readonly CrudField<Row, FormModel, any>[]
+  fields?: () => CrudField<Row, FormModel, any>[]
   /**
    * row（表单 edit / 详情等场景可选）
    */
@@ -41,13 +41,13 @@ export function useEffectiveFields<Row = any, FormModel = any>(
 ): ComputedRef<CrudField<Row, FormModel, any>[]> {
   const ctx = useCrudContext<Row>({ runtime: options.runtime as any })
 
-  const fieldsSource = options.fields ?? (() => (ctx.fields ?? []) as readonly CrudField<Row, FormModel, any>[])
+  const fieldsSource = options.fields ?? (() => (ctx.fields ?? []) as CrudField<Row, FormModel, any>[])
   const querySource = options.query ?? (() => (ctx.crud?.query.value ?? {}) as Record<string, any>)
   const extraSource = options.extra ?? (() => ctx.extra)
   const userSource = options.user ?? (() => ctx.user)
 
   return computed(() => {
-    const list = (fieldsSource() ?? []) as readonly CrudField<Row, FormModel, any>[]
+    const list = (fieldsSource() ?? []) as CrudField<Row, FormModel, any>[]
     const surface = options.surface
 
     return list.filter((field) => {

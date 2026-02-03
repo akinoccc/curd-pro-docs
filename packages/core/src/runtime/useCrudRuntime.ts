@@ -1,6 +1,6 @@
+import type { CrudRuntime } from './types'
 import { inject, provide } from 'vue'
 import { CrudRuntimeSymbol } from '../context/symbols'
-import type { CrudRuntime } from './types'
 
 export function provideCrudRuntime(runtime: CrudRuntime<any, any, any, any, any, any>): void {
   provide(CrudRuntimeSymbol, runtime as any)
@@ -12,5 +12,3 @@ export function useCrudRuntime<Row = any>(): CrudRuntime<Row, any, any, any, any
     throw new Error('[fcurd] Missing CrudRuntime. Did you forget to wrap with <CrudProvider :runtime="..."> ?')
   return runtime
 }
-
-

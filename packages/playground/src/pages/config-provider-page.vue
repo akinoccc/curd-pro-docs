@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CrudAdapter, CrudField, CrudListResult, CrudSort } from '@fcurd/core'
+import type { CrudAdapter, CrudListResult, CrudSort } from '@fcurd/core'
 import { createCrudRuntime, CrudConfigProvider, CrudProvider } from '@fcurd/core'
 import {
   controlMap,
@@ -291,7 +291,7 @@ const fields = defineFields<ConfigDemoRow, any>([
   },
 ])
 
-const columns = computed(() => createColumns<ConfigDemoRow>(fields as readonly CrudField<ConfigDemoRow, any>[], {
+const columns = computed(() => createColumns<ConfigDemoRow>(fields, {
   overrides: {
     name: { sortable: true, width: 160 },
     date: { width: 160 },

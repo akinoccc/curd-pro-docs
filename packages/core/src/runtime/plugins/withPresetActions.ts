@@ -1,8 +1,8 @@
-import { computed } from 'vue'
-import type { CrudAction, CrudAdapter } from '../../crud/models'
-import { createCrudPresetActions } from '../../actions/presets'
-import type { CrudPlugin, CrudRuntime } from '../types'
 import type { CrudConfig } from '../../config/symbols'
+import type { CrudAction, CrudAdapter } from '../../crud/models'
+import type { CrudPlugin, CrudRuntime } from '../types'
+import { computed } from 'vue'
+import { createCrudPresetActions } from '../../actions/presets'
 
 export interface WithPresetActionsOptions<
   Row = any,
@@ -51,5 +51,3 @@ export function withPresetActions<
     })
   }
 }
-
-

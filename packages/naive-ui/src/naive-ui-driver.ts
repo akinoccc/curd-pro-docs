@@ -145,7 +145,7 @@ export const naiveUiDriver: CrudUiDriver = {
       renderCell,
     } = options
 
-    const baseColumns: DataTableColumn[] = (columns as readonly CrudTableColumn<any>[]).map((column) => {
+    const baseColumns: DataTableColumn[] = (columns as CrudTableColumn<any>[]).map((column) => {
       const field = column.field
       const passthrough = (column.ui ?? {}) as Record<string, any>
       const isCurrentSortField = sort?.field === field.key

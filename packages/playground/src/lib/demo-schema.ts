@@ -101,7 +101,7 @@ export function createDemoFields() {
   ])
 }
 
-export function createDemoColumns(fields: readonly UiCrudField<DemoRow, DemoRow>[]) {
+export function createDemoColumns(fields: UiCrudField<DemoRow, DemoRow>[]) {
   return createColumns<DemoRow>(fields, {
     overrides: {
       name: { sortable: true, width: 220 },

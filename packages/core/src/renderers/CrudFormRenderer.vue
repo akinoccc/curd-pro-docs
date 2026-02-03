@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { CrudField } from '../crud/models'
+import type { CrudRuntime } from '../runtime/types'
 import { computed, provide, reactive, ref, watch } from 'vue'
 import { CrudFormModelSymbol, CrudFormModeSymbol } from '../context/symbols'
 import { useCrudContext } from '../context/useCrudContext'
 import { useEffectiveFields } from '../fields/useEffectiveFields'
-import type { CrudRuntime } from '../runtime/types'
 
 interface CrudFormRendererProps<Row = any> {
   /**
@@ -12,7 +12,7 @@ interface CrudFormRendererProps<Row = any> {
    */
   runtime?: CrudRuntime<Row, any, any, any, any, any>
   row?: Row | null
-  fields?: readonly CrudField<Row, Row>[]
+  fields?: CrudField<Row, Row>[]
 }
 
 interface CrudFormRendererEmits<Row = any> {
@@ -85,7 +85,7 @@ watch(
 const effectiveFields = useEffectiveFields<any, any>({
   surface: 'form',
   runtime: props.runtime as any,
-  fields: () => (props.fields ?? ctx.fields ?? []) as readonly CrudField<any, any>[],
+  fields: () => (props.fields ?? ctx.fields ?? []) as CrudField<any, any>[],
   row: () => (props.row ?? undefined) as any,
   formModel: () => formModel,
   query: () => (ctx.crud?.query.value ?? {}) as Record<string, any>,

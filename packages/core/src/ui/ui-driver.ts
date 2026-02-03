@@ -80,7 +80,7 @@ export interface CrudUiDriver {
    * - Naive：CrudTableColumn -> DataTableColumn
    */
   mapTableColumns?: <Row = any>(options: {
-    columns: readonly CrudTableColumn<Row>[]
+    columns: CrudTableColumn<Row>[]
     sort?: CrudSort | null
     showSelection?: boolean
     /**

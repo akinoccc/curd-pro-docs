@@ -37,5 +37,3 @@ export function useCrudUiResolvers<Row = any>(surface: CrudSurface) {
     resolveFormItemProps,
   }
 }
-
-
