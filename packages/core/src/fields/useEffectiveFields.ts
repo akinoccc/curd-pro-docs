@@ -2,14 +2,14 @@ import type { CrudField, CrudFieldContext, CrudSurface } from '@fcurd/core'
 import type { ComputedRef } from 'vue'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
-import type { CrudController } from '../controller/useCrudController'
+import type { CrudRuntime } from '../runtime/types'
 
 export interface UseEffectiveFieldsOptions<Row = any, FormModel = any> {
   surface: CrudSurface
   /**
-   * Optional: explicitly provide controller (no Provider needed).
+   * Optional: explicitly provide runtime (no Provider needed).
    */
-  controller?: CrudController<Row, any, any>
+  runtime?: CrudRuntime<Row, any, any, any, any, any>
   /**
    * 字段来源（props 优先，未传则使用 CrudProvider 注入的 fields）
    */
@@ -39,7 +39,7 @@ export interface UseEffectiveFieldsOptions<Row = any, FormModel = any> {
 export function useEffectiveFields<Row = any, FormModel = any>(
   options: UseEffectiveFieldsOptions<Row, FormModel>,
 ): ComputedRef<CrudField<Row, FormModel, any>[]> {
-  const ctx = useCrudContext<Row>({ controller: options.controller as any })
+  const ctx = useCrudContext<Row>({ runtime: options.runtime as any })
 
   const fieldsSource = options.fields ?? (() => (ctx.fields ?? []) as readonly CrudField<Row, FormModel, any>[])
   const querySource = options.query ?? (() => (ctx.crud?.query.value ?? {}) as Record<string, any>)

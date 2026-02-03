@@ -11,7 +11,7 @@ import type {
 } from '@fcurd/core'
 import type { DataTableProps, DrawerContentProps, DrawerProps, FormProps, ModalProps, PaginationProps } from 'naive-ui'
 import type { FunctionalComponent } from 'vue'
-import { CrudActionButtonsRenderer, CrudProvider, useCrudConfig, useCrudController } from '@fcurd/core'
+import { createCrudRuntime, CrudActionButtonsRenderer, CrudProvider, useCrudConfig, withPresetActions, withSelection } from '@fcurd/core'
 import { NCard } from 'naive-ui'
 import { computed, h, onMounted, ref, useSlots } from 'vue'
 import { naiveControlMap } from './control-map-naive'
@@ -108,21 +108,26 @@ function openEdit(row: any): void {
   visible.value = true
 }
 
-const controller = useCrudController<Row, RowId, Query, CreateInput, UpdateInput, SortField>({
+const runtime = createCrudRuntime<Row, RowId, Query, CreateInput, UpdateInput, SortField>({
   adapter: props.adapter,
   fields: props.fields,
-  columns: props.tableColumns,
-  actions: props.actions as any,
-  config: crudConfig.value,
-  openCreate,
-  openEdit,
-  disableAdd: props.disableAdd,
-  disableEdit: props.disableEdit,
-  disableDelete: props.disableDelete,
-  disableExport: props.disableExport,
+  columns: (props.tableColumns ?? []) as any,
+  ui: { uiDriver: naiveUiDriver as any, controlMap: naiveControlMap as any },
+  extra: { onError: (err: any) => emit('error', err) },
 })
+  .use(withSelection())
+  .use(withPresetActions<Row, RowId, Query, CreateInput, UpdateInput, SortField>({
+    openCreate,
+    openEdit,
+    disableAdd: props.disableAdd,
+    disableEdit: props.disableEdit,
+    disableDelete: props.disableDelete,
+    disableExport: props.disableExport,
+    config: crudConfig.value,
+    actions: props.actions as any,
+  }))
 
-const crud = controller.crud
+const crud = runtime.crud
 
 onMounted(() => {
   void crud.refresh()
@@ -130,7 +135,7 @@ onMounted(() => {
 
 // 允许业务侧在不侵入 slot 的情况下刷新列表/写查询
 defineExpose({
-  controller,
+  runtime,
   crud,
   refresh: crud.refresh,
   setQuery: crud.setQuery,
@@ -141,14 +146,16 @@ interface RowActionProps {
 }
 
 const EditAction: FunctionalComponent<RowActionProps> = (p) => {
-  const a = (controller.actions.value as CrudAction<Row>[]).find(x => x.id === 'edit')
+  const list = (runtime.actions?.value ?? []) as CrudAction<Row>[]
+  const a = list.find(x => x.id === 'edit')
   if (!a)
     return null
   return h(CrudActionButtonsRenderer as any, { actions: [a], area: a.area, row: p.row } as any)
 }
 
 const DeleteAction: FunctionalComponent<RowActionProps> = (p) => {
-  const a = (controller.actions.value as CrudAction<Row>[]).find(x => x.id === 'delete')
+  const list = (runtime.actions?.value ?? []) as CrudAction<Row>[]
+  const a = list.find(x => x.id === 'delete')
   if (!a)
     return null
   return h(CrudActionButtonsRenderer as any, { actions: [a], area: a.area, row: p.row } as any)
@@ -196,13 +203,7 @@ function handleFormModelReady(model: any, currentMode: 'create' | 'edit'): void 
 </script>
 
 <template>
-  <CrudProvider
-    :controller="controller"
-    :control-map="naiveControlMap"
-    :ui-driver="naiveUiDriver"
-    :get-id="adapter.getId ?? ((row: any) => row?.id as RowId)"
-    :extra="{ onError: (err: any) => emit('error', err) }"
-  >
+  <CrudProvider :runtime="runtime">
     <NCard title="列表">
       <template #header-extra>
         <section class="fcurd-page__toolbar">

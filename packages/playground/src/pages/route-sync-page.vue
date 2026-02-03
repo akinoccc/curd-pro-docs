@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NaiveAutoCrud } from '@fcurd/naive-ui'
+import { AutoCrud } from '@fcurd/naive-ui'
 import { NAlert, NCard, NCode, NDivider, NText } from 'naive-ui'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
@@ -45,7 +45,7 @@ const searchQueryRaw = computed(() => {
 
       <NDivider style="margin: 12px 0" />
 
-      <NaiveAutoCrud
+      <AutoCrud
         :adapter="adapter"
         :fields="fields"
         :table-columns="tableColumns"

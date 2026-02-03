@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { CrudAdapter, CrudField, CrudListResult, CrudSort } from '@fcurd/core'
-import { CrudConfigProvider, CrudProvider, useCrud } from '@fcurd/core'
+import { createCrudRuntime, CrudConfigProvider, CrudProvider } from '@fcurd/core'
 import {
-  createNaiveColumns,
-  defineNaiveFields,
-  naiveControlMap,
-  NaiveCrudForm,
-  NaiveCrudSearch,
-  NaiveCrudTable,
-  naiveUiDriver,
+  controlMap,
+  createColumns,
+  CrudForm,
+  CrudSearch,
+  CrudTable,
+  defineFields,
+  uiDriver,
 } from '@fcurd/naive-ui'
 import {
   NButton,
@@ -252,7 +252,7 @@ const adapter: CrudAdapter<ConfigDemoRow, number, ConfigDemoQuery, Partial<Confi
   },
 }
 
-const fields = defineNaiveFields<ConfigDemoRow, any>([
+const fields = defineFields<ConfigDemoRow, any>([
   {
     key: 'name',
     label: () => '名称',
@@ -291,7 +291,7 @@ const fields = defineNaiveFields<ConfigDemoRow, any>([
   },
 ])
 
-const columns = computed(() => createNaiveColumns<ConfigDemoRow>(fields as readonly CrudField<ConfigDemoRow, any>[], {
+const columns = computed(() => createColumns<ConfigDemoRow>(fields as readonly CrudField<ConfigDemoRow, any>[], {
   overrides: {
     name: { sortable: true, width: 160 },
     date: { width: 160 },
@@ -299,11 +299,18 @@ const columns = computed(() => createNaiveColumns<ConfigDemoRow>(fields as reado
   },
 }))
 
-const crud = useCrud<ConfigDemoRow, ConfigDemoQuery, number>({
+const runtime = createCrudRuntime<ConfigDemoRow, number, ConfigDemoQuery>({
   adapter,
+  fields,
+  columns: columns.value,
   debounceMs: 150,
   dedupe: true,
+  ui: {
+    uiDriver,
+    controlMap,
+  },
 })
+const crud = runtime.crud
 
 onMounted(() => {
   void crud.refresh()
@@ -359,14 +366,7 @@ function formatCell(value: unknown, kind: 'date' | 'datetime'): string {
 
 <template>
   <CrudConfigProvider :config="config">
-    <CrudProvider
-      :crud="crud"
-      :fields="fields as any"
-      :columns="columns"
-      :control-map="naiveControlMap"
-      :ui-driver="naiveUiDriver"
-      :get-id="(row: any) => row.id"
-    >
+    <CrudProvider :runtime="runtime">
       <div style="display: flex; flex-direction: column; gap: 12px">
         <NCard title="ConfigProvider：在一个 CRUD 实例里演示 date 配置">
           <NSpace
@@ -492,9 +492,9 @@ function formatCell(value: unknown, kind: 'date' | 'datetime'): string {
               </NText>。你可以切换 valueType 看它回写 number 还是 YYYY-MM-DD。
             </NText>
 
-            <NaiveCrudSearch :fields="fields as any" />
+            <CrudSearch :fields="fields" />
 
-            <NaiveCrudTable
+            <CrudTable
               :columns="columns"
               :show-actions-column="true"
             >
@@ -527,7 +527,7 @@ function formatCell(value: unknown, kind: 'date' | 'datetime'): string {
                   </NButton>
                 </NSpace>
               </template>
-            </NaiveCrudTable>
+            </CrudTable>
 
             <NDivider style="margin: 8px 0" />
 
@@ -551,10 +551,10 @@ function formatCell(value: unknown, kind: 'date' | 'datetime'): string {
           </NSpace>
         </NCard>
 
-        <NaiveCrudForm
+        <CrudForm
           v-model="formVisible"
           :row="editingRow"
-          :fields="fields as any"
+          :fields="fields"
           form-mode="drawer"
           :reset-on-close="true"
           @submit="handleSubmit"

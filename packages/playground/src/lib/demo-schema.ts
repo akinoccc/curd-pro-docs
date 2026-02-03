@@ -1,7 +1,7 @@
-import type { NaiveCrudField } from '@fcurd/naive-ui'
+import type { UiCrudField } from '@fcurd/naive-ui'
 import type { SelectOption } from 'naive-ui'
 import type { DemoRow } from './memory-crud'
-import { cellBooleanTag, cellEnumTag, cellMoney, createNaiveColumns, defineNaiveFields } from '@fcurd/naive-ui'
+import { cellBooleanTag, cellEnumTag, cellMoney, createColumns, defineFields } from '@fcurd/naive-ui'
 
 const statusOptions: SelectOption[] = [
   { label: '草稿', value: 'draft' },
@@ -16,7 +16,7 @@ const categoryOptions: SelectOption[] = [
 ]
 
 export function createDemoFields() {
-  return defineNaiveFields([
+  return defineFields([
     {
       key: 'name',
       label: () => '名称',
@@ -101,8 +101,8 @@ export function createDemoFields() {
   ])
 }
 
-export function createDemoColumns(fields: readonly NaiveCrudField<DemoRow, DemoRow>[]) {
-  return createNaiveColumns<DemoRow>(fields, {
+export function createDemoColumns(fields: readonly UiCrudField<DemoRow, DemoRow>[]) {
+  return createColumns<DemoRow>(fields, {
     overrides: {
       name: { sortable: true, width: 220 },
       status: {

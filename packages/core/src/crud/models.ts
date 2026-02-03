@@ -182,6 +182,12 @@ export type CrudActionArea
 export interface CrudActionContext<Row = any> {
   row?: Row
   selectedRows: Row[]
+  selectedIds: (string | number)[]
+  /**
+   * Optional selection capability for actions (provided by runtime/controller).
+   * Prefer this over ctx.extra to avoid name collisions.
+   */
+  clearSelection?: () => void | Promise<void>
   query: Record<string, any>
   extra?: Record<string, any>
 }

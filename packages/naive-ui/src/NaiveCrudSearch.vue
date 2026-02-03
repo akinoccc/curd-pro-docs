@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import type { CrudControlMap, CrudField } from '@fcurd/core'
+import type { CrudField } from '@fcurd/core'
 import type { FormProps } from 'naive-ui'
 import {
   CrudActionButtonsRenderer,
-  CrudControlMapSymbol,
   CrudSearchRenderer,
+  useCrudUiResolvers,
   useCrudContext,
 } from '@fcurd/core'
 import { NButton, NForm, NFormItem, NSpace } from 'naive-ui'
-import { inject } from 'vue'
 
 interface NaiveCrudSearchProps<Row = any> {
   fields?: readonly CrudField<Row, any>[]
@@ -18,25 +17,8 @@ interface NaiveCrudSearchProps<Row = any> {
 const props = defineProps<NaiveCrudSearchProps<any>>()
 
 const ctx = useCrudContext<any>()
-const controlMap = inject<CrudControlMap>(CrudControlMapSymbol)
-
-function resolveFormItemProps(field: CrudField<any, any>): Record<string, any> {
-  return ctx.uiDriver?.resolveFormItem?.({ surface: 'search', field })?.formItemProps ?? {}
-}
-
-function resolveControl(field: CrudField<any, any>): { component: any, bind: Record<string, any> } {
-  const resolved = ctx.uiDriver?.resolveControl?.({
-    surface: 'search',
-    field,
-    controlMap: controlMap as any,
-  })
-  const component = resolved?.component ?? (controlMap as any)?.[field.type] ?? (controlMap as any)?.text
-  const bind = {
-    ...(resolved?.controlProps ?? {}),
-    ...((resolved?.passField ?? false) ? { field } : {}),
-  }
-  return { component, bind }
-}
+const controlMap = ctx.controlMap
+const { resolveControl, resolveFormItemProps } = useCrudUiResolvers('search')
 </script>
 
 <template>

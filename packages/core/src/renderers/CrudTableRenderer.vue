@@ -3,25 +3,25 @@ import type { CrudTableColumn, UseCrudReturn } from '../crud/models'
 import { computed } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 import { useEffectiveColumns } from '../fields/useEffectiveColumns'
-import type { CrudController } from '../controller/useCrudController'
+import type { CrudRuntime } from '../runtime/types'
 
 interface CrudTableRendererProps<Row = any> {
   /**
-   * Optional: explicitly provide controller (no Provider needed).
+   * Optional: explicitly provide runtime (no Provider needed).
    */
-  controller?: CrudController<Row, any, any>
+  runtime?: CrudRuntime<Row, any, any, any, any, any>
   columns?: readonly CrudTableColumn<Row>[]
   crud?: UseCrudReturn<Row>
 }
 
 const props = defineProps<CrudTableRendererProps<any>>()
 
-const ctx = useCrudContext<any>({ controller: props.controller as any })
+const ctx = useCrudContext<any>({ runtime: props.runtime as any })
 const crud = (props.crud ?? ctx.crud) as UseCrudReturn<any> | undefined
 
 const columns = computed(() => (props.columns ?? ctx.columns ?? []) as CrudTableColumn<any>[])
 const effectiveColumns = useEffectiveColumns<any>({
-  controller: props.controller as any,
+  runtime: props.runtime as any,
   columns: () => columns.value,
 })
 </script>

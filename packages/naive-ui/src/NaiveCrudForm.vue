@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { CrudControlMap, CrudField } from '@fcurd/core'
+import type { CrudField } from '@fcurd/core'
 import type { DrawerContentProps, DrawerProps, FormInst, FormProps, ModalProps } from 'naive-ui'
-import { CrudControlMapSymbol, CrudFormRenderer, resolveSlotName, useCrudContext } from '@fcurd/core'
+import { CrudFormRenderer, resolveSlotName, useCrudContext, useCrudUiResolvers } from '@fcurd/core'
 import {
 
   NButton,
@@ -12,7 +12,7 @@ import {
   NModal,
   NSpace,
 } from 'naive-ui'
-import { computed, inject, ref, useSlots, watch } from 'vue'
+import { computed, ref, useSlots, watch } from 'vue'
 
 interface NaiveCrudFormProps<Row = any> {
   modelValue?: boolean
@@ -42,7 +42,8 @@ const props = defineProps<NaiveCrudFormProps<any>>()
 const emit = defineEmits<NaiveCrudFormEmits<any>>()
 
 const ctx = useCrudContext<any>()
-const controlMap = inject<CrudControlMap>(CrudControlMapSymbol)
+const controlMap = ctx.controlMap
+const { resolveControl, resolveFormItemProps } = useCrudUiResolvers('form')
 const formRef = ref<FormInst | null>(null)
 const slots = useSlots()
 
@@ -106,24 +107,6 @@ function emitSubmit(
     mode: submitMode,
     data: buildSubmitData(submitMode, formModel, changedData),
   })
-}
-
-function resolveFormItemProps(field: CrudField<any, any>): Record<string, any> {
-  return ctx.uiDriver?.resolveFormItem?.({ surface: 'form', field })?.formItemProps ?? {}
-}
-
-function resolveControl(field: CrudField<any, any>): { component: any, bind: Record<string, any> } {
-  const resolved = ctx.uiDriver?.resolveControl?.({
-    surface: 'form',
-    field,
-    controlMap: controlMap as any,
-  })
-  const component = resolved?.component ?? (controlMap as any)?.[field.type] ?? (controlMap as any)?.text
-  const bind = {
-    ...(resolved?.controlProps ?? {}),
-    ...((resolved?.passField ?? false) ? { field } : {}),
-  }
-  return { component, bind }
 }
 
 // success/error 由上层调用 adapter 后再 emit 回来，这里只提供事件占位

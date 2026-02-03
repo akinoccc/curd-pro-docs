@@ -1,70 +1,59 @@
 import type { ComputedRef, Ref } from 'vue'
-import type { CrudAction, CrudField, CrudTableColumn, UseCrudActionsReturn, UseCrudReturn } from '../crud/models'
-import type { CrudUiDriver } from '../ui/ui-driver'
-import type { CrudController } from '../controller/useCrudController'
-import type { CrudControlMap } from './symbols'
 import { computed, inject, ref } from 'vue'
-import {
-  CrudActionsSymbol,
-  CrudColumnsSymbol,
-  CrudControlMapSymbol,
-  CrudControllerSymbol,
-  CrudExtraSymbol,
-  CrudFieldsSymbol,
-  CrudGetIdSymbol,
-  CrudInstanceSymbol,
-  CrudSelectedIdsSymbol,
-  CrudSelectedRowsSymbol,
-  CrudSelectionSymbol,
-  CrudUiDriverSymbol,
-  CrudUserSymbol,
-} from './symbols'
+import type { CrudAction, CrudField, CrudTableColumn, UseCrudReturn } from '../crud/models'
+import type { CrudUiDriver } from '../ui/ui-driver'
+import type { CrudRuntime } from '../runtime/types'
+import type { CrudControlMap } from './symbols'
+import { CrudRuntimeSymbol } from './symbols'
 
 export interface UseCrudContextReturn<Row = any> {
-  controller?: CrudController<Row, any, any>
-  crud?: UseCrudReturn<Row, any, any>
-  fields?: readonly CrudField<Row, any>[]
-  columns?: readonly CrudTableColumn<Row>[]
-  actions?: UseCrudActionsReturn<Row> | CrudAction<Row>[]
+  runtime: CrudRuntime<Row, any, any, any, any, any>
+  crud: UseCrudReturn<Row, any, any>
+  fields: readonly CrudField<Row, any>[]
+  columns: readonly CrudTableColumn<Row>[]
+  actions: CrudAction<Row>[]
+
   user?: { roles: string[] }
   extra?: Record<string, any>
+
+  // UI attachments (optional)
   controlMap?: CrudControlMap
+  uiDriver?: CrudUiDriver
+
   getId: (row: Row) => string | number
   selection: Ref<Set<string | number>>
   selectedIds: ComputedRef<(string | number)[]>
   selectedRows: ComputedRef<Row[]>
-  uiDriver?: CrudUiDriver
+  clearSelection: () => void
 }
 
-export function useCrudContext<Row = any>(options: { controller?: CrudController<Row, any, any> } = {}): UseCrudContextReturn<Row> {
-  const injectedController = inject(CrudControllerSymbol, undefined) as CrudController<Row, any, any> | undefined
-  const controller = options.controller ?? injectedController
+export function useCrudContext<Row = any>(
+  options: { runtime?: CrudRuntime<Row, any, any, any, any, any> } = {},
+): UseCrudContextReturn<Row> {
+  const injectedRuntime = inject(CrudRuntimeSymbol, undefined) as CrudRuntime<Row, any, any, any, any, any> | undefined
+  const runtime = (options.runtime ?? injectedRuntime) as CrudRuntime<Row, any, any, any, any, any> | undefined
+  if (!runtime)
+    throw new Error('[fcurd] Missing CrudRuntime. Did you forget to wrap with <CrudProvider :runtime="..."> ?')
 
-  const crud = controller?.crud ?? (inject(CrudInstanceSymbol, undefined) as UseCrudReturn<Row, any, any> | undefined)
-  const fields = controller?.fields ?? (inject(CrudFieldsSymbol, undefined) as readonly CrudField<Row, any>[] | undefined)
-  const columns = controller?.columns?.value ?? (inject(CrudColumnsSymbol, undefined) as readonly CrudTableColumn<Row>[] | undefined)
-  const actions = (controller?.actions?.value as any) ?? (inject(CrudActionsSymbol, undefined) as UseCrudActionsReturn<Row> | CrudAction<Row>[] | undefined)
-  const user = inject(CrudUserSymbol, undefined)
-  const extra = inject(CrudExtraSymbol, undefined)
-  const controlMap = inject(CrudControlMapSymbol, undefined)
-  const uiDriver = inject(CrudUiDriverSymbol, undefined)
+  const crud = runtime.crud as UseCrudReturn<Row, any, any>
+  const fields = runtime.fields ?? ([] as any)
+  const columns = (runtime.columns?.value ?? []) as readonly CrudTableColumn<Row>[]
+  const actions = (runtime.actions?.value ?? []) as CrudAction<Row>[]
 
-  const getId = (controller?.getId as any) ?? (inject(CrudGetIdSymbol, (row: any) => row?.id as string | number) as (row: Row) => string | number)
+  const user = runtime.user
+  const extra = runtime.extra
+  const controlMap = runtime.ui?.controlMap
+  const uiDriver = runtime.ui?.uiDriver
 
-  const selection = (controller?.selection as any) ?? inject(CrudSelectionSymbol, ref<Set<string | number>>(new Set()))
-  const selectedIdsInjected = inject(CrudSelectedIdsSymbol, undefined) as ComputedRef<(string | number)[]> | undefined
-  const selectedIds = (controller?.selectedIds as any) ?? (selectedIdsInjected ?? computed<(string | number)[]>(() => Array.from(selection.value)))
-  const selectedRowsInjected = inject(CrudSelectedRowsSymbol, undefined) as ComputedRef<Row[]> | undefined
-  const selectedRows = (controller?.selectedRows as any) ?? (selectedRowsInjected ?? computed<Row[]>(() => {
-    if (!crud)
-      return []
-    const list = crud.rows?.value ?? []
-    const ids = selection.value
-    return (list as any[]).filter(row => ids.has(getId(row))) as Row[]
-  }))
+  const getId = (runtime.getId as any) ?? ((row: any) => row?.id as string | number)
+
+  const selection = (runtime.selection as any) ?? ref<Set<string | number>>(new Set())
+  const selectedIds = (runtime.selectedIds as any) ?? computed<(string | number)[]>(() => Array.from(selection.value))
+  const selectedRows = (runtime.selectedRows as any) ?? computed<Row[]>(() => [])
+  const clearSelection = (runtime.clearSelection as any) ?? (() => {})
 
   return {
-    controller,
+    runtime,
     crud,
     fields,
     columns,
@@ -76,6 +65,7 @@ export function useCrudContext<Row = any>(options: { controller?: CrudController
     selection,
     selectedIds,
     selectedRows,
+    clearSelection,
     uiDriver,
   }
 }

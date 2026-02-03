@@ -181,8 +181,7 @@ export function createCrudPresetActions<
     visible: ctx => (ctx.selectedRows?.length ?? 0) > 0,
     disabled: ctx => (ctx.selectedRows?.length ?? 0) === 0,
     onClick: (ctx) => {
-      const extra: any = ctx.extra ?? {}
-      return typeof extra.clearSelection === 'function' ? extra.clearSelection() : undefined
+      return typeof ctx.clearSelection === 'function' ? ctx.clearSelection() : undefined
     },
   })
 
@@ -206,9 +205,8 @@ export function createCrudPresetActions<
           await adapter.remove?.(id)
         }
         await crud.refresh()
-        const extra: any = ctx.extra ?? {}
-        if (typeof extra.clearSelection === 'function')
-          await extra.clearSelection()
+        if (typeof ctx.clearSelection === 'function')
+          await ctx.clearSelection()
       },
     })
   }

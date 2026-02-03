@@ -3,14 +3,13 @@ import type {
   CrudAction,
   CrudActionArea,
   CrudActionContext,
-  UseCrudActionsReturn,
 } from '../crud/models'
 import { computed, defineComponent, h } from 'vue'
 import { useCrudContext } from '../context/useCrudContext'
 import { useCrudActionRunner } from './useCrudActionRunner'
 
 interface CrudActionButtonsRendererProps<Row = any> {
-  actions?: CrudAction<Row>[] | UseCrudActionsReturn<Row>
+  actions?: CrudAction<Row>[]
   area?: CrudActionArea
   row?: Row
 }
@@ -19,16 +18,14 @@ const props = defineProps<CrudActionButtonsRendererProps<any>>()
 
 const ctx = useCrudContext<any>()
 
-function isActionRegistry(value: any): value is UseCrudActionsReturn<any> {
-  return Boolean(value && typeof value === 'object' && typeof value.list === 'function')
-}
-
 const actionsSource = computed(() => props.actions ?? ctx.actions)
 
 const actionContext = computed<CrudActionContext<any>>(() => {
   return {
     row: props.row,
     selectedRows: ctx.selectedRows.value as any[],
+    selectedIds: ctx.selectedIds.value as any[],
+    clearSelection: (ctx as any).clearSelection,
     query: (ctx.crud?.query.value ?? {}) as Record<string, any>,
     extra: ctx.extra,
   }
@@ -45,7 +42,7 @@ const { actions: effectiveActions, run } = useCrudActionRunner<any>({
     if (typeof extra.onError === 'function')
       extra.onError(err)
     else
-      console.error(err) // eslint-disable-line no-console
+      console.error(err)
   },
 })
 

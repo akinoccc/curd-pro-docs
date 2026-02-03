@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DemoRow } from '../lib/memory-crud'
-import { NaiveAutoCrud } from '@fcurd/naive-ui'
+import { AutoCrud } from '@fcurd/naive-ui'
 import { NAlert, NCode, NDivider, NTag, NText } from 'naive-ui'
 import { computed, ref } from 'vue'
 import { createDemoColumns, createDemoFields } from '../lib/demo-schema'
@@ -65,11 +65,11 @@ function statusLabel(status: DemoRow['status']): string {
       :bordered="false"
     >
       这个页面用 <NText code>
-        NaiveAutoCrud
+        AutoCrud
       </NText> 覆盖：搜索（含路由同步）、分页、排序、表单（drawer）、新增/编辑/删除、导出、选择集、slot 自定义渲染、字典加载。
     </NAlert>
 
-    <NaiveAutoCrud
+    <AutoCrud
       ref="crudRef"
       :adapter="adapter"
       :fields="fields"
@@ -136,6 +136,6 @@ function statusLabel(status: DemoRow['status']): string {
           language="text"
         />
       </template>
-    </NaiveAutoCrud>
+    </AutoCrud>
   </div>
 </template>
