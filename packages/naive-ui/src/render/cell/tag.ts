@@ -73,21 +73,27 @@ export function cellEnumLabel<Row = any>(
 ): (ctx: CrudTableCellContext<Row>) => any {
   const { placeholder = '-', map, options: opts } = options
 
-  const mapFromOptions = new Map<any, string>()
+  const mapFromOptions = new Map<string | number, string>()
   for (const it of (opts ?? [])) {
     if (it.value === null || it.value === undefined)
       continue
-    mapFromOptions.set(it.value, String(it.label ?? it.value))
+    if (typeof it.value === 'string' || typeof it.value === 'number')
+      mapFromOptions.set(it.value, String(it.label ?? it.value))
   }
 
   return (ctx) => {
     if (isEmptyValue(ctx.value))
       return placeholder
-    const key = ctx.value as any
+    const key = ctx.value
+    const strKey = String(key)
     const mapped = map
-      ? (map as any)[String(key)] ?? (map as any)[key]
+      ? ((map as Record<string, string>)[strKey]
+        ?? (typeof key === 'number' ? (map as Record<number, string>)[key] : undefined))
       : undefined
-    return mapped ?? mapFromOptions.get(key) ?? toText(key)
+    const optMapped = (typeof key === 'string' || typeof key === 'number')
+      ? mapFromOptions.get(key)
+      : undefined
+    return mapped ?? optMapped ?? toText(key)
   }
 }
 
@@ -119,10 +125,13 @@ export function cellEnumTag<Row = any>(
   return (ctx) => {
     if (isEmptyValue(ctx.value))
       return placeholder
-    const key = ctx.value as any
-    const type = typeMap
-      ? (typeMap as any)[String(key)] ?? (typeMap as any)[key] ?? defaultType
-      : defaultType
+    const key = ctx.value
+    const strKey = String(key)
+    const mappedType = typeMap
+      ? ((typeMap as Record<string, TagProps['type']>)[strKey]
+        ?? (typeof key === 'number' ? (typeMap as Record<number, TagProps['type']>)[key] : undefined))
+      : undefined
+    const type = mappedType ?? defaultType
     return h(NTag, { type, size }, { default: () => labelRender(ctx) })
   }
 }

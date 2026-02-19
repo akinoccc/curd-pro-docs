@@ -9,12 +9,12 @@ import { createMemoryCrudAdapter } from '../lib/memory-crud'
 const { adapter } = createMemoryCrudAdapter()
 
 const fields = createDemoFields()
-const tableColumns = createDemoColumns(fields)
+const tableColumns = createDemoColumns()
 
 const crudRef = ref<any>(null)
 const selectedCount = computed(() => {
-  const ids = crudRef.value?.controller?.selectedIds?.value
-  return Array.isArray(ids) ? ids.length : 0
+  const selection = crudRef.value?.selection
+  return selection?.selectedCount.value ?? 0
 })
 
 function formatDate(value: number | string): string {
@@ -66,21 +66,21 @@ function statusLabel(status: DemoRow['status']): string {
     >
       这个页面用 <NText code>
         AutoCrud
-      </NText> 覆盖：搜索（含路由同步）、分页、排序、表单（drawer）、新增/编辑/删除、导出、选择集、slot 自定义渲染、字典加载。
+      </NText> 覆盖：搜索（含路由同步）、分页、排序、表单（drawer）、新增/编辑/删除、导出、选择集、slot 自定义渲染。
     </NAlert>
 
     <AutoCrud
       ref="crudRef"
       :adapter="adapter"
       :fields="fields"
-      :table-columns="tableColumns"
+      :columns="tableColumns"
       form-mode="drawer"
       show-selection
       :show-actions-column="true"
     >
-      <template #beforeTable>
+      <template #before-table>
         <NDivider style="margin: 8px 0">
-          自定义内容（beforeTable slot）
+          自定义内容（before-table slot）
         </NDivider>
         <NText depth="3">
           已勾选：{{ selectedCount }}
@@ -111,20 +111,20 @@ function statusLabel(status: DemoRow['status']): string {
         </NText>
       </template>
 
-      <template #row-actions="{ row, openEdit, defaultActions }">
+      <template #row-actions="{ row, openEdit, defaultButtons }">
         <component
-          :is="defaultActions.Edit"
+          :is="defaultButtons.Edit"
           :row="row"
         />
         <component
-          :is="defaultActions.Delete"
+          :is="defaultButtons.Delete"
           :row="row"
         />
         <NDivider vertical />
         <NText
           depth="3"
           style="cursor: pointer"
-          @click="openEdit(row)"
+          @click="openEdit"
         >
           二次编辑
         </NText>

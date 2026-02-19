@@ -10,7 +10,7 @@ const route = useRoute()
 const { adapter } = createMemoryCrudAdapter()
 
 const fields = createDemoFields()
-const tableColumns = createDemoColumns(fields)
+const tableColumns = createDemoColumns()
 
 const searchQueryRaw = computed(() => {
   const v = (route.query as any)?.search
@@ -48,9 +48,11 @@ const searchQueryRaw = computed(() => {
       <AutoCrud
         :adapter="adapter"
         :fields="fields"
-        :table-columns="tableColumns"
+        :columns="tableColumns"
         form-mode="modal"
         :show-actions-column="true"
+        route-sync
+        route-query-key="search"
       />
     </NCard>
   </div>

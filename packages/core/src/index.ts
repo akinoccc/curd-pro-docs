@@ -1,29 +1,12 @@
-export { default as CrudActionButtonsRenderer } from './actions/CrudActionButtonsRenderer.vue'
-export * from './actions/presets'
-export * from './actions/useCrudActionRunner'
-export { default as CrudConfigProvider } from './config/CrudConfigProvider.vue'
+// =============================================================================
+// @fcurd/core - Headless CRUD Hooks
+// =============================================================================
 
-export * from './config/symbols'
-export * from './config/useCrudConfig'
-// UI + Context + Renderers (按功能划分目录，但对外 API 不变)
-export { default as CrudProvider } from './context/CrudProvider.vue'
-export * from './context/symbols'
-export * from './context/useCrudContext'
-export * from './crud/models'
+// Core hooks
+export * from './hooks'
 
-export * from './crud/useCrud'
-export * from './crud/useCrudActions'
-export * from './fields/useEffectiveColumns'
-export * from './fields/useEffectiveFields'
-export { default as CrudActionsRenderer } from './renderers/CrudActionsRenderer.vue'
-export { default as CrudFormRenderer } from './renderers/CrudFormRenderer.vue'
-export { default as CrudSearchRenderer } from './renderers/CrudSearchRenderer.vue'
-export { default as CrudTableRenderer } from './renderers/CrudTableRenderer.vue'
-export * from './runtime'
-export * from './search/useCrudSearchRouteSync'
-export * from './selection/useCrudSelection'
-export * from './slots/useSlotNameResolver'
-export * from './table/useCrudTableSorterSync'
-export * from './table/useCrudTableUiColumns'
-export * from './ui/ui-driver'
-export * from './ui/useCrudUiResolvers'
+// Core types
+export * from './types'
+
+// Utility functions
+export * from './utils'

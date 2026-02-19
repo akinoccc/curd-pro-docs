@@ -1,7 +1,8 @@
-import type { UiCrudField } from '@fcurd/naive-ui'
+import type { CrudColumn } from '@fcurd/core'
+import type { NaiveCrudField } from '@fcurd/naive-ui'
 import type { SelectOption } from 'naive-ui'
 import type { DemoRow } from './memory-crud'
-import { cellBooleanTag, cellEnumTag, cellMoney, createColumns, defineFields } from '@fcurd/naive-ui'
+import { cellBooleanTag, cellEnumTag, cellMoney, defineColumns, defineFields } from '@fcurd/naive-ui'
 
 const statusOptions: SelectOption[] = [
   { label: '草稿', value: 'draft' },
@@ -15,24 +16,21 @@ const categoryOptions: SelectOption[] = [
   { label: '分类 C', value: 'C' },
 ]
 
-export function createDemoFields() {
+export function createDemoFields(): NaiveCrudField<DemoRow>[] {
   return defineFields([
     {
       key: 'name',
-      label: () => '名称',
+      label: '名称',
       type: 'text',
       required: true,
       visibleIn: { search: true, table: true, form: true },
       ui: {
-        control: { clearable: true },
-        // 单条规则直接透传到 NFormItem 的 rule
         formItem: {
           form: {
             rule: {
               trigger: ['change', 'blur', 'input'],
-              validator: async (_r, value) => {
+              validator: async (_r: any, value: any) => {
                 const v = String(value ?? '').trim()
-                // required 由 NaiveCrudForm 自动处理（基于 field.required）
                 if (!v)
                   return
                 if (v.length < 2)
@@ -45,28 +43,28 @@ export function createDemoFields() {
     },
     {
       key: 'status',
-      label: () => '状态',
+      label: '状态',
       type: 'select',
       required: true,
       visibleIn: { search: true, table: true, form: true },
-      ui: { control: { clearable: true, options: statusOptions } },
+      ui: { control: { clearable: true, options: statusOptions }, options: statusOptions },
     },
     {
       key: 'category',
-      label: () => '分类',
+      label: '分类',
       type: 'select',
       visibleIn: { search: true, table: true, form: true },
-      ui: { control: { clearable: true, options: categoryOptions } },
+      ui: { control: { clearable: true, options: categoryOptions }, options: categoryOptions },
     },
     {
       key: 'enabled',
-      label: () => '启用',
+      label: '启用',
       type: 'switch',
       visibleIn: { search: true, table: true, form: true },
     },
     {
       key: 'amount',
-      label: () => '金额',
+      label: '金额',
       type: 'number',
       required: true,
       visibleIn: { search: false, table: true, form: true },
@@ -76,7 +74,7 @@ export function createDemoFields() {
     },
     {
       key: 'createdAt',
-      label: () => '创建时间',
+      label: '创建时间',
       type: 'datetimeRange',
       visibleIn: { search: true, table: true, form: false },
       ui: {
@@ -85,7 +83,7 @@ export function createDemoFields() {
     },
     {
       key: 'remark',
-      label: () => '备注（仅禁用时出现）',
+      label: '备注（仅禁用时出现）',
       type: 'textarea',
       visibleIn: {
         search: false,
@@ -101,30 +99,31 @@ export function createDemoFields() {
   ])
 }
 
-export function createDemoColumns(fields: UiCrudField<DemoRow, DemoRow>[]) {
-  return createColumns<DemoRow>(fields, {
-    overrides: {
-      name: { sortable: true, width: 220 },
-      status: {
-        width: 120,
-        cellRender: cellEnumTag({
-          options: statusOptions,
-          typeMap: { draft: 'warning', enabled: 'success', disabled: 'error' },
-        }),
-      },
-      category: { width: 120 },
-      enabled: {
-        width: 90,
-        cellRender: cellBooleanTag({ trueText: '启用', falseText: '关闭' }),
-      },
-      createdAt: { width: 220 },
-      amount: {
-        width: 120,
-        cellRender: cellMoney({ currency: 'CNY' }),
-      },
+export function createDemoColumns(): CrudColumn<DemoRow>[] {
+  return defineColumns([
+    { key: 'name', label: '名称', sortable: true, width: 220 },
+    {
+      key: 'status',
+      label: '状态',
+      width: 120,
+      render: cellEnumTag({
+        options: statusOptions,
+        typeMap: { draft: 'warning', enabled: 'success', disabled: 'error' },
+      }),
     },
-    defaults: {
-      // minWidth: 120,
+    { key: 'category', label: '分类', width: 120 },
+    {
+      key: 'enabled',
+      label: '启用',
+      width: 90,
+      render: cellBooleanTag({ trueText: '启用', falseText: '关闭' }),
     },
-  })
+    { key: 'createdAt', label: '创建时间', width: 220 },
+    {
+      key: 'amount',
+      label: '金额',
+      width: 120,
+      render: cellMoney({ currency: 'CNY' }),
+    },
+  ])
 }

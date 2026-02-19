@@ -11,7 +11,7 @@
   "dependencies": {
     "@fcurd/core": "workspace:*",
     "@fcurd/naive-ui": "workspace:*",
-    "naive-ui": "^2.39.0",
+    "naive-ui": "^2.43.2",
     "vue": "^3.5.27",
     "vue-router": "^4.6.0"
   },

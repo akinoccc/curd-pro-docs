@@ -1,14 +1,12 @@
 <script setup lang="ts">
-import type { CrudAdapter, CrudListResult, CrudSort } from '@fcurd/core'
-import { createCrudRuntime, CrudConfigProvider, CrudProvider } from '@fcurd/core'
+import type { CrudAdapter, ListResult } from '@fcurd/core'
+import { useCrudForm, useCrudList, useCrudSelection } from '@fcurd/core'
 import {
-  controlMap,
-  createColumns,
   CrudForm,
   CrudSearch,
   CrudTable,
+  defineColumns,
   defineFields,
-  uiDriver,
 } from '@fcurd/naive-ui'
 import {
   NButton,
@@ -55,7 +53,7 @@ const config = computed(() => {
   return {
     date: {
       valueType: valueType.value,
-      unit: unit.value,
+      unit: valueType.value === 'timestamp' ? unit.value : undefined,
       displayFormat,
     },
   }
@@ -63,504 +61,336 @@ const config = computed(() => {
 
 interface ConfigDemoRow {
   id: number
-  name: string
-  date: number // ms in db
-  datetime: number // ms in db
-  dateRange: [number, number] | null // ms tuple in db
-  datetimeRange: [number, number] | null // ms tuple in db
+  date: number | string
+  datetime: number | string
+  dateRange: [number | string, number | string] | null
+  datetimeRange: [number | string, number | string] | null
 }
 
-interface ConfigDemoQuery {
-  search?: {
-    name?: string | null
-    date?: number | string | null
-    datetime?: number | string | null
-    dateRange?: [number, number] | [string, string] | null
-    datetimeRange?: [number, number] | [string, string] | null
+function genValue(offset: number): number | string {
+  const ms = Date.now() + offset * 86400_000
+  if (valueType.value === 'string')
+    return new Date(ms).toISOString()
+  return unit.value === 's' ? Math.floor(ms / 1000) : ms
+}
+
+let idCounter = 1
+function createRow(offset: number): ConfigDemoRow {
+  return {
+    id: idCounter++,
+    date: genValue(offset),
+    datetime: genValue(offset),
+    dateRange: [genValue(offset), genValue(offset + 5)],
+    datetimeRange: [genValue(offset), genValue(offset + 3)],
   }
 }
 
-function isYmd(value: string): boolean {
-  return /^\d{4}-\d{2}-\d{2}$/.test(value)
-}
+const store = ref<ConfigDemoRow[]>([
+  createRow(-7),
+  createRow(-3),
+  createRow(0),
+  createRow(5),
+])
 
-function parseYmdToMsLocal(ymd: string): number | null {
-  if (!isYmd(ymd))
-    return null
-  const [y, m, d] = ymd.split('-').map(s => Number(s))
-  if (!Number.isFinite(y) || !Number.isFinite(m) || !Number.isFinite(d))
-    return null
-  const dt = new Date(y, m - 1, d, 0, 0, 0, 0)
-  const ms = dt.getTime()
-  return Number.isFinite(ms) ? ms : null
-}
+const adapter: CrudAdapter<ConfigDemoRow> = {
+  getId: (row: ConfigDemoRow) => row.id,
+  list: async (params: any): Promise<ListResult<ConfigDemoRow>> => {
+    await new Promise(r => setTimeout(r, 100))
+    const { page, pageSize, sort } = params
 
-function normalizeToMs(value: unknown): number | null {
-  if (value === null || value === undefined)
-    return null
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    // 当 valueType=timestamp 时，组件回写的 number 会按 unit 表示（ms/s）
-    return unit.value === 's' ? value * 1000 : value
-  }
-  if (typeof value === 'string')
-    return parseYmdToMsLocal(value)
-  return null
-}
+    const result = [...store.value]
 
-function normalizeRangeToMs(value: unknown): [number, number] | null {
-  if (!Array.isArray(value) || value.length !== 2)
-    return null
-  const [a, b] = value
-  const s = normalizeToMs(a)
-  const e = normalizeToMs(b)
-  if (s === null || e === null)
-    return null
-  return [s, e]
-}
-
-function normalizeSearch(query: Record<string, any>): ConfigDemoQuery['search'] {
-  const maybeSearch = (query as any)?.search
-  if (maybeSearch && typeof maybeSearch === 'object')
-    return maybeSearch as any
-  return query as any
-}
-
-function compare(a: any, b: any): number {
-  if (a === b)
-    return 0
-  if (a === undefined || a === null)
-    return -1
-  if (b === undefined || b === null)
-    return 1
-  if (typeof a === 'number' && typeof b === 'number')
-    return a - b
-  return String(a).localeCompare(String(b))
-}
-
-function nextId(list: ConfigDemoRow[]): number {
-  return list.reduce((max, row) => Math.max(max, row.id), 0) + 1
-}
-
-function seedRows(): ConfigDemoRow[] {
-  const base = Date.now()
-  const rows: ConfigDemoRow[] = []
-  for (let i = 0; i < 23; i += 1) {
-    const id = i + 1
-    const dt = base - id * 24 * 60 * 60 * 1000
-    rows.push({
-      id,
-      name: `示例 ${id}`,
-      date: dt,
-      datetime: dt + (id % 24) * 60 * 60 * 1000,
-      dateRange: [dt - 3 * 24 * 60 * 60 * 1000, dt] as [number, number],
-      datetimeRange: [dt - 2 * 24 * 60 * 60 * 1000, dt + 2 * 60 * 60 * 1000] as [number, number],
-    })
-  }
-  return rows
-}
-
-let db: ConfigDemoRow[] = seedRows()
-
-const adapter: CrudAdapter<ConfigDemoRow, number, ConfigDemoQuery, Partial<ConfigDemoRow>, Partial<ConfigDemoRow>, string> = {
-  getId(row) {
-    return row.id
-  },
-  async list(params): Promise<CrudListResult<ConfigDemoRow>> {
-    const search = normalizeSearch(params.query as any)
-    const name = search?.name ?? null
-    const date = search?.date ?? null
-    const datetime = search?.datetime ?? null
-    const dateRange = search?.dateRange ?? null
-    const datetimeRange = search?.datetimeRange ?? null
-
-    const dateMs = normalizeToMs(date)
-    const datetimeMs = normalizeToMs(datetime)
-    const dateRangeMs = normalizeRangeToMs(dateRange)
-    const datetimeRangeMs = normalizeRangeToMs(datetimeRange)
-
-    let rows = db.slice()
-
-    rows = rows.filter((row) => {
-      if (name && !row.name.toLowerCase().includes(String(name).toLowerCase()))
-        return false
-      if (dateMs !== null && row.date !== dateMs)
-        return false
-      if (datetimeMs !== null && row.datetime !== datetimeMs)
-        return false
-      if (dateRangeMs) {
-        const [s, e] = dateRangeMs
-        const value = row.date
-        if (value < s || value > e)
-          return false
-      }
-      if (datetimeRangeMs) {
-        const [s, e] = datetimeRangeMs
-        const value = row.datetime
-        if (value < s || value > e)
-          return false
-      }
-      return true
-    })
-
-    const sort = params.sort as CrudSort | null | undefined
     if (sort) {
-      const dir = sort.order === 'descend' ? -1 : 1
-      rows = rows.slice().sort((ra, rb) => dir * compare((ra as any)[sort.field], (rb as any)[sort.field]))
+      const key = sort.field as keyof ConfigDemoRow
+      result.sort((a, b) => {
+        const av = a[key]
+        const bv = b[key]
+        if (av === bv)
+          return 0
+        const cmp = av! > bv! ? 1 : -1
+        return sort.order === 'descend' ? -cmp : cmp
+      })
     }
 
-    const page = Math.max(1, params.page ?? 1)
-    const pageSize = Math.max(1, params.pageSize ?? 10)
     const start = (page - 1) * pageSize
-    const end = start + pageSize
-    return { items: rows.slice(start, end), total: rows.length }
+    const items = result.slice(start, start + pageSize)
+
+    return { items, total: store.value.length }
   },
-  async create(data): Promise<ConfigDemoRow> {
-    const id = nextId(db)
-    const now = Date.now()
+
+  create: async (data: any) => {
     const row: ConfigDemoRow = {
-      id,
-      name: String((data as any)?.name ?? ''),
-      date: normalizeToMs((data as any)?.date) ?? now,
-      datetime: normalizeToMs((data as any)?.datetime) ?? now,
-      dateRange: normalizeRangeToMs((data as any)?.dateRange),
-      datetimeRange: normalizeRangeToMs((data as any)?.datetimeRange),
+      id: idCounter++,
+      date: data.date ?? genValue(0),
+      datetime: data.datetime ?? genValue(0),
+      dateRange: data.dateRange ?? null,
+      datetimeRange: data.datetimeRange ?? null,
     }
-    db = [row, ...db]
+    store.value.push(row)
     return row
   },
-  async update(id, data): Promise<ConfigDemoRow> {
-    const idx = db.findIndex(r => r.id === id)
-    if (idx < 0)
-      throw new Error(`记录不存在：${id}`)
-    const current = db[idx]
-    const next: ConfigDemoRow = {
-      ...current,
-      ...(data as any),
-      id: current.id,
-      name: String((data as any)?.name ?? current.name),
-      date: normalizeToMs((data as any)?.date) ?? current.date,
-      datetime: normalizeToMs((data as any)?.datetime) ?? current.datetime,
-      dateRange: (data as any)?.dateRange === undefined ? current.dateRange : normalizeRangeToMs((data as any)?.dateRange),
-      datetimeRange: (data as any)?.datetimeRange === undefined ? current.datetimeRange : normalizeRangeToMs((data as any)?.datetimeRange),
+
+  update: async (id: any, data: any) => {
+    const idx = store.value.findIndex(r => r.id === id)
+    if (idx >= 0) {
+      store.value[idx] = { ...store.value[idx], ...data }
+      return store.value[idx]
     }
-    db = db.slice()
-    db[idx] = next
-    return next
+    throw new Error('Row not found')
   },
-  async remove(id): Promise<void> {
-    db = db.filter(r => r.id !== id)
+
+  remove: async (id: any) => {
+    const idx = store.value.findIndex(r => r.id === id)
+    if (idx >= 0) {
+      store.value.splice(idx, 1)
+    }
   },
 }
 
-const fields = defineFields<ConfigDemoRow, any>([
-  {
-    key: 'name',
-    label: () => '名称',
-    type: 'text',
-    required: true,
-    visibleIn: { search: true, table: true, form: true },
-    ui: { control: { clearable: true, placeholder: '支持模糊搜索' } },
-  },
+const fields = defineFields<ConfigDemoRow>([
   {
     key: 'date',
-    label: () => 'date（单日）',
+    label: '日期',
     type: 'date',
     visibleIn: { search: true, table: true, form: true },
-    ui: { control: { clearable: true } },
   },
   {
     key: 'datetime',
-    label: () => 'datetime（时间）',
+    label: '日期时间',
     type: 'datetime',
     visibleIn: { search: true, table: true, form: true },
-    ui: { control: { clearable: true } },
   },
   {
     key: 'dateRange',
-    label: () => 'dateRange（范围）',
+    label: '日期范围',
     type: 'dateRange',
-    visibleIn: { search: true, table: false, form: true },
-    ui: { control: { clearable: true } },
+    visibleIn: { search: true, table: true, form: true },
   },
   {
     key: 'datetimeRange',
-    label: () => 'datetimeRange（范围）',
+    label: '日期时间范围',
     type: 'datetimeRange',
-    visibleIn: { search: true, table: false, form: true },
-    ui: { control: { clearable: true } },
+    visibleIn: { search: true, table: true, form: true },
   },
 ])
 
-const columns = computed(() => createColumns<ConfigDemoRow>(fields, {
-  overrides: {
-    name: { sortable: true, width: 160 },
-    date: { width: 160 },
-    datetime: { width: 200 },
-  },
-}))
+const columns = defineColumns<ConfigDemoRow>([
+  { key: 'date', label: '日期', sortable: true, width: 150 },
+  { key: 'datetime', label: '日期时间', sortable: true, width: 180 },
+  { key: 'dateRange', label: '日期范围', width: 220 },
+  { key: 'datetimeRange', label: '日期时间范围', width: 280 },
+])
 
-const runtime = createCrudRuntime<ConfigDemoRow, number, ConfigDemoQuery>({
+// Initialize hooks
+const list = useCrudList<ConfigDemoRow>({
   adapter,
-  fields,
-  columns: columns.value,
-  debounceMs: 150,
-  dedupe: true,
-  ui: {
-    uiDriver,
-    controlMap,
-  },
-})
-const crud = runtime.crud
-
-onMounted(() => {
-  void crud.refresh()
 })
 
+const selection = useCrudSelection<ConfigDemoRow>({
+  rows: list.rows,
+  getId: adapter.getId,
+})
+
+const form = useCrudForm<ConfigDemoRow>({
+  fields: fields as any,
+})
+
+// Form visibility
 const formVisible = ref(false)
 const editingRow = ref<ConfigDemoRow | null>(null)
 
-function openCreate(): void {
+function openCreate() {
   editingRow.value = null
+  form.reset()
+  form.setMode('create')
   formVisible.value = true
 }
 
-function openEdit(row: ConfigDemoRow): void {
+function openEdit(row: ConfigDemoRow) {
   editingRow.value = row
+  form.reset(row)
+  form.setMode('edit')
   formVisible.value = true
 }
 
-function closeForm(): void {
-  formVisible.value = false
+async function handleFormSubmit(data: Partial<ConfigDemoRow>) {
+  try {
+    if (form.mode.value === 'create') {
+      await adapter.create!(data)
+    }
+    else if (editingRow.value) {
+      await adapter.update!(editingRow.value.id, data)
+    }
+    formVisible.value = false
+    await list.refresh()
+  }
+  catch (err) {
+    console.error(err)
+  }
 }
 
-async function handleSubmit(payload: { mode: 'create' | 'edit', data: any }): Promise<void> {
-  if (payload.mode === 'create') {
-    await adapter.create?.(payload.data)
+function formatDateValue(value: any): string {
+  if (value == null)
+    return '-'
+  if (typeof value === 'number') {
+    const ms = unit.value === 's' ? value * 1000 : value
+    return new Date(ms).toLocaleString()
   }
-  else {
-    const id = editingRow.value?.id
-    if (id === undefined)
-      return
-    await adapter.update?.(id, payload.data)
+  if (typeof value === 'string') {
+    return new Date(value).toLocaleString()
   }
-  await crud.refresh()
-  formVisible.value = false
+  return String(value)
 }
 
-async function handleRemove(row: ConfigDemoRow): Promise<void> {
-  await adapter.remove?.(row.id)
-  await crud.refresh()
+function formatRangeValue(value: any): string {
+  if (!Array.isArray(value) || value.length < 2)
+    return '-'
+  return `${formatDateValue(value[0])} ~ ${formatDateValue(value[1])}`
 }
 
-function formatCell(value: unknown, kind: 'date' | 'datetime'): string {
-  if (typeof value === 'number' && Number.isFinite(value)) {
-    return kind === 'date'
-      ? new Date(value).toLocaleDateString()
-      : new Date(value).toLocaleString()
-  }
-  if (typeof value === 'string')
-    return value
-  return String(value ?? '')
-}
+onMounted(() => {
+  void list.refresh()
+})
 </script>
 
 <template>
-  <CrudConfigProvider :config="config">
-    <CrudProvider :runtime="runtime">
-      <div style="display: flex; flex-direction: column; gap: 12px">
-        <NCard title="ConfigProvider：在一个 CRUD 实例里演示 date 配置">
-          <NSpace
-            vertical
-            :size="10"
+  <div style="display: flex; flex-direction: column; gap: 16px">
+    <!-- Config panel -->
+    <NCard title="日期配置">
+      <NForm
+        label-placement="left"
+        label-width="120"
+      >
+        <NFormItem label="值类型">
+          <NRadioGroup v-model:value="valueType">
+            <NRadioButton value="timestamp">
+              时间戳
+            </NRadioButton>
+            <NRadioButton value="string">
+              ISO字符串
+            </NRadioButton>
+          </NRadioGroup>
+        </NFormItem>
+
+        <NFormItem
+          v-if="valueType === 'timestamp'"
+          label="时间戳单位"
+        >
+          <NRadioGroup v-model:value="unit">
+            <NRadioButton value="ms">
+              毫秒
+            </NRadioButton>
+            <NRadioButton value="s">
+              秒
+            </NRadioButton>
+          </NRadioGroup>
+        </NFormItem>
+
+        <NFormItem label="显示格式">
+          <NRadioGroup v-model:value="displayMode">
+            <NRadioButton value="none">
+              无格式化
+            </NRadioButton>
+            <NRadioButton value="global">
+              全局格式
+            </NRadioButton>
+            <NRadioButton value="byType">
+              按类型
+            </NRadioButton>
+          </NRadioGroup>
+        </NFormItem>
+
+        <template v-if="displayMode === 'global'">
+          <NFormItem label="全局格式">
+            <NInput v-model:value="globalFormat" />
+          </NFormItem>
+        </template>
+
+        <template v-if="displayMode === 'byType'">
+          <NFormItem label="日期格式">
+            <NInput v-model:value="fmtDate" />
+          </NFormItem>
+          <NFormItem label="日期时间格式">
+            <NInput v-model:value="fmtDatetime" />
+          </NFormItem>
+          <NFormItem label="日期范围格式">
+            <NInput v-model:value="fmtDateRange" />
+          </NFormItem>
+          <NFormItem label="日期时间范围格式">
+            <NInput v-model:value="fmtDatetimeRange" />
+          </NFormItem>
+        </template>
+      </NForm>
+
+      <NDivider />
+
+      <NText>当前配置：</NText>
+      <NCode
+        :code="JSON.stringify(config, null, 2)"
+        language="json"
+      />
+    </NCard>
+
+    <!-- CRUD demo -->
+    <NCard title="日期字段演示">
+      <template #header-extra>
+        <NSpace>
+          <NButton
+            type="primary"
+            @click="openCreate"
           >
-            <NText depth="3">
-              这个页面用同一个 crud 实例贯穿搜索/表格/表单。输入支持 timestamp 或 YYYY-MM-DD；
-              但每次选择/更新时，会始终按 ConfigProvider 的 valueType 回写到 formModel/searchModel。
-            </NText>
+            新增
+          </NButton>
+        </NSpace>
+      </template>
 
-            <NForm
-              label-placement="left"
-              label-width="140"
+      <!-- Search -->
+      <CrudSearch
+        :list="list"
+        :fields="(fields as any)"
+      />
+
+      <!-- Table -->
+      <CrudTable
+        :list="list"
+        :columns="columns"
+        :selection="selection"
+        :row-key="(row: ConfigDemoRow) => row.id"
+        show-actions-column
+      >
+        <template #cell-date="{ row }">
+          {{ formatDateValue(row.date) }}
+        </template>
+        <template #cell-datetime="{ row }">
+          {{ formatDateValue(row.datetime) }}
+        </template>
+        <template #cell-dateRange="{ row }">
+          {{ formatRangeValue(row.dateRange) }}
+        </template>
+        <template #cell-datetimeRange="{ row }">
+          {{ formatRangeValue(row.datetimeRange) }}
+        </template>
+
+        <template #row-actions="{ row }">
+          <NSpace>
+            <NButton
+              size="small"
+              @click="openEdit(row)"
             >
-              <NFormItem label="valueType（回写格式）">
-                <NRadioGroup v-model:value="valueType">
-                  <NRadioButton value="timestamp">
-                    timestamp
-                  </NRadioButton>
-                  <NRadioButton value="string">
-                    string
-                  </NRadioButton>
-                </NRadioGroup>
-              </NFormItem>
-
-              <NFormItem label="unit（timestamp 单位）">
-                <NSpace
-                  :size="8"
-                  align="center"
-                >
-                  <NRadioGroup v-model:value="unit">
-                    <NRadioButton value="ms">
-                      ms
-                    </NRadioButton>
-                    <NRadioButton value="s">
-                      s
-                    </NRadioButton>
-                  </NRadioGroup>
-                  <NText
-                    depth="3"
-                    style="font-size: 12px"
-                  >
-                    （仅 valueType=timestamp 时生效）
-                  </NText>
-                </NSpace>
-              </NFormItem>
-
-              <NFormItem label="displayFormat（展示）">
-                <NSpace
-                  vertical
-                  :size="8"
-                  style="width: 100%"
-                >
-                  <NRadioGroup v-model:value="displayMode">
-                    <NRadioButton value="none">
-                      不配置
-                    </NRadioButton>
-                    <NRadioButton value="global">
-                      全局一个
-                    </NRadioButton>
-                    <NRadioButton value="byType">
-                      按类型
-                    </NRadioButton>
-                  </NRadioGroup>
-
-                  <template v-if="displayMode === 'global'">
-                    <NInput
-                      v-model:value="globalFormat"
-                      placeholder="例如：yyyy-MM-dd"
-                    />
-                  </template>
-
-                  <template v-else-if="displayMode === 'byType'">
-                    <div style="display: grid; grid-template-columns: 140px 1fr; gap: 8px 12px">
-                      <NText depth="3">
-                        date
-                      </NText>
-                      <NInput v-model:value="fmtDate" />
-                      <NText depth="3">
-                        datetime
-                      </NText>
-                      <NInput v-model:value="fmtDatetime" />
-                      <NText depth="3">
-                        dateRange
-                      </NText>
-                      <NInput v-model:value="fmtDateRange" />
-                      <NText depth="3">
-                        datetimeRange
-                      </NText>
-                      <NInput v-model:value="fmtDatetimeRange" />
-                    </div>
-                  </template>
-                </NSpace>
-              </NFormItem>
-            </NForm>
-
-            <NSpace :size="8">
-              <NButton
-                type="primary"
-                @click="openCreate"
-              >
-                新增
-              </NButton>
-              <NButton
-                tertiary
-                @click="crud.refresh"
-              >
-                刷新
-              </NButton>
-            </NSpace>
+              编辑
+            </NButton>
           </NSpace>
-        </NCard>
+        </template>
+      </CrudTable>
 
-        <NCard title="搜索 / 表格">
-          <NSpace
-            vertical
-            :size="12"
-          >
-            <NText depth="3">
-              搜索面板会把值写入 <NText code>
-                crud.query.value.search
-              </NText>。你可以切换 valueType 看它回写 number 还是 YYYY-MM-DD。
-            </NText>
-
-            <CrudSearch :fields="fields" />
-
-            <CrudTable
-              :columns="columns"
-              :show-actions-column="true"
-            >
-              <template #cell-date="{ row }">
-                <NText depth="3">
-                  {{ formatCell(row.date, 'date') }}
-                </NText>
-              </template>
-              <template #cell-datetime="{ row }">
-                <NText depth="3">
-                  {{ formatCell(row.datetime, 'datetime') }}
-                </NText>
-              </template>
-              <template #row-actions="{ row }">
-                <NSpace :size="8">
-                  <NButton
-                    size="small"
-                    tertiary
-                    @click="openEdit(row)"
-                  >
-                    编辑
-                  </NButton>
-                  <NButton
-                    size="small"
-                    tertiary
-                    type="error"
-                    @click="handleRemove(row)"
-                  >
-                    删除
-                  </NButton>
-                </NSpace>
-              </template>
-            </CrudTable>
-
-            <NDivider style="margin: 8px 0" />
-
-            <NText depth="3">
-              当前注入的 config（供确认）：
-            </NText>
-            <NCode
-              :code="JSON.stringify(config, null, 2)"
-              language="json"
-            />
-
-            <NDivider style="margin: 8px 0" />
-
-            <NText depth="3">
-              当前 crud.query（供确认）：
-            </NText>
-            <NCode
-              :code="JSON.stringify(crud.query.value, null, 2)"
-              language="json"
-            />
-          </NSpace>
-        </NCard>
-
-        <CrudForm
-          v-model="formVisible"
-          :row="editingRow"
-          :fields="fields"
-          form-mode="drawer"
-          :reset-on-close="true"
-          @submit="handleSubmit"
-          @close="closeForm"
-        />
-      </div>
-    </CrudProvider>
-  </CrudConfigProvider>
+      <!-- Form -->
+      <CrudForm
+        v-model:visible="formVisible"
+        :form="form"
+        :fields="(fields as any)"
+        display-mode="drawer"
+        @submit="handleFormSubmit"
+      />
+    </NCard>
+  </div>
 </template>
