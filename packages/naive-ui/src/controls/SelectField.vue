@@ -14,7 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const modelValue = defineModel<string | number | (string | number)[] | null>()
 
-const controlProps = computed(() => {
+const controlProps = computed<Record<string, any>>(() => {
   if (!props.field)
     return {}
   const baseProps = resolveControlProps(props.field, props.surface)

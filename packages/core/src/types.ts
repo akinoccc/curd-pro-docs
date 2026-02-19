@@ -37,21 +37,23 @@ export type CrudTableCellContext<Row = any> = CellContext<Row>
 /**
  * Field definition - core schema for form/search/table
  */
-export interface CrudField<Row = any, FormModel = Row> {
+export type CrudFieldType =
+  | 'text'
+  | 'textarea'
+  | 'select'
+  | 'date'
+  | 'datetime'
+  | 'dateRange'
+  | 'datetimeRange'
+  | 'switch'
+  | 'number'
+  | 'money'
+  | 'custom'
+
+export interface CrudField<Row = any, FormModel = Row, UiExt = unknown> {
   key: string
   label: string | (() => string)
-  type:
-    | 'text'
-    | 'textarea'
-    | 'select'
-    | 'date'
-    | 'datetime'
-    | 'dateRange'
-    | 'datetimeRange'
-    | 'switch'
-    | 'number'
-    | 'money'
-    | 'custom'
+  type: CrudFieldType | (string & {})
   required?: boolean
   visibleIn?: {
     search?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
@@ -60,13 +62,13 @@ export interface CrudField<Row = any, FormModel = Row> {
     detail?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
   }
   /** UI-specific extensions, defined by adapter layer */
-  ui?: Record<string, unknown>
+  ui?: UiExt
 }
 
 /**
  * Table column definition
  */
-export interface CrudColumn<Row = any> {
+export interface CrudColumn<Row = any, UiExt = unknown> {
   key: string
   label?: string | (() => string)
   width?: number
@@ -75,7 +77,7 @@ export interface CrudColumn<Row = any> {
   sortable?: boolean
   render?: (ctx: CellContext<Row>) => any
   /** UI-specific extensions */
-  ui?: Record<string, unknown>
+  ui?: UiExt
 }
 
 // =============================================================================
@@ -205,6 +207,14 @@ export interface ActionContext<Row = any> {
   row?: Row
   selectedRows: Row[]
   selectedIds: (string | number)[]
+  /** Current list query (if available) */
+  query?: Record<string, unknown>
+  /** Current list sort (if available) */
+  sort?: CrudSort | null
+  /** Current page (if available) */
+  page?: number
+  /** Current page size (if available) */
+  pageSize?: number
   refresh: () => Promise<void>
   clearSelection: () => void
 }

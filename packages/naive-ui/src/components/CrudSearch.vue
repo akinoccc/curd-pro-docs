@@ -11,6 +11,12 @@ interface Props {
   list: UseCrudListReturn<Row, Query>
   /** Field definitions */
   fields: CrudField<Row>[]
+  /**
+   * Where to read/write search conditions in query.
+   * - undefined: flat query (default)
+   * - 'search': nested query.search = { ... }
+   */
+  queryKey?: string
   /** Form props passthrough */
   formProps?: FormProps
   /** Whether to show reset button */
@@ -24,12 +30,25 @@ const props = withDefaults(defineProps<Props>(), {
   showSearch: true,
 })
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value)
+}
+
+function getQuerySource(query: Query): Record<string, unknown> {
+  if (!props.queryKey)
+    return query as any
+  const nested = (query as any)?.[props.queryKey]
+  return isRecord(nested) ? nested : {}
+}
+
 // Filter fields visible in search
 const searchFields = computed(() => {
   return filterFieldsBySurface(props.fields, 'search', {
     query: props.list.query.value as Record<string, unknown>,
   })
 })
+
+const searchFieldKeys = computed(() => searchFields.value.map(f => f.key))
 
 // Local search model (synced with list.query)
 const searchModel = reactive<Record<string, unknown>>({})
@@ -41,14 +60,25 @@ watch(
     Object.keys(searchModel).forEach((key) => {
       delete searchModel[key]
     })
-    Object.assign(searchModel, query)
+    const src = getQuerySource(query)
+    for (const key of searchFieldKeys.value) {
+      if (key in src)
+        searchModel[key] = src[key]
+    }
   },
   { immediate: true, deep: true },
 )
 
 // Handle search
 function handleSearch() {
-  props.list.setQuery(searchModel as Partial<Query>)
+  if (!props.queryKey) {
+    props.list.setQuery(searchModel as Partial<Query>)
+    return
+  }
+
+  props.list.setQuery({
+    [props.queryKey]: { ...searchModel },
+  } as any)
 }
 
 // Handle reset

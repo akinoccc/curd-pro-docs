@@ -49,9 +49,7 @@ export interface NaiveFieldUi {
   options?: SelectOption[]
 }
 
-export type NaiveCrudField<Row = any, FormModel = Row> = CrudField<Row, FormModel> & {
-  ui?: NaiveFieldUi
-}
+export type NaiveCrudField<Row = any, FormModel = Row> = CrudField<Row, FormModel, NaiveFieldUi>
 
 // =============================================================================
 // Helper Functions
@@ -103,10 +101,10 @@ export function resolveFormItemProps(
  * Create Naive UI DataTable columns from CrudColumns
  */
 export function createTableColumns<Row = any>(
-  columns: CrudColumn<Row>[],
+  columns: CrudColumn<Row, any>[],
   options?: {
     slots?: Record<string, any>
-    renderCell?: (column: CrudColumn<Row>, row: Row, value: any, rowIndex: number) => any
+    renderCell?: (column: CrudColumn<Row, any>, row: Row, value: any, rowIndex: number) => any
   },
 ): DataTableColumn<Row>[] {
   return columns.map((col) => {
@@ -123,6 +121,8 @@ export function createTableColumns<Row = any>(
         }
       }
     }
+
+    const ui = col.ui && typeof col.ui === 'object' && !Array.isArray(col.ui) ? col.ui : {}
 
     return {
       key: col.key,
@@ -142,7 +142,7 @@ export function createTableColumns<Row = any>(
           : options?.renderCell
             ? (row: Row, rowIndex: number) => options.renderCell!(col, row, (row as any)[col.key], rowIndex)
             : undefined,
-      ...(col.ui ?? {}),
+      ...ui,
     } as DataTableColumn<Row>
   })
 }

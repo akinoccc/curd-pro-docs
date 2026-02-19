@@ -157,8 +157,8 @@ function renderFormBody() {
             key: field.key,
             label: getFieldLabel(field),
             path: field.key,
-            required: field.required,
-            rule: buildRules(field),
+            required: Boolean(field.required),
+            rule: buildRules(field) as any,
             ...resolveFormItemProps(field as any, 'form'),
           },
           () => fieldSlot

@@ -13,7 +13,7 @@ const fields = createDemoFields()
 const tableColumns = createDemoColumns()
 
 const searchQueryRaw = computed(() => {
-  const v = (route.query as any)?.search
+  const v = (route.query as any)?.q
   return v === undefined ? '(无)' : String(v)
 })
 </script>
@@ -27,7 +27,7 @@ const searchQueryRaw = computed(() => {
       <div>
         这个页面重点看 “搜索与路由 query 同步”。在搜索表单里输入条件并点击查询，URL 会自动写入
         <NText code>
-          ?search=...
+          ?q=...
         </NText>；刷新页面/复制链接打开也会自动还原搜索并刷新列表。
       </div>
     </NAlert>
@@ -35,7 +35,7 @@ const searchQueryRaw = computed(() => {
     <NCard>
       <div style="display: flex; flex-direction: column; gap: 8px">
         <NText depth="3">
-          当前 route.query.search
+          当前 route.query.q
         </NText>
         <NCode
           :code="searchQueryRaw"
@@ -49,10 +49,11 @@ const searchQueryRaw = computed(() => {
         :adapter="adapter"
         :fields="fields"
         :columns="tableColumns"
+        search-query-key="search"
         form-mode="modal"
         :show-actions-column="true"
         route-sync
-        route-query-key="search"
+        route-query-key="q"
       />
     </NCard>
   </div>

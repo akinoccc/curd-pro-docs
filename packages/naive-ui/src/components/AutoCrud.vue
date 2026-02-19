@@ -33,6 +33,12 @@ interface Props {
   columns?: CrudColumn<Row>[]
   /** Search field definitions (optional, uses fields if not provided) */
   searchFields?: CrudField<Row>[]
+  /**
+   * Where CrudSearch reads/writes search conditions in query.
+   * - undefined: flat query (default)
+   * - 'search': nested query.search = { ... }
+   */
+  searchQueryKey?: string
   /** Custom actions */
   actions?: CrudAction<Row>[]
   /** Form display mode */
@@ -80,12 +86,33 @@ const emit = defineEmits<{
 
 const slots = useSlots()
 
-// Filtered slots for forwarding (exclude row-actions which is handled separately)
-const forwardSlots = computed(() => {
+// Build extra props for row-actions slot
+function getRowActionsSlotProps(row: Row) {
+  return {
+    openEdit: () => openEdit(row),
+    actions: rowActions.value,
+    defaultButtons,
+  }
+}
+
+const reservedSlotNames = new Set([
+  'toolbar',
+  'before-table',
+  'batch-actions',
+  'row-actions',
+  'search',
+  'table',
+  'form',
+  'table-header',
+  'footer',
+])
+
+// Forward slots to sub components (exclude reserved ones)
+const forwardedSlots = computed(() => {
   const result: Record<string, any> = {}
-  for (const [name, slot] of Object.entries(slots)) {
-    if (name !== 'row-actions') {
-      result[name] = slot
+  for (const name of Object.keys(slots)) {
+    if (!reservedSlotNames.has(name)) {
+      result[name] = slots[name]
     }
   }
   return result
@@ -131,6 +158,10 @@ if (props.routeSync && router && route) {
 const formVisible = ref(false)
 const editingRow = ref<Row | null>(null)
 
+function setFormVisible(visible: boolean) {
+  formVisible.value = visible
+}
+
 // Open create form
 function openCreate() {
   editingRow.value = null
@@ -153,6 +184,10 @@ function buildActionContext(row?: Row): ActionContext<Row> {
     row,
     selectedRows: selection.selectedRows.value,
     selectedIds: [...selection.selectedIds.value],
+    query: (list.query.value ?? {}) as any,
+    sort: list.sort.value,
+    page: list.page.value,
+    pageSize: list.pageSize.value,
     refresh: list.refresh,
     clearSelection: selection.clear,
   }
@@ -360,22 +395,30 @@ defineExpose({
     </template>
 
     <!-- Search -->
-    <CrudSearch
-      v-if="searchFields?.length || fields.some(f => f.visibleIn?.search !== false)"
-      :list="list"
-      :fields="searchFields ?? fields"
-    >
-      <template
-        v-for="(_, name) in slots"
-        :key="name"
-        #[name]="slotProps"
+    <template v-if="searchFields?.length || fields.some(f => f.visibleIn?.search !== false)">
+      <slot
+        name="search"
+        :list="list"
+        :fields="(searchFields ?? fields)"
       >
-        <slot
-          :name="name"
-          v-bind="slotProps"
-        />
-      </template>
-    </CrudSearch>
+        <CrudSearch
+          :list="list"
+          :fields="searchFields ?? fields"
+          :query-key="searchQueryKey"
+        >
+          <template
+            v-for="(_, name) in forwardedSlots"
+            :key="name"
+            #[name]="slotProps"
+          >
+            <slot
+              :name="name"
+              v-bind="slotProps"
+            />
+          </template>
+        </CrudSearch>
+      </slot>
+    </template>
 
     <!-- Before table slot -->
     <div
@@ -394,76 +437,105 @@ defineExpose({
       v-if="batchActions.length > 0 && selection.selectedCount.value > 0"
       class="auto-crud__batch-actions"
     >
-      <NSpace>
-        <span>已选择 {{ selection.selectedCount.value }} 项</span>
-        <template
-          v-for="action in batchActions"
-          :key="action.id"
-        >
-          <component :is="() => renderActionButton(action)" />
-        </template>
-      </NSpace>
+      <slot
+        name="batch-actions"
+        :list="list"
+        :selection="selection"
+        :actions="batchActions"
+        :renderActionButton="renderActionButton"
+      >
+        <NSpace>
+          <span>已选择 {{ selection.selectedCount.value }} 项</span>
+          <template
+            v-for="action in batchActions"
+            :key="action.id"
+          >
+            <component :is="() => renderActionButton(action)" />
+          </template>
+        </NSpace>
+      </slot>
     </div>
 
     <!-- Table -->
-    <CrudTable
+    <slot
+      name="table"
       :list="list"
       :columns="effectiveColumns"
-      :selection="showSelection ? selection : undefined"
-      :row-key="rowKey"
-      :show-actions-column="showActionsColumn && rowActions.length > 0"
-      :pagination-props="paginationProps"
+      :selection="(showSelection ? selection : undefined)"
+      :rowKey="rowKey"
+      :rowActions="rowActions"
+      :renderActionButton="renderActionButton"
+      :getRowActionsSlotProps="getRowActionsSlotProps"
     >
-      <!-- Forward cell slots (exclude row-actions which is handled separately) -->
-      <template
-        v-for="(_, name) in forwardSlots"
-        :key="name"
-        #[name]="slotProps"
+      <CrudTable
+        :list="list"
+        :columns="effectiveColumns"
+        :selection="showSelection ? selection : undefined"
+        :row-key="rowKey"
+        :show-actions-column="showActionsColumn && rowActions.length > 0"
+        :pagination-props="paginationProps"
+        :get-row-actions-slot-props="getRowActionsSlotProps"
       >
-        <slot
-          :name="name"
-          v-bind="slotProps"
-        />
-      </template>
-
-      <!-- Row actions - explicitly handled to add defaultButtons -->
-      <template #row-actions="{ row }">
-        <slot
-          name="row-actions"
-          :row="row"
-          :open-edit="() => openEdit(row)"
-          :actions="rowActions"
-          :default-buttons="defaultButtons"
+        <!-- Forward cell slots (reserved + row-actions excluded) -->
+        <template
+          v-for="(_, name) in forwardedSlots"
+          :key="name"
+          #[name]="slotProps"
         >
-          <template
-            v-for="action in rowActions"
-            :key="action.id"
+          <slot
+            :name="name"
+            v-bind="slotProps"
+          />
+        </template>
+
+        <!-- row-actions: inject extra props via getRowActionsSlotProps -->
+        <template #row-actions="slotProps">
+          <slot
+            name="row-actions"
+            v-bind="slotProps"
           >
-            <component :is="() => renderActionButton(action, row)" />
-          </template>
-        </slot>
-      </template>
-    </CrudTable>
+            <!-- Default: render all row actions -->
+            <template
+              v-for="action in rowActions"
+              :key="action.id"
+            >
+              <component :is="() => renderActionButton(action, slotProps.row)" />
+            </template>
+          </slot>
+        </template>
+      </CrudTable>
+    </slot>
 
     <!-- Form -->
-    <CrudForm
-      v-model:visible="formVisible"
+    <slot
+      name="form"
       :form="form"
       :fields="fields"
-      :display-mode="formMode"
-      @submit="handleFormSubmit"
+      :visible="formVisible"
+      :setVisible="setFormVisible"
+      :mode="form.mode.value"
+      :editingRow="editingRow"
+      :submit="handleFormSubmit"
     >
-      <template
-        v-for="(_, name) in slots"
-        :key="name"
-        #[name]="slotProps"
+      <CrudForm
+        v-model:visible="formVisible"
+        :form="form"
+        :fields="fields"
+        :display-mode="formMode"
+        @submit="handleFormSubmit"
       >
-        <slot
-          :name="name"
-          v-bind="slotProps"
-        />
-      </template>
-    </CrudForm>
+        <template
+          v-for="(_, name) in forwardedSlots"
+          :key="name"
+          #[name]="slotProps"
+        >
+          <slot
+            :name="name"
+            v-bind="slotProps"
+          />
+        </template>
+      </CrudForm>
+    </slot>
   </NCard>
 </template>
 

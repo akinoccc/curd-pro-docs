@@ -184,9 +184,11 @@ export function exportAction<Row = any>(options: ExportActionOptions<Row>): Crud
         return
 
       try {
+        const query = (ctx.query ?? {}) as any
+        const sort = (ctx.sort ?? null) as any
         const result = await adapter.export({
-          query: {} as any,
-          sort: null,
+          query,
+          sort,
         })
         options.handleExport?.(result, options.filename)
         options.onSuccess?.()

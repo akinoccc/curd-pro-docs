@@ -1,9 +1,9 @@
 <script setup lang="ts" generic="Row">
 import type { CrudColumn, CrudSort, UseCrudListReturn, UseCrudSelectionReturn } from '@fcurd/core'
 import type { DataTableColumn, DataTableSortState, PaginationProps } from 'naive-ui'
-import { NDataTable, NPagination, NSpace } from 'naive-ui'
-import { computed, h, useSlots } from 'vue'
 import { createTableColumns } from '../adapter'
+import { NDataTable, NPagination, NSpace } from 'naive-ui'
+import { computed, h } from 'vue'
 
 interface Props {
   /** CRUD list state from useCrudList */
@@ -24,6 +24,8 @@ interface Props {
   tableProps?: Record<string, unknown>
   /** Pagination props passthrough */
   paginationProps?: PaginationProps
+  /** Extra props generator for row-actions slot */
+  getRowActionsSlotProps?: (row: Row) => Record<string, unknown>
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -36,13 +38,13 @@ const emit = defineEmits<{
   (e: 'sort', sort: CrudSort | null): void
 }>()
 
-const slots = useSlots()
+const slots = defineSlots<Record<string, any>>()
 
 // Build table columns
 const tableColumns = computed<DataTableColumn<Row>[]>(() => {
   const cols = createTableColumns(props.columns, {
     slots,
-    renderCell: (_col, _row, value) => {
+    renderCell: (_col: CrudColumn<Row>, _row: Row, value: any) => {
       // Default rendering
       return value
     },
@@ -63,7 +65,10 @@ const tableColumns = computed<DataTableColumn<Row>[]>(() => {
       width: props.actionsColumnWidth,
       fixed: 'right',
       render: (row: Row, rowIndex: number) => {
-        return h(NSpace, { size: 8 }, () => slots['row-actions']!({ row, rowIndex }))
+        // Build slot props with optional extra props from parent
+        const extraProps = props.getRowActionsSlotProps?.(row) ?? {}
+        const slotProps = { row, rowIndex, ...extraProps }
+        return h(NSpace, { size: 8 }, () => slots['row-actions']!(slotProps))
       },
     } as DataTableColumn<Row>)
   }

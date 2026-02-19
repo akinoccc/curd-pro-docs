@@ -1,4 +1,4 @@
-import type { CrudAdapter, CrudListResult, CrudSort } from '@fcurd/core'
+import type { CrudAdapter, CrudSort, ListResult } from '@fcurd/core'
 import { sleep } from './sleep'
 
 export interface DemoRow {
@@ -13,7 +13,7 @@ export interface DemoRow {
 }
 
 export interface DemoQuery {
-  // NaiveCrudSearch 默认会把搜索写到 query.search
+  // Use CrudSearch queryKey='search' to nest search conditions
   search?: {
     name?: string | null
     status?: DemoRow['status'] | null
@@ -172,7 +172,7 @@ export function createDemoRows(count = 137): DemoRow[] {
 }
 
 export function createMemoryCrudAdapter(initial?: DemoRow[]): {
-  adapter: CrudAdapter<DemoRow, number, DemoQuery>
+  adapter: CrudAdapter<DemoRow, DemoQuery>
   getAll: () => DemoRow[]
   reset: (next?: DemoRow[]) => void
 } {
@@ -186,11 +186,11 @@ export function createMemoryCrudAdapter(initial?: DemoRow[]): {
     db = (next ?? createDemoRows()).slice()
   }
 
-  const adapter: CrudAdapter<DemoRow, number, DemoQuery> = {
+  const adapter: CrudAdapter<DemoRow, DemoQuery> = {
     getId(row) {
       return row.id
     },
-    async list(params): Promise<CrudListResult<DemoRow>> {
+    async list(params): Promise<ListResult<DemoRow>> {
       // 模拟延迟 + 支持 abort（验证 useCrud 的“最后一次请求胜出”）
       await sleep(220, params.signal)
 

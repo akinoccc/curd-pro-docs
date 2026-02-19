@@ -74,6 +74,7 @@ function statusLabel(status: DemoRow['status']): string {
       :adapter="adapter"
       :fields="fields"
       :columns="tableColumns"
+      search-query-key="search"
       form-mode="drawer"
       show-selection
       :show-actions-column="true"
@@ -113,11 +114,11 @@ function statusLabel(status: DemoRow['status']): string {
 
       <template #row-actions="{ row, openEdit, defaultButtons }">
         <component
-          :is="defaultButtons.Edit"
+          :is="defaultButtons?.Edit"
           :row="row"
         />
         <component
-          :is="defaultButtons.Delete"
+          :is="defaultButtons?.Delete"
           :row="row"
         />
         <NDivider vertical />
