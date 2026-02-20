@@ -1,0 +1,10 @@
+:root {
+  --vp-c-brand-1: #18a058;
+  --vp-c-brand-2: #36ad6a;
+  --vp-c-brand-3: #2fb35f;
+}
+
+.vp-doc :where(pre, code) {
+  font-variant-ligatures: none;
+}
+

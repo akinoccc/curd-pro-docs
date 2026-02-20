@@ -1,0 +1,80 @@
+import type { SelectOption } from 'naive-ui'
+import { defineColumns, defineFields } from '@fcurd/naive-ui'
+import { cellDateTime, cellEnumTag, cellMoney } from '@fcurd/naive-ui'
+import type { DemoRow } from './basic-types'
+
+const statusOptions: SelectOption[] = [
+  { label: '草稿', value: 'draft' },
+  { label: '启用', value: 'enabled' },
+  { label: '禁用', value: 'disabled' },
+]
+
+export const demoFields = defineFields<DemoRow>([
+  {
+    key: 'name',
+    label: '名称',
+    type: 'text',
+    required: true,
+    visibleIn: { search: true, table: true, form: true },
+    ui: {
+      control: {
+        placeholder: '输入名称',
+        form: { clearable: true },
+        search: { clearable: true },
+      },
+    },
+  },
+  {
+    key: 'status',
+    label: '状态',
+    type: 'select',
+    required: true,
+    visibleIn: { search: true, table: true, form: true },
+    ui: {
+      options: statusOptions,
+      control: { options: statusOptions, clearable: true },
+    },
+  },
+  {
+    key: 'amount',
+    label: '金额',
+    type: 'money',
+    required: true,
+    visibleIn: { search: false, table: true, form: true },
+    ui: {
+      control: { min: 0, step: 1, placeholder: '输入金额' },
+    },
+  },
+  {
+    key: 'createdAt',
+    label: '创建时间',
+    type: 'datetime',
+    visibleIn: { search: false, table: true, form: false },
+  },
+])
+
+export const demoColumns = defineColumns<DemoRow>([
+  { key: 'name', label: '名称', sortable: true, width: 220 },
+  {
+    key: 'status',
+    label: '状态',
+    width: 120,
+    render: cellEnumTag({
+      options: statusOptions,
+      typeMap: { draft: 'warning', enabled: 'success', disabled: 'error' },
+    }),
+  },
+  {
+    key: 'amount',
+    label: '金额',
+    width: 140,
+    render: cellMoney({ currency: 'CNY' }),
+  },
+  {
+    key: 'createdAt',
+    label: '创建时间',
+    width: 200,
+    render: cellDateTime(),
+  },
+])
+
