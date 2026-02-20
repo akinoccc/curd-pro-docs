@@ -60,6 +60,10 @@ title: 快速开始
 <<< @/examples/basic-types.ts [类型定义]
 :::
 
+### 交互预览
+
+<demo vue="../examples/auto-crud-basic.vue" />
+
 这个组件会自动处理：
 
 - 搜索表单渲染 + 查询联动

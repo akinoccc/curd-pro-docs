@@ -1,3 +1,5 @@
+/// <reference types="node" />
+
 function resolveBase(): string {
   const envBase = process.env.VITEPRESS_BASE
   if (envBase)
@@ -14,103 +16,112 @@ function resolveBase(): string {
   return `/${repo}/`
 }
 
-export default {
-  lang: 'zh-CN',
-  title: 'fcurd',
-  description: '@fcurd/core 与 @fcurd/naive-ui 文档',
-  base: resolveBase(),
-  cleanUrls: true,
-  themeConfig: {
-    nav: [
-      { text: '指南', link: '/guide/introduction' },
-      {
-        text: 'API 参考',
-        items: [
-          { text: '@fcurd/core', link: '/api/core/adapter' },
-          { text: '@fcurd/naive-ui', link: '/api/naive-ui/overview' },
+export default async () => {
+  const { vitepressDemoPlugin } = await import('vitepress-demo-plugin')
+
+  return {
+    lang: 'zh-CN',
+    title: 'fcurd',
+    description: '@fcurd/core 与 @fcurd/naive-ui 文档',
+    base: resolveBase(),
+    cleanUrls: true,
+    markdown: {
+      config(md) {
+        md.use(vitepressDemoPlugin)
+      },
+    },
+    themeConfig: {
+      nav: [
+        { text: '指南', link: '/guide/introduction' },
+        {
+          text: 'API 参考',
+          items: [
+            { text: '@fcurd/core', link: '/api/core/adapter' },
+            { text: '@fcurd/naive-ui', link: '/api/naive-ui/overview' },
+          ],
+        },
+        { text: '开发者', link: '/dev/overview' },
+      ],
+      search: {
+        provider: 'local',
+      },
+      sidebar: {
+        '/guide/': [
+          {
+            text: '开始',
+            items: [
+              { text: '介绍', link: '/guide/introduction' },
+              { text: '安装', link: '/guide/installation' },
+              { text: '快速开始', link: '/guide/quick-start' },
+              { text: '核心概念', link: '/guide/concepts' },
+            ],
+          },
+          {
+            text: '进阶用法',
+            items: [
+              { text: '路由同步', link: '/guide/route-sync' },
+              { text: '嵌套搜索 query', link: '/guide/nested-query' },
+              { text: 'Slots 约定', link: '/guide/custom-slots' },
+              { text: '导出', link: '/guide/export' },
+              { text: '自定义 Actions', link: '/guide/custom-actions' },
+            ],
+          },
+        ],
+        '/api/core/': [
+          {
+            text: '核心 API',
+            items: [
+              { text: 'CrudAdapter', link: '/api/core/adapter' },
+              { text: '类型定义', link: '/api/core/types' },
+              { text: '工具函数', link: '/api/core/utils' },
+            ],
+          },
+          {
+            text: 'Hooks',
+            items: [
+              { text: 'useCrudList', link: '/api/core/hooks/use-crud-list' },
+              { text: 'useCrudForm', link: '/api/core/hooks/use-crud-form' },
+              { text: 'useCrudSelection', link: '/api/core/hooks/use-crud-selection' },
+              { text: 'useCrudRouteSync', link: '/api/core/hooks/use-crud-route-sync' },
+              { text: 'useCrudActions', link: '/api/core/hooks/use-crud-actions' },
+            ],
+          },
+        ],
+        '/api/naive-ui/': [
+          {
+            text: 'Naive UI 适配',
+            items: [
+              { text: '概览', link: '/api/naive-ui/overview' },
+              { text: 'Adapter 工具', link: '/api/naive-ui/adapter' },
+              { text: 'Controls 控件', link: '/api/naive-ui/controls' },
+              { text: 'Renderers 渲染器', link: '/api/naive-ui/renderers' },
+            ],
+          },
+          {
+            text: '组件',
+            items: [
+              { text: 'AutoCrud', link: '/api/naive-ui/components/auto-crud' },
+              { text: 'CrudSearch', link: '/api/naive-ui/components/crud-search' },
+              { text: 'CrudTable', link: '/api/naive-ui/components/crud-table' },
+              { text: 'CrudForm', link: '/api/naive-ui/components/crud-form' },
+            ],
+          },
+        ],
+        '/dev/': [
+          {
+            text: '开发者 / 贡献者',
+            items: [
+              { text: '概览', link: '/dev/overview' },
+              { text: '本地开发', link: '/dev/local-dev' },
+              { text: '构建与发布', link: '/dev/build-and-release' },
+            ],
+          },
         ],
       },
-      { text: '开发者', link: '/dev/overview' },
-    ],
-    search: {
-      provider: 'local',
+      footer: {
+        message: 'Made with VitePress',
+        copyright: 'MIT Licensed',
+      },
     },
-    sidebar: {
-      '/guide/': [
-        {
-          text: '开始',
-          items: [
-            { text: '介绍', link: '/guide/introduction' },
-            { text: '安装', link: '/guide/installation' },
-            { text: '快速开始', link: '/guide/quick-start' },
-            { text: '核心概念', link: '/guide/concepts' },
-          ],
-        },
-        {
-          text: '进阶用法',
-          items: [
-            { text: '路由同步', link: '/guide/route-sync' },
-            { text: '嵌套搜索 query', link: '/guide/nested-query' },
-            { text: 'Slots 约定', link: '/guide/custom-slots' },
-            { text: '导出', link: '/guide/export' },
-            { text: '自定义 Actions', link: '/guide/custom-actions' },
-          ],
-        },
-      ],
-      '/api/core/': [
-        {
-          text: '核心 API',
-          items: [
-            { text: 'CrudAdapter', link: '/api/core/adapter' },
-            { text: '类型定义', link: '/api/core/types' },
-            { text: '工具函数', link: '/api/core/utils' },
-          ],
-        },
-        {
-          text: 'Hooks',
-          items: [
-            { text: 'useCrudList', link: '/api/core/hooks/use-crud-list' },
-            { text: 'useCrudForm', link: '/api/core/hooks/use-crud-form' },
-            { text: 'useCrudSelection', link: '/api/core/hooks/use-crud-selection' },
-            { text: 'useCrudRouteSync', link: '/api/core/hooks/use-crud-route-sync' },
-            { text: 'useCrudActions', link: '/api/core/hooks/use-crud-actions' },
-          ],
-        },
-      ],
-      '/api/naive-ui/': [
-        {
-          text: 'Naive UI 适配',
-          items: [
-            { text: '概览', link: '/api/naive-ui/overview' },
-            { text: 'Adapter 工具', link: '/api/naive-ui/adapter' },
-            { text: 'Controls 控件', link: '/api/naive-ui/controls' },
-            { text: 'Renderers 渲染器', link: '/api/naive-ui/renderers' },
-          ],
-        },
-        {
-          text: '组件',
-          items: [
-            { text: 'AutoCrud', link: '/api/naive-ui/components/auto-crud' },
-            { text: 'CrudSearch', link: '/api/naive-ui/components/crud-search' },
-            { text: 'CrudTable', link: '/api/naive-ui/components/crud-table' },
-            { text: 'CrudForm', link: '/api/naive-ui/components/crud-form' },
-          ],
-        },
-      ],
-      '/dev/': [
-        {
-          text: '开发者 / 贡献者',
-          items: [
-            { text: '概览', link: '/dev/overview' },
-            { text: '本地开发', link: '/dev/local-dev' },
-            { text: '构建与发布', link: '/dev/build-and-release' },
-          ],
-        },
-      ],
-    },
-    footer: {
-      message: 'Made with VitePress',
-      copyright: 'MIT Licensed',
-    },
-  },
+  }
 }

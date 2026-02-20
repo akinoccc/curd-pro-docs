@@ -30,6 +30,10 @@ list.refresh()
 list.reset()
 ```
 
+## 交互示例
+
+<demo vue="../../../demos/use-crud-list-basic.vue" />
+
 ## Options
 
 | 参数 | 类型 | 默认值 | 说明 |

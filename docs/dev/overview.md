@@ -19,3 +19,11 @@ pnpm typecheck
 pnpm lint
 ```
 
+## 交互 Demo（文档内可运行）
+
+在 markdown 里用 `<demo />` 引用 `.vue/.tsx/.html` 文件即可：
+
+```html
+<demo vue="../demos/use-crud-selection-basic.vue" />
+```
+

@@ -95,11 +95,13 @@ function buildRules(field: CrudField<Row>) {
   }
 
   const label = getFieldLabel(field)
-  const requiredRule = {
+  const requiredRule: Record<string, any> = {
     required: true,
     message: `${label}不能为空`,
     trigger: ['input', 'blur', 'change'],
   }
+  if (field.type === 'number' || field.type === 'money')
+    requiredRule.type = 'number'
 
   if (!existingRules) {
     return [requiredRule]
@@ -150,6 +152,10 @@ function renderFormBody() {
         const slotName = `field-${field.key}`
         const fieldSlot = slots[slotName]
         const model = props.form.model as Record<string, unknown>
+        const formItemProps = resolveFormItemProps(field as any, 'form') as Record<string, unknown>
+        // `buildRules` will merge `formItemProps.rule` already; avoid overriding our generated rules.
+        // eslint-disable-next-line unused-imports/no-unused-vars
+        const { rule: _existingRule, ...restFormItemProps } = (formItemProps ?? {})
 
         return h(
           NFormItem,
@@ -159,7 +165,7 @@ function renderFormBody() {
             path: field.key,
             required: Boolean(field.required),
             rule: buildRules(field) as any,
-            ...resolveFormItemProps(field as any, 'form'),
+            ...restFormItemProps,
           },
           () => fieldSlot
             ? fieldSlot({ field, model, mode: props.form.mode.value, value: model[field.key] })

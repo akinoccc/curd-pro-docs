@@ -26,6 +26,10 @@ selection.isSelected(2) // true
 selection.selectedCount.value // 1
 ```
 
+## 交互示例
+
+<demo vue="../../../demos/use-crud-selection-basic.vue" />
+
 ## Options
 
 | 参数 | 类型 | 默认值 | 说明 |

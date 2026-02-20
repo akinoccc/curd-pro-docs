@@ -32,3 +32,7 @@ pnpm typecheck
 pnpm lint
 ```
 
+## 文档交互 Demo（可选）
+
+<demo vue="../demos/use-crud-list-basic.vue" />
+

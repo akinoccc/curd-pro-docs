@@ -14,9 +14,14 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^7.2.0",
+    "@fcurd/core": "workspace:^",
+    "@fcurd/naive-ui": "workspace:^",
+    "@types/node": "^22.19.7",
     "eslint": "^9.39.2",
+    "naive-ui": "^2.43.2",
     "typescript": "^5.9.2",
     "vitepress": "^1.6.4",
+    "vitepress-demo-plugin": "^1.5.1",
     "vue": "^3.5.27",
     "vue-router": "^4.6.0",
     "vue-tsc": "^3.2.3"
