@@ -1,11 +1,12 @@
 import type { Ref } from 'vue'
-import { watch } from 'vue'
+import type { SetQueryOptions } from '../types'
+import { onScopeDispose, watch } from 'vue'
 
 export interface UseCrudRouteSyncOptions<Query = Record<string, unknown>> {
   /** Query ref from useCrudList */
   query: Ref<Query>
   /** Set query function from useCrudList */
-  setQuery: (partial: Partial<Query>) => void
+  setQuery: (partial: Partial<Query>, options?: SetQueryOptions) => void
   /** Router instance (vue-router) */
   router?: any
   /** Route instance (vue-router) */
@@ -18,6 +19,12 @@ export interface UseCrudRouteSyncOptions<Query = Record<string, unknown>> {
   deserialize?: (str: string) => Partial<Query>
   /** Debounce delay in ms (default: 300) */
   debounceMs?: number
+  /**
+   * How to apply query when syncing from route (default: 'replace')
+   * - replace: URL is the source of truth (prevents stale keys from lingering)
+   * - merge: merge into current query
+   */
+  syncFromRouteMode?: 'replace' | 'merge'
 }
 
 /**
@@ -35,10 +42,42 @@ export function useCrudRouteSync<Query = Record<string, unknown>>(
     serialize = (q: Query) => JSON.stringify(q),
     deserialize = (s: string) => JSON.parse(s) as Partial<Query>,
     debounceMs = 300,
+    syncFromRouteMode = 'replace',
   } = options
 
   let syncTimer: ReturnType<typeof setTimeout> | null = null
   let isSyncingFromRoute = false
+  let releaseSyncTimer: ReturnType<typeof setTimeout> | null = null
+
+  function isPlainObject(value: unknown): value is Record<string, unknown> {
+    return Object.prototype.toString.call(value) === '[object Object]'
+  }
+
+  function pruneEmptyDeep<T>(value: T): T | undefined {
+    if (value === undefined || value === null)
+      return undefined
+    if (typeof value === 'string' && value === '')
+      return undefined
+
+    if (Array.isArray(value)) {
+      const next = value
+        .map(v => pruneEmptyDeep(v))
+        .filter(v => v !== undefined) as unknown as T
+      return (next as unknown as unknown[]).length === 0 ? undefined : next
+    }
+
+    if (isPlainObject(value)) {
+      const out: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(value)) {
+        const pv = pruneEmptyDeep(v)
+        if (pv !== undefined)
+          out[k] = pv
+      }
+      return Object.keys(out).length === 0 ? undefined : (out as T)
+    }
+
+    return value
+  }
 
   // Sync query from route to list
   function syncFromRoute(): void {
@@ -53,16 +92,22 @@ export function useCrudRouteSync<Query = Record<string, unknown>>(
       isSyncingFromRoute = true
       const parsed = deserialize(raw)
       if (parsed && typeof parsed === 'object') {
-        setQuery(parsed)
+        setQuery(parsed, {
+          mode: syncFromRouteMode,
+          pruneEmpty: true,
+        })
       }
     }
     catch {
       // Invalid query string, ignore
     }
     finally {
-      setTimeout(() => {
+      if (releaseSyncTimer)
+        clearTimeout(releaseSyncTimer)
+      releaseSyncTimer = setTimeout(() => {
+        releaseSyncTimer = null
         isSyncingFromRoute = false
-      }, 50)
+      }, 0)
     }
   }
 
@@ -72,8 +117,9 @@ export function useCrudRouteSync<Query = Record<string, unknown>>(
       return
 
     const currentQuery = query.value
-    const isEmpty = !currentQuery || Object.keys(currentQuery).length === 0
-      || Object.values(currentQuery).every(v => v === undefined || v === null || v === '')
+    const normalized = pruneEmptyDeep(currentQuery as any) as any
+    const isEmpty = normalized === undefined
+      || (isPlainObject(normalized) && Object.keys(normalized).length === 0)
 
     const newRouteQuery = { ...route.query }
 
@@ -81,14 +127,14 @@ export function useCrudRouteSync<Query = Record<string, unknown>>(
       delete newRouteQuery[queryKey]
     }
     else {
-      newRouteQuery[queryKey] = serialize(currentQuery)
+      newRouteQuery[queryKey] = serialize(normalized)
     }
 
     // Only update if changed
     const currentStr = route.query?.[queryKey] ?? ''
     const newStr = newRouteQuery[queryKey] ?? ''
     if (currentStr !== newStr) {
-      router.replace({ query: newRouteQuery })
+      void Promise.resolve(router.replace({ query: newRouteQuery })).catch(() => {})
     }
   }
 
@@ -116,9 +162,19 @@ export function useCrudRouteSync<Query = Record<string, unknown>>(
     syncFromRoute()
   }
 
+  onScopeDispose(() => {
+    if (syncTimer) {
+      clearTimeout(syncTimer)
+      syncTimer = null
+    }
+    if (releaseSyncTimer) {
+      clearTimeout(releaseSyncTimer)
+      releaseSyncTimer = null
+    }
+  })
+
   return {
     syncFromRoute,
     syncToRoute,
   }
 }
-

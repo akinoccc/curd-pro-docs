@@ -17,7 +17,7 @@ import {
   useCrudSelection,
 } from '@fcurd/core'
 import { NButton, NCard, NSpace } from 'naive-ui'
-import { computed, h, onMounted, ref, useSlots } from 'vue'
+import { computed, h, ref, useSlots } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { confirmAction, handleExportResult } from '../adapter'
 import CrudForm from './CrudForm.vue'
@@ -72,7 +72,7 @@ const props = withDefaults(defineProps<Props>(), {
   disableCreate: false,
   disableEdit: false,
   disableDelete: false,
-  disableExport: true, // Disabled by default, enable if adapter has export
+  disableExport: false,
   title: '列表',
   routeSync: false,
   routeQueryKey: 'q',
@@ -356,11 +356,6 @@ const defaultButtons = {
   Delete: DeleteButton,
   View: ViewButton,
 }
-
-// Auto fetch on mount
-onMounted(() => {
-  void list.refresh()
-})
 
 // Expose for external access
 defineExpose({

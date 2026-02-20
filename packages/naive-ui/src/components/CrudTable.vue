@@ -1,9 +1,9 @@
 <script setup lang="ts" generic="Row">
 import type { CrudColumn, CrudSort, UseCrudListReturn, UseCrudSelectionReturn } from '@fcurd/core'
 import type { DataTableColumn, DataTableSortState, PaginationProps } from 'naive-ui'
-import { createTableColumns } from '../adapter'
 import { NDataTable, NPagination, NSpace } from 'naive-ui'
 import { computed, h } from 'vue'
+import { createTableColumns } from '../adapter'
 
 interface Props {
   /** CRUD list state from useCrudList */
@@ -84,9 +84,7 @@ const checkedRowKeys = computed(() => {
 function handleCheckedRowKeysChange(keys: (string | number)[]) {
   if (!props.selection)
     return
-  // Clear current selection and add new keys
-  props.selection.clear()
-  keys.forEach(key => props.selection!.select(key))
+  props.selection.setSelectedIds(keys)
 }
 
 // Sort handling

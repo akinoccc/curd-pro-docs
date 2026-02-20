@@ -37,18 +37,18 @@ export type CrudTableCellContext<Row = any> = CellContext<Row>
 /**
  * Field definition - core schema for form/search/table
  */
-export type CrudFieldType =
-  | 'text'
-  | 'textarea'
-  | 'select'
-  | 'date'
-  | 'datetime'
-  | 'dateRange'
-  | 'datetimeRange'
-  | 'switch'
-  | 'number'
-  | 'money'
-  | 'custom'
+export type CrudFieldType
+  = | 'text'
+    | 'textarea'
+    | 'select'
+    | 'date'
+    | 'datetime'
+    | 'dateRange'
+    | 'datetimeRange'
+    | 'switch'
+    | 'number'
+    | 'money'
+    | 'custom'
 
 export interface CrudField<Row = any, FormModel = Row, UiExt = unknown> {
   key: string
@@ -152,11 +152,28 @@ export interface UseCrudListReturn<Row = any, Query = Record<string, unknown>> {
 
   // Actions
   refresh: () => Promise<void>
-  setQuery: (partial: Partial<Query>) => void
+  setQuery: (partial: Partial<Query>, options?: SetQueryOptions) => void
   setPage: (page: number) => void
   setPageSize: (size: number) => void
   setSort: (sort: CrudSort | null) => void
   reset: () => void
+}
+
+export interface SetQueryOptions {
+  /**
+   * How to apply the partial query update
+   * - merge: shallow merge into existing query (default)
+   * - replace: replace the whole query with partial
+   */
+  mode?: 'merge' | 'replace'
+  /** Keys to delete from current query before applying the update (useful for flat search forms) */
+  clearKeys?: string[]
+  /**
+   * Remove empty values after applying update.
+   * Treats `undefined | null | '' | [] | {}` as empty (deep).
+   * Keeps `0` / `false`.
+   */
+  pruneEmpty?: boolean
 }
 
 export interface UseCrudFormOptions<Row = any> {
@@ -191,6 +208,8 @@ export interface UseCrudSelectionReturn<Row = any> {
   selectedRows: ComputedRef<Row[]>
   selectedCount: ComputedRef<number>
 
+  /** Replace the whole selectedIds set (used by UI adapters to keep cross-page selection stable) */
+  setSelectedIds: (ids: (string | number)[]) => void
   select: (id: string | number) => void
   deselect: (id: string | number) => void
   toggle: (id: string | number) => void

@@ -47,20 +47,21 @@ title: 路由同步
 | 参数 | 类型 | 默认值 | 说明 |
 |---|---|---|---|
 | `query` | `Ref<Query>` | — | 来自 `useCrudList` 的 query ref |
-| `setQuery` | `(partial: Partial<Query>) => void` | — | 来自 `useCrudList` 的 setQuery |
+| `setQuery` | `(partial: Partial<Query>, options?: SetQueryOptions) => void` | — | 来自 `useCrudList` 的 setQuery |
 | `router` | `Router` | — | vue-router 的 router 实例 |
 | `route` | `RouteLocationNormalized` | — | vue-router 的 route 实例 |
 | `queryKey` | `string` | `'q'` | URL query 参数名 |
 | `serialize` | `(query: Query) => string` | `JSON.stringify` | 自定义序列化 |
 | `deserialize` | `(str: string) => Partial<Query>` | `JSON.parse` | 自定义反序列化 |
 | `debounceMs` | `number` | `300` | 写入 URL 的防抖延迟（ms） |
+| `syncFromRouteMode` | `'replace' \| 'merge'` | `'replace'` | 从 URL 还原时的写回策略（默认以 URL 为准） |
 
 ## 行为说明
 
 1. **初始化**：组件挂载时从 `route.query[queryKey]` 读取并反序列化，写回 `setQuery`
 2. **写入 URL**：监听 `query` 变化，防抖后调用 `router.replace({ query })`
 3. **防循环**：从路由读取时会设置标记，避免写回时触发 watch 循环
-4. **空值清理**：当 query 为空对象时，自动删除 URL 中的 queryKey 参数
+4. **空值清理**：深度裁剪空值后若 query 为空，自动删除 URL 中的 queryKey 参数（保留 `0/false`）
 
 ## 自定义序列化
 

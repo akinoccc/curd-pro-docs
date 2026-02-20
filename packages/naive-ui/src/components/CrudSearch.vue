@@ -72,13 +72,20 @@ watch(
 // Handle search
 function handleSearch() {
   if (!props.queryKey) {
-    props.list.setQuery(searchModel as Partial<Query>)
+    props.list.setQuery(searchModel as Partial<Query>, {
+      mode: 'merge',
+      clearKeys: searchFieldKeys.value,
+      pruneEmpty: true,
+    })
     return
   }
 
   props.list.setQuery({
     [props.queryKey]: { ...searchModel },
-  } as any)
+  } as any, {
+    mode: 'merge',
+    pruneEmpty: true,
+  })
 }
 
 // Handle reset

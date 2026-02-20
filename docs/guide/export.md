@@ -57,14 +57,13 @@ async export() {
 
 ## AutoCrud 中使用
 
-只要 adapter 有 `export` 方法，`AutoCrud` 就会自动在工具栏显示"导出"按钮（注意默认 `disableExport` 为 `true`，需要手动开启）：
+只要 adapter 有 `export` 方法，`AutoCrud` 就会自动在工具栏显示"导出"按钮：
 
 ```vue
 <AutoCrud
   :adapter="adapter"
   :fields="fields"
   :columns="columns"
-  :disable-export="false"
 />
 ```
 

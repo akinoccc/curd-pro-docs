@@ -1,5 +1,5 @@
-import type { CrudSort, UseCrudListOptions, UseCrudListReturn } from '../types'
-import { ref, shallowRef, watch } from 'vue'
+import type { CrudSort, SetQueryOptions, UseCrudListOptions, UseCrudListReturn } from '../types'
+import { onScopeDispose, ref, shallowRef, watch } from 'vue'
 
 /**
  * Core hook for CRUD list operations - handles pagination, sorting, query, and data fetching
@@ -36,13 +36,20 @@ export function useCrudList<Row = any, Query extends object = Record<string, unk
   let activeKey: string | null = null
   let abortController: AbortController | null = null
 
-  function buildKey(): string {
-    return JSON.stringify({
-      page: page.value,
-      pageSize: pageSize.value,
-      query: query.value,
-      sort: sort.value,
-    })
+  function buildKey(): string | null {
+    try {
+      return JSON.stringify({
+        page: page.value,
+        pageSize: pageSize.value,
+        query: query.value,
+        sort: sort.value,
+      })
+    }
+    catch {
+      // Unstringifiable query (e.g. BigInt/circular refs) should not break list fetching.
+      // Fallback: disable dedupe for this round.
+      return null
+    }
   }
 
   function isAbortError(err: unknown): boolean {
@@ -52,6 +59,36 @@ export function useCrudList<Row = any, Query extends object = Record<string, unk
     return obj.name === 'AbortError' || obj.code === 'ABORT_ERR'
   }
 
+  function isPlainObject(value: unknown): value is Record<string, unknown> {
+    return Object.prototype.toString.call(value) === '[object Object]'
+  }
+
+  function pruneEmptyDeep<T>(value: T): T | undefined {
+    if (value === undefined || value === null)
+      return undefined
+    if (typeof value === 'string' && value === '')
+      return undefined
+
+    if (Array.isArray(value)) {
+      const next = value
+        .map(v => pruneEmptyDeep(v))
+        .filter(v => v !== undefined) as unknown as T
+      return (next as unknown as unknown[]).length === 0 ? undefined : next
+    }
+
+    if (isPlainObject(value)) {
+      const out: Record<string, unknown> = {}
+      for (const [k, v] of Object.entries(value)) {
+        const pv = pruneEmptyDeep(v)
+        if (pv !== undefined)
+          out[k] = pv
+      }
+      return Object.keys(out).length === 0 ? undefined : (out as T)
+    }
+
+    return value
+  }
+
   async function fetchList(opts?: { force?: boolean }): Promise<void> {
     if (!adapter || typeof adapter.list !== 'function')
       return
@@ -59,7 +96,7 @@ export function useCrudList<Row = any, Query extends object = Record<string, unk
     const force = Boolean(opts?.force)
     const key = buildKey()
 
-    if (!force && dedupe) {
+    if (!force && dedupe && key) {
       if (key === lastKey || key === activeKey)
         return
     }
@@ -97,7 +134,8 @@ export function useCrudList<Row = any, Query extends object = Record<string, unk
 
       rows.value = result.items
       total.value = result.total
-      lastKey = key
+      if (key)
+        lastKey = key
     }
     catch (err) {
       if (isAbortError(err))
@@ -143,8 +181,24 @@ export function useCrudList<Row = any, Query extends object = Record<string, unk
   }, { deep: false })
 
   // Actions
-  function setQuery(partial: Partial<Query>): void {
-    query.value = { ...query.value, ...partial } as Query
+  function setQuery(partial: Partial<Query>, options?: SetQueryOptions): void {
+    const mode = options?.mode ?? 'merge'
+    const clearKeys = options?.clearKeys ?? []
+    const shouldPrune = Boolean(options?.pruneEmpty)
+
+    const base = mode === 'replace'
+      ? {}
+      : ({ ...(query.value as any) } as Record<string, unknown>)
+
+    for (const k of clearKeys)
+      delete base[k]
+
+    const merged = mode === 'replace'
+      ? ({ ...(partial as any) } as Record<string, unknown>)
+      : ({ ...base, ...(partial as any) } as Record<string, unknown>)
+
+    const next = shouldPrune ? (pruneEmptyDeep(merged) ?? {}) : merged
+    query.value = next as Query
     page.value = 1
   }
 
@@ -177,6 +231,28 @@ export function useCrudList<Row = any, Query extends object = Record<string, unk
   async function refresh(): Promise<void> {
     await fetchList({ force: true })
   }
+
+  // Initial fetch (if enabled)
+  scheduleFetch()
+
+  // Cleanup on scope dispose (component unmount / effect stop)
+  onScopeDispose(() => {
+    if (fetchTimer) {
+      clearTimeout(fetchTimer)
+      fetchTimer = null
+    }
+    if (abortController) {
+      try {
+        abortController.abort()
+      }
+      catch {
+        // ignore
+      }
+      abortController = null
+    }
+    activeSeq = 0
+    activeKey = null
+  })
 
   return {
     // State

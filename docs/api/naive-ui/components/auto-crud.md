@@ -22,7 +22,7 @@ title: AutoCrud
 | `disableCreate` | `boolean` | `false` | 禁用新增按钮 |
 | `disableEdit` | `boolean` | `false` | 禁用编辑按钮 |
 | `disableDelete` | `boolean` | `false` | 禁用删除按钮 |
-| `disableExport` | `boolean` | `true` | 禁用导出按钮（需手动开启） |
+| `disableExport` | `boolean` | `false` | 禁用导出按钮 |
 | `title` | `string` | `'列表'` | 卡片标题 |
 | `paginationProps` | `PaginationProps` | — | 透传到 `NPagination` |
 | `routeSync` | `boolean` | `false` | 开启 URL query 同步 |
