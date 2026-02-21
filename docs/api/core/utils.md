@@ -22,8 +22,8 @@ function defineFields<Row, FormModel, const Fields extends CrudField<Row, FormMo
 import { defineFields } from '@fcurd/core'
 
 const fields = defineFields<MyRow>([
-  { key: 'name', label: '名称', type: 'text', visibleIn: { search: true, form: true } },
-  { key: 'status', label: '状态', type: 'select', visibleIn: { search: true, form: true } },
+  { key: 'name', label: '名称', type: 'text', visibleIn: { searchForm: true, editForm: true } },
+  { key: 'status', label: '状态', type: 'select', visibleIn: { searchForm: true, editForm: true } },
 ])
 // fields 保留字面量类型，IDE 能推导出 key 的具体值
 ```
@@ -65,7 +65,7 @@ function createColumnsFromFields<Row>(
 ```ts
 function filterFieldsBySurface<Row>(
   fields: CrudField<Row>[],
-  surface: 'search' | 'table' | 'form' | 'detail',
+  surface: 'searchForm' | 'table' | 'editForm' | 'detail',
   ctx?: Partial<FieldContext<Row>>
 ): CrudField<Row>[]
 ```

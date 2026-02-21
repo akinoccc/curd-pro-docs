@@ -6,11 +6,11 @@ import { resolveControlProps } from '../adapter'
 
 interface Props {
   field?: NaiveCrudField
-  surface?: 'form' | 'search'
+  surface?: 'editForm' | 'searchForm'
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  surface: 'form',
+  surface: 'editForm',
 })
 const modelValue = defineModel<number | null>()
 

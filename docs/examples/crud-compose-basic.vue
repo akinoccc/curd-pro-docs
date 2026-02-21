@@ -10,9 +10,9 @@ import { createBasicAdapter } from './basic-adapter'
 const { adapter } = createBasicAdapter()
 
 const fields = defineFields<DemoRow>([
-  { key: 'name', label: '名称', type: 'text', required: true, visibleIn: { search: true, table: true, form: true } },
-  { key: 'status', label: '状态', type: 'select', visibleIn: { search: true, table: true, form: true } },
-  { key: 'amount', label: '金额', type: 'number', visibleIn: { search: false, table: true, form: true } },
+  { key: 'name', label: '名称', type: 'text', required: true, visibleIn: { searchForm: true, table: true, editForm: true } },
+  { key: 'status', label: '状态', type: 'select', visibleIn: { searchForm: true, table: true, editForm: true } },
+  { key: 'amount', label: '金额', type: 'number', visibleIn: { searchForm: false, table: true, editForm: true } },
 ])
 
 const columns = defineColumns<DemoRow>([

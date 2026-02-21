@@ -39,7 +39,7 @@ defineFields([
 
 ## 自定义验证规则
 
-通过 `ui.formItem.form.rule` 可以为编辑表单添加自定义规则（搜索表单不受影响）：
+通过 `ui.overrides.editForm.formItem.rule` 可以为编辑表单添加自定义规则（搜索表单不受影响）：
 
 ```ts
 {
@@ -48,15 +48,17 @@ defineFields([
   type: 'text',
   required: true,
   ui: {
-    formItem: {
-      form: {
-        rule: {
-          trigger: ['change', 'blur', 'input'],
-          validator: (_rule, value) => {
-            const v = String(value ?? '').trim()
-            if (!v) return  // 空值由 required 规则处理
-            if (v.length < 2)
-              throw new Error('名称至少 2 个字符')
+    overrides: {
+      editForm: {
+        formItem: {
+          rule: {
+            trigger: ['change', 'blur', 'input'],
+            validator: (_rule, value) => {
+              const v = String(value ?? '').trim()
+              if (!v) return  // 空值由 required 规则处理
+              if (v.length < 2)
+                throw new Error('名称至少 2 个字符')
+            },
           },
         },
       },
@@ -86,16 +88,18 @@ defineFields([
   type: 'text',
   required: true,
   ui: {
-    formItem: {
-      form: {
-        rule: {
-          trigger: ['blur'],
-          validator: async (_rule, value) => {
-            const v = String(value ?? '').trim()
-            if (!v) return
-            const exists = await api.checkUsername(v)
-            if (exists)
-              throw new Error('用户名已存在')
+    overrides: {
+      editForm: {
+        formItem: {
+          rule: {
+            trigger: ['blur'],
+            validator: async (_rule, value) => {
+              const v = String(value ?? '').trim()
+              if (!v) return
+              const exists = await api.checkUsername(v)
+              if (exists)
+                throw new Error('用户名已存在')
+            },
           },
         },
       },
@@ -110,22 +114,24 @@ defineFields([
 
 ```ts
 ui: {
-  formItem: {
-    form: {
-      rule: [
-        {
-          trigger: ['input'],
-          validator: (_r, v) => {
-            if (v && v.length > 50)
-              throw new Error('不能超过 50 个字符')
+  overrides: {
+    editForm: {
+      formItem: {
+        rule: [
+          {
+            trigger: ['input'],
+            validator: (_r, v) => {
+              if (v && v.length > 50)
+                throw new Error('不能超过 50 个字符')
+            },
           },
-        },
-        {
-          trigger: ['blur'],
-          pattern: /^[a-zA-Z0-9_]+$/,
-          message: '只允许字母、数字和下划线',
-        },
-      ],
+          {
+            trigger: ['blur'],
+            pattern: /^[a-zA-Z0-9_]+$/,
+            message: '只允许字母、数字和下划线',
+          },
+        ],
+      },
     },
   },
 }
@@ -133,10 +139,10 @@ ui: {
 
 ## 搜索表单 vs 编辑表单
 
-验证规则的场景差异化通过 `formItem.form` / `formItem.search` 实现：
+验证规则的场景差异化通过 `overrides` 实现：
 
-- `formItem.form.rule` — 仅在编辑/新增表单中生效
-- `formItem.search.rule` — 仅在搜索表单中生效（通常不需要）
+- `overrides.editForm.formItem.rule` — 仅在编辑/新增表单中生效
+- `overrides.searchForm.formItem.rule` — 仅在搜索表单中生效（通常不需要）
 
 `required: true` 生成的自动规则也**仅作用于编辑表单**，搜索表单不会强制必填。
 

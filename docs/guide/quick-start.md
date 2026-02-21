@@ -46,7 +46,7 @@ title: 快速开始
 | `label` | 显示名称 |
 | `type` | 字段类型（`text` / `select` / `number` / `money` / `date` / `switch` 等） |
 | `required` | 表单必填（自动生成验证规则） |
-| `visibleIn` | 控制字段在 `search` / `table` / `form` 中是否可见 |
+| `visibleIn` | 控制字段在 `searchForm` / `table` / `editForm` 中是否可见 |
 | `ui` | Naive UI 扩展配置（控件 props、formItem props、options 等） |
 
 ## 4) 使用 AutoCrud 组件

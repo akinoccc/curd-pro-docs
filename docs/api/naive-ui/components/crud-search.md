@@ -21,7 +21,7 @@ title: CrudSearch
 
 ### 字段过滤
 
-只渲染 `visibleIn.search` 为 `true`（或函数返回 `true`）的字段。通过 `filterFieldsBySurface(fields, 'search')` 实现。
+只渲染 `visibleIn.searchForm` 为 `true`（或函数返回 `true`）的字段。通过 `filterFieldsBySurface(fields, 'searchForm')` 实现。
 
 ### 搜索流程
 

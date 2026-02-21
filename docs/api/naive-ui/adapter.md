@@ -12,13 +12,17 @@ title: Adapter 工具
 
 ```ts
 interface NaiveFieldUi {
-  control?: Record<string, unknown> & {
-    form?: Record<string, unknown>
-    search?: Record<string, unknown>
-  }
-  formItem?: {
-    form?: Record<string, unknown>
-    search?: Record<string, unknown>
+  controlProps?: Record<string, unknown>
+  formItem?: Record<string, unknown>
+  overrides?: {
+    editForm?: {
+      controlProps?: Record<string, unknown>
+      formItem?: Record<string, unknown>
+    }
+    searchForm?: {
+      controlProps?: Record<string, unknown>
+      formItem?: Record<string, unknown>
+    }
   }
   component?: Component
   column?: Record<string, unknown>
@@ -28,15 +32,16 @@ interface NaiveFieldUi {
 
 | 属性 | 类型 | 说明 |
 |---|---|---|
-| `control` | `object` | 透传到字段控件的 props，支持 `form` / `search` 分面覆盖 |
-| `formItem` | `object` | 透传到 `NFormItem` 的 props，支持 `form` / `search` 分面覆盖 |
+| `controlProps` | `object` | 透传到字段控件的 props，可通过 `overrides` 按场景覆盖 |
+| `formItem` | `object` | 透传到 `NFormItem` 的 props，可通过 `overrides` 按场景覆盖 |
+| `overrides` | `object` | 按 surface（`editForm` / `searchForm`）覆盖 `controlProps` / `formItem` |
 | `component` | `Component` | 替换默认控件（高级用法） |
 | `column` | `object` | 额外的 DataTableColumn props |
 | `options` | `SelectOption[]` | Select 字段的选项 |
 
-### 分面覆盖示例
+### 场景覆盖示例
 
-`control` 的根属性作为基础值，`form` / `search` 子对象在对应 surface 下覆盖基础值：
+`controlProps` 的根属性作为基础值，`overrides.editForm.controlProps` / `overrides.searchForm.controlProps` 在对应 surface 下覆盖基础值：
 
 ```ts
 const field: NaiveCrudField = {
@@ -44,10 +49,10 @@ const field: NaiveCrudField = {
   label: '名称',
   type: 'text',
   ui: {
-    control: {
-      placeholder: '请输入', // 基础值，form 和 search 都生效
-      form: { clearable: true }, // 只在 form 中生效
-      search: { clearable: true }, // 只在 search 中生效
+    controlProps: { placeholder: '请输入' },  // 基础值，editForm 和 searchForm 都生效
+    overrides: {
+      editForm: { controlProps: { clearable: true } },   // 只在编辑表单中生效
+      searchForm: { controlProps: { clearable: true } },  // 只在搜索表单中生效
     },
   },
 }
@@ -102,18 +107,18 @@ function createTableColumns<Row>(
 
 ## resolveControlProps
 
-解析字段控件的最终 props（合并分面覆盖）。
+解析字段控件的最终 props（合并基础值和场景覆盖）。
 
 ```ts
-function resolveControlProps(field: NaiveCrudField, surface: 'form' | 'search'): Record<string, unknown>
+function resolveControlProps(field: NaiveCrudField, surface: 'editForm' | 'searchForm'): Record<string, unknown>
 ```
 
 ## resolveFormItemProps
 
-解析 NFormItem 的最终 props。
+解析 NFormItem 的最终 props（合并基础值和场景覆盖）。
 
 ```ts
-function resolveFormItemProps(field: NaiveCrudField, surface: 'form' | 'search'): Record<string, unknown>
+function resolveFormItemProps(field: NaiveCrudField, surface: 'editForm' | 'searchForm'): Record<string, unknown>
 ```
 
 ## confirmAction
@@ -150,7 +155,7 @@ function handleExportResult(
 import { defineFields } from '@fcurd/naive-ui'
 
 const fields = defineFields<MyRow>([
-  { key: 'name', label: '名称', type: 'text', ui: { control: { clearable: true } } },
+  { key: 'name', label: '名称', type: 'text', ui: { controlProps: { clearable: true } } },
 ])
 // fields 的类型推导包含 NaiveFieldUi
 ```

@@ -13,8 +13,8 @@ import { useCrudForm } from '@fcurd/core'
 
 const form = useCrudForm<MyRow>({
   fields: [
-    { key: 'name', label: '名称', type: 'text', required: true, visibleIn: { form: true } },
-    { key: 'status', label: '状态', type: 'select', visibleIn: { form: true } },
+    { key: 'name', label: '名称', type: 'text', required: true, visibleIn: { editForm: true } },
+    { key: 'status', label: '状态', type: 'select', visibleIn: { editForm: true } },
   ],
 })
 
@@ -50,7 +50,7 @@ const data = form.getSubmitData()
 | `dirty` | `ComputedRef<boolean>` | model 是否与初始快照不同 |
 | `changedKeys` | `ComputedRef<string[]>` | 变更的字段 key 列表 |
 | `changedData` | `ComputedRef<Partial<Row>>` | 仅包含变更字段的数据 |
-| `visibleFields` | `ComputedRef<CrudField<Row>[]>` | 按 `visibleIn.form` 过滤后的字段 |
+| `visibleFields` | `ComputedRef<CrudField<Row>[]>` | 按 `visibleIn.editForm` 过滤后的字段 |
 
 ### Actions
 
@@ -79,7 +79,7 @@ const data = form.getSubmitData()
 
 ### visibleFields
 
-根据 `visibleIn.form` 过滤。如果 `visibleIn.form` 是函数，会传入 `FieldContext`（包含 `formModel`），支持条件渲染。
+根据 `visibleIn.editForm` 过滤。如果 `visibleIn.editForm` 是函数，会传入 `FieldContext`（包含 `formModel`），支持条件渲染。
 
 ## 完整示例
 

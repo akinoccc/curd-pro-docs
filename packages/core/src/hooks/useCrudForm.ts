@@ -64,17 +64,17 @@ export function useCrudForm<Row = any>(
   // Computed: dirty flag
   const dirty = computed<boolean>(() => changedKeys.value.length > 0)
 
-  // Computed: visible fields (filtered by visibleIn.form)
+  // Computed: visible fields (filtered by visibleIn.editForm)
   const visibleFields = computed<CrudField<Row>[]>(() => {
     return fields.filter((field) => {
-      const formVisible = field.visibleIn?.form
+      const formVisible = field.visibleIn?.editForm
       if (formVisible === undefined || formVisible === true)
         return true
       if (formVisible === false)
         return false
       if (typeof formVisible === 'function') {
         const ctx: FieldContext<Row, any> = {
-          surface: 'form',
+          surface: 'editForm',
           formModel: model,
         }
         return formVisible(ctx as any)

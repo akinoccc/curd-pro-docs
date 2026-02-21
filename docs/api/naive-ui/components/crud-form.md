@@ -40,12 +40,12 @@ title: CrudForm
 
 ### 字段渲染
 
-只渲染 `form.visibleFields`（由 `visibleIn.form` 过滤）。
+只渲染 `form.visibleFields`（由 `visibleIn.editForm` 过滤）。
 
 ### 验证
 
 - `required: true` 自动补一个"必填"规则（`${label}不能为空`）
-- 不会覆盖你在 `field.ui.formItem.form.rule` 中定义的自定义规则
+- 不会覆盖你在 `field.ui.overrides.editForm.formItem.rule` 中定义的自定义规则
 - 提交时先调用 `NForm.validate()`，通过后才 emit `submit`
 
 ### 提交数据

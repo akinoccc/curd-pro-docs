@@ -16,7 +16,7 @@ export interface CrudSort<Field extends string = string> {
  * Field visibility context
  */
 export interface FieldContext<Row = any, FormModel = Row> {
-  surface: 'search' | 'table' | 'form' | 'detail'
+  surface: 'searchForm' | 'table' | 'editForm' | 'detail'
   row?: Row
   formModel?: FormModel
   query?: Record<string, unknown>
@@ -56,9 +56,9 @@ export interface CrudField<Row = any, FormModel = Row, UiExt = unknown> {
   type: CrudFieldType | (string & {})
   required?: boolean
   visibleIn?: {
-    search?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
+    searchForm?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
     table?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
-    form?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
+    editForm?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
     detail?: boolean | ((ctx: FieldContext<Row, FormModel>) => boolean)
   }
   /** UI-specific extensions, defined by adapter layer */

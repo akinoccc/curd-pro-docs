@@ -43,7 +43,7 @@ function getQuerySource(query: Query): Record<string, unknown> {
 
 // Filter fields visible in search
 const searchFields = computed(() => {
-  return filterFieldsBySurface(props.fields, 'search', {
+  return filterFieldsBySurface(props.fields, 'searchForm', {
     query: props.list.query.value as Record<string, unknown>,
   })
 })
@@ -99,7 +99,7 @@ function handleReset() {
 // Render field control
 function renderControl(field: CrudField<Row>) {
   const component = componentMap[field.type] ?? componentMap.text
-  const controlProps = resolveControlProps(field as any, 'search')
+  const controlProps = resolveControlProps(field as any, 'searchForm')
 
   return h(component, {
     'modelValue': searchModel[field.key],
@@ -107,7 +107,7 @@ function renderControl(field: CrudField<Row>) {
       searchModel[field.key] = value
     },
     'field': field,
-    'surface': 'search',
+    'surface': 'searchForm',
     ...controlProps,
   })
 }
@@ -125,7 +125,7 @@ function renderControl(field: CrudField<Row>) {
         v-for="field in searchFields"
         :key="field.key"
         :label="getFieldLabel(field)"
-        v-bind="resolveFormItemProps(field as any, 'search')"
+        v-bind="resolveFormItemProps(field as any, 'searchForm')"
       >
         <slot
           :name="`search-${field.key}`"

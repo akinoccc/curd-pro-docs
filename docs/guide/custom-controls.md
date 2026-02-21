@@ -48,7 +48,7 @@ import type { NaiveCrudField } from '@fcurd/naive-ui'
 
 interface Props {
   field?: NaiveCrudField  // 字段定义
-  surface?: 'form' | 'search'  // 当前使用场景
+  surface?: 'editForm' | 'searchForm'  // 当前使用场景
 }
 
 defineProps<Props>()
@@ -65,10 +65,10 @@ const modelValue = defineModel<string | null>()
 | Props | 类型 | 说明 |
 |---|---|---|
 | `field` | `NaiveCrudField` | 当前字段定义，可用于读取 label、ui 等信息 |
-| `surface` | `'form' \| 'search'` | 当前使用场景，可据此调整行为 |
+| `surface` | `'editForm' \| 'searchForm'` | 当前使用场景，可据此调整行为 |
 | `modelValue` | 由 `defineModel` 定义 | 双向绑定的值 |
 
-此外，`CrudForm` / `CrudSearch` 在渲染控件时还会透传 `resolveControlProps(field, surface)` 的结果作为额外 props，所以你通过 `ui.control` 配置的属性也会自动传到自定义组件上。
+此外，`CrudForm` / `CrudSearch` 在渲染控件时还会透传 `resolveControlProps(field, surface)` 的结果作为额外 props，所以你通过 `ui.controlProps` 配置的属性也会自动传到自定义组件上。
 
 ### 2. 在字段中注册
 
@@ -82,11 +82,10 @@ defineFields([
     type: 'custom',
     ui: {
       component: RichTextField,
-      control: {
-        // 这些 props 会透传给 RichTextField
-        height: 300,
-        form: { toolbar: 'full' },
-        search: { toolbar: 'minimal' },
+      controlProps: { height: 300 },
+      overrides: {
+        editForm: { controlProps: { toolbar: 'full' } },
+        searchForm: { controlProps: { toolbar: 'minimal' } },
       },
     },
   },
@@ -130,11 +129,11 @@ import { computed } from 'vue'
 
 interface Props {
   field?: NaiveCrudField
-  surface?: 'form' | 'search'
+  surface?: 'editForm' | 'searchForm'
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  surface: 'form',
+  surface: 'editForm',
 })
 const modelValue = defineModel<string | null>()
 
@@ -170,10 +169,10 @@ defineFields([
     key: 'attachment',
     label: '附件',
     type: 'custom',
-    visibleIn: { search: false },
+    visibleIn: { searchForm: false },
     ui: {
       component: UploadField,
-      control: { action: '/api/upload', accept: '.pdf,.doc' },
+      controlProps: { action: '/api/upload', accept: '.pdf,.doc' },
     },
   },
 ])

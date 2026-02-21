@@ -414,7 +414,7 @@ defineExpose({
     </template>
 
     <!-- Search -->
-    <template v-if="searchFields?.length || fields.some(f => f.visibleIn?.search !== false)">
+    <template v-if="searchFields?.length || fields.some(f => f.visibleIn?.searchForm !== false)">
       <slot
         name="search"
         :list="list"

@@ -23,18 +23,20 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
       label: '名称',
       type: 'text',
       required: true,
-      visibleIn: { search: true, table: true, form: true },
+      visibleIn: { searchForm: true, table: true, editForm: true },
       ui: {
-        formItem: {
-          form: {
-            rule: {
-              trigger: ['change', 'blur', 'input'],
-              validator: async (_r: any, value: any) => {
-                const v = String(value ?? '').trim()
-                if (!v)
-                  return
-                if (v.length < 2)
-                  throw new Error('名称至少 2 个字符')
+        overrides: {
+          editForm: {
+            formItem: {
+              rule: {
+                trigger: ['change', 'blur', 'input'],
+                validator: async (_r: any, value: any) => {
+                  const v = String(value ?? '').trim()
+                  if (!v)
+                    return
+                  if (v.length < 2)
+                    throw new Error('名称至少 2 个字符')
+                },
               },
             },
           },
@@ -46,39 +48,39 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
       label: '状态',
       type: 'select',
       required: true,
-      visibleIn: { search: true, table: true, form: true },
-      ui: { control: { clearable: true, options: statusOptions }, options: statusOptions },
+      visibleIn: { searchForm: true, table: true, editForm: true },
+      ui: { controlProps: { clearable: true, options: statusOptions }, options: statusOptions },
     },
     {
       key: 'category',
       label: '分类',
       type: 'select',
-      visibleIn: { search: true, table: true, form: true },
-      ui: { control: { clearable: true, options: categoryOptions }, options: categoryOptions },
+      visibleIn: { searchForm: true, table: true, editForm: true },
+      ui: { controlProps: { clearable: true, options: categoryOptions }, options: categoryOptions },
     },
     {
       key: 'enabled',
       label: '启用',
       type: 'switch',
-      visibleIn: { search: true, table: true, form: true },
+      visibleIn: { searchForm: true, table: true, editForm: true },
     },
     {
       key: 'amount',
       label: '金额',
       type: 'number',
       required: true,
-      visibleIn: { search: false, table: true, form: true },
+      visibleIn: { searchForm: false, table: true, editForm: true },
       ui: {
-        control: { min: 0, step: 1, placeholder: '请输入金额' },
+        controlProps: { min: 0, step: 1, placeholder: '请输入金额' },
       },
     },
     {
       key: 'createdAt',
       label: '创建时间',
       type: 'datetimeRange',
-      visibleIn: { search: true, table: true, form: false },
+      visibleIn: { searchForm: true, table: true, editForm: false },
       ui: {
-        control: { clearable: true },
+        controlProps: { clearable: true },
       },
     },
     {
@@ -86,14 +88,14 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
       label: '备注（仅禁用时出现）',
       type: 'textarea',
       visibleIn: {
-        search: false,
+        searchForm: false,
         table: false,
-        form(ctx) {
+        editForm(ctx) {
           return ctx.formModel?.status === 'disabled'
         },
       },
       ui: {
-        control: { autosize: { minRows: 2, maxRows: 6 }, placeholder: '可选填写' },
+        controlProps: { autosize: { minRows: 2, maxRows: 6 }, placeholder: '可选填写' },
       },
     },
   ])

@@ -14,12 +14,12 @@ export const demoFields = defineFields<DemoRow>([
     label: '名称',
     type: 'text',
     required: true,
-    visibleIn: { search: true, table: true, form: true },
+    visibleIn: { searchForm: true, table: true, editForm: true },
     ui: {
-      control: {
-        placeholder: '输入名称',
-        form: { clearable: true },
-        search: { clearable: true },
+      controlProps: { placeholder: '输入名称' },
+      overrides: {
+        editForm: { controlProps: { clearable: true } },
+        searchForm: { controlProps: { clearable: true } },
       },
     },
   },
@@ -28,10 +28,10 @@ export const demoFields = defineFields<DemoRow>([
     label: '状态',
     type: 'select',
     required: true,
-    visibleIn: { search: true, table: true, form: true },
+    visibleIn: { searchForm: true, table: true, editForm: true },
     ui: {
       options: statusOptions,
-      control: { options: statusOptions, clearable: true },
+      controlProps: { options: statusOptions, clearable: true },
     },
   },
   {
@@ -39,16 +39,16 @@ export const demoFields = defineFields<DemoRow>([
     label: '金额',
     type: 'money',
     required: true,
-    visibleIn: { search: false, table: true, form: true },
+    visibleIn: { searchForm: false, table: true, editForm: true },
     ui: {
-      control: { min: 0, step: 1, placeholder: '输入金额' },
+      controlProps: { min: 0, step: 1, placeholder: '输入金额' },
     },
   },
   {
     key: 'createdAt',
     label: '创建时间',
     type: 'datetime',
-    visibleIn: { search: false, table: true, form: false },
+    visibleIn: { searchForm: false, table: true, editForm: false },
   },
 ])
 

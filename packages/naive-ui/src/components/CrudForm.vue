@@ -91,7 +91,7 @@ async function handleSubmit() {
 
 // Auto required rule helper
 function buildRules(field: CrudField<Row>) {
-  const formItemProps = resolveFormItemProps(field as any, 'form')
+  const formItemProps = resolveFormItemProps(field as any, 'editForm')
   const existingRules = formItemProps.rule
 
   if (!field.required) {
@@ -124,7 +124,7 @@ function buildRules(field: CrudField<Row>) {
 // Render field control
 function renderControl(field: CrudField<Row>) {
   const component = componentMap[field.type] ?? componentMap.text
-  const controlProps = resolveControlProps(field as any, 'form')
+  const controlProps = resolveControlProps(field as any, 'editForm')
   const model = props.form.model as Record<string, unknown>
 
   return h(component, {
@@ -133,7 +133,7 @@ function renderControl(field: CrudField<Row>) {
       model[field.key] = value
     },
     'field': field,
-    'surface': 'form',
+    'surface': 'editForm',
     ...controlProps,
   })
 }
@@ -156,7 +156,7 @@ function renderFormBody() {
         const slotName = `field-${field.key}`
         const fieldSlot = slots[slotName]
         const model = props.form.model as Record<string, unknown>
-        const formItemProps = resolveFormItemProps(field as any, 'form') as Record<string, unknown>
+        const formItemProps = resolveFormItemProps(field as any, 'editForm') as Record<string, unknown>
         // `buildRules` will merge `formItemProps.rule` already; avoid overriding our generated rules.
         // eslint-disable-next-line unused-imports/no-unused-vars
         const { rule: _existingRule, ...restFormItemProps } = (formItemProps ?? {})

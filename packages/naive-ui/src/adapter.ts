@@ -31,15 +31,20 @@ export const componentMap: Record<string, Component> = {
 // =============================================================================
 
 export interface NaiveFieldUi {
-  /** Control props passed to the field component */
-  control?: Record<string, unknown> & {
-    form?: Record<string, unknown>
-    search?: Record<string, unknown>
-  }
-  /** FormItem props */
-  formItem?: {
-    form?: Record<string, unknown>
-    search?: Record<string, unknown>
+  /** 控件属性，透传给字段对应的表单控件组件（如 NInput、NSelect） */
+  controlProps?: Record<string, unknown>
+  /** 表单项属性，透传给 NFormItem */
+  formItem?: Record<string, unknown>
+  /** 按 surface 覆盖 controlProps / formItem 的配置 */
+  overrides?: {
+    editForm?: {
+      controlProps?: Record<string, unknown>
+      formItem?: Record<string, unknown>
+    }
+    searchForm?: {
+      controlProps?: Record<string, unknown>
+      formItem?: Record<string, unknown>
+    }
   }
   /** Custom component override */
   component?: Component
@@ -63,38 +68,29 @@ export function getFieldLabel(field: CrudField): string {
 }
 
 /**
- * Resolve control props for a specific surface
+ * 解析字段控件的最终 props（合并 base + surface 覆盖）
  */
 export function resolveControlProps(
   field: NaiveCrudField,
-  surface: 'form' | 'search',
+  surface: 'editForm' | 'searchForm',
 ): Record<string, unknown> {
   const ui = field.ui ?? {}
-  const control = ui.control ?? {}
-
-  // Check for surface-specific props
-  const surfaceProps = control[surface]
-  if (surfaceProps && typeof surfaceProps === 'object') {
-    // eslint-disable-next-line unused-imports/no-unused-vars
-    const { form, search, ...baseProps } = control as Record<string, unknown>
-    return { ...baseProps, ...(surfaceProps as Record<string, unknown>) }
-  }
-
-  // Return base control props (excluding surface keys)
-  // eslint-disable-next-line unused-imports/no-unused-vars
-  const { form, search, ...baseProps } = control as Record<string, unknown>
-  return baseProps
+  const base = ui.controlProps ?? {}
+  const surfaceOverride = ui.overrides?.[surface]?.controlProps
+  return surfaceOverride ? { ...base, ...surfaceOverride } : { ...base }
 }
 
 /**
- * Resolve form item props for a specific surface
+ * 解析 NFormItem 的最终 props（合并 base + surface 覆盖）
  */
 export function resolveFormItemProps(
   field: NaiveCrudField,
-  surface: 'form' | 'search',
+  surface: 'editForm' | 'searchForm',
 ): Record<string, unknown> {
-  const formItem = field.ui?.formItem ?? {}
-  return formItem[surface] ?? {}
+  const ui = field.ui ?? {}
+  const base = ui.formItem ?? {}
+  const surfaceOverride = ui.overrides?.[surface]?.formItem
+  return surfaceOverride ? { ...base, ...surfaceOverride } : { ...base }
 }
 
 /**

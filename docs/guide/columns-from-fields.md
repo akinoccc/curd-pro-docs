@@ -70,7 +70,7 @@ const columns = createColumnsFromFields(fields, {
 const columns = createColumnsFromFields(fields, {
   filter: (field) => {
     // 只展示 search 和 table 都可见的字段
-    return field.visibleIn?.search !== false && field.visibleIn?.table !== false
+    return field.visibleIn?.searchForm !== false && field.visibleIn?.table !== false
   },
 })
 ```
