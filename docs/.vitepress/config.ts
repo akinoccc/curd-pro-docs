@@ -57,8 +57,23 @@ export default async () => {
             ],
           },
           {
+            text: '基础用法',
+            items: [
+              { text: '字段 UI 配置', link: '/guide/field-ui-config' },
+              { text: '表单验证', link: '/guide/form-validation' },
+              { text: '渲染器', link: '/guide/renderers' },
+              { text: '从 Fields 生成 Columns', link: '/guide/columns-from-fields' },
+              { text: '表单模式与 Props 透传', link: '/guide/form-mode-and-passthrough' },
+            ],
+          },
+          {
             text: '进阶用法',
             items: [
+              { text: 'Hooks 组合模式', link: '/guide/hooks-composition' },
+              { text: '选择与批量操作', link: '/guide/selection-and-batch' },
+              { text: '列表查询高级技巧', link: '/guide/advanced-query' },
+              { text: '表单变更追踪', link: '/guide/form-change-tracking' },
+              { text: '自定义控件', link: '/guide/custom-controls' },
               { text: '路由同步', link: '/guide/route-sync' },
               { text: '嵌套搜索 query', link: '/guide/nested-query' },
               { text: 'Slots 约定', link: '/guide/custom-slots' },
