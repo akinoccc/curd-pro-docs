@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@10.0.0",
+  "type": "module",
   "scripts": {
     "changeset": "changeset",
     "dev:playground": "pnpm --filter @fcurd/playground dev",
@@ -23,6 +24,7 @@
     "@types/node": "^22.19.7",
     "@vitejs/plugin-vue": "^6.0.3",
     "eslint": "^9.39.2",
+    "mermaid": "^11.12.3",
     "naive-ui": "^2.43.2",
     "rimraf": "^6.0.1",
     "tsup": "^8.5.0",
@@ -30,6 +32,7 @@
     "vite": "^7.3.1",
     "vitepress": "^1.6.4",
     "vitepress-demo-plugin": "^1.5.1",
+    "vitepress-plugin-mermaid": "^2.0.17",
     "vue": "^3.5.27",
     "vue-router": "^4.6.0",
     "vue-tsc": "^3.2.3"

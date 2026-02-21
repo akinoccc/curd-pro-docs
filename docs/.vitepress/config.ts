@@ -1,4 +1,5 @@
-/// <reference types="node" />
+import { vitepressDemoPlugin } from 'vitepress-demo-plugin'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 function resolveBase(): string {
   const envBase = process.env.VITEPRESS_BASE
@@ -17,9 +18,7 @@ function resolveBase(): string {
 }
 
 export default async () => {
-  const { vitepressDemoPlugin } = await import('vitepress-demo-plugin')
-
-  return {
+  return withMermaid({
     lang: 'zh-CN',
     title: 'fcurd',
     description: '@fcurd/core 与 @fcurd/naive-ui 文档',
@@ -29,6 +28,9 @@ export default async () => {
       config(md) {
         md.use(vitepressDemoPlugin)
       },
+    },
+    mermaid: {
+      securityLevel: 'loose',
     },
     themeConfig: {
       nav: [
@@ -138,5 +140,20 @@ export default async () => {
         copyright: 'MIT Licensed',
       },
     },
-  }
+    vite: {
+      ssr: {
+        noExternal: [
+          'vitepress-plugin-mermaid',
+          'mermaid',
+          'dayjs',
+        ],
+      },
+      optimizeDeps: {
+        include: [
+          'mermaid',
+          'dayjs',
+        ],
+      },
+    },
+  })
 }
