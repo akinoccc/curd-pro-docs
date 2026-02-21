@@ -32,17 +32,17 @@ export const componentMap: Record<string, Component> = {
 
 export interface NaiveFieldUi {
   /** 控件属性，透传给字段对应的表单控件组件（如 NInput、NSelect） */
-  controlProps?: Record<string, unknown>
+  formControl?: Record<string, unknown>
   /** 表单项属性，透传给 NFormItem */
   formItem?: Record<string, unknown>
-  /** 按 surface 覆盖 controlProps / formItem 的配置 */
+  /** 按 surface 覆盖 formControl / formItem 的配置 */
   overrides?: {
     editForm?: {
-      controlProps?: Record<string, unknown>
+      formControl?: Record<string, unknown>
       formItem?: Record<string, unknown>
     }
     searchForm?: {
-      controlProps?: Record<string, unknown>
+      formControl?: Record<string, unknown>
       formItem?: Record<string, unknown>
     }
   }
@@ -75,8 +75,8 @@ export function resolveControlProps(
   surface: 'editForm' | 'searchForm',
 ): Record<string, unknown> {
   const ui = field.ui ?? {}
-  const base = ui.controlProps ?? {}
-  const surfaceOverride = ui.overrides?.[surface]?.controlProps
+  const base = ui.formControl ?? {}
+  const surfaceOverride = ui.overrides?.[surface]?.formControl
   return surfaceOverride ? { ...base, ...surfaceOverride } : { ...base }
 }
 

@@ -16,10 +16,10 @@ export const demoFields = defineFields<DemoRow>([
     required: true,
     visibleIn: { searchForm: true, table: true, editForm: true },
     ui: {
-      controlProps: { placeholder: '输入名称' },
+      formControl: { placeholder: '输入名称' },
       overrides: {
-        editForm: { controlProps: { clearable: true } },
-        searchForm: { controlProps: { clearable: true } },
+        editForm: { formControl: { clearable: true } },
+        searchForm: { formControl: { clearable: true } },
       },
     },
   },
@@ -31,7 +31,7 @@ export const demoFields = defineFields<DemoRow>([
     visibleIn: { searchForm: true, table: true, editForm: true },
     ui: {
       options: statusOptions,
-      controlProps: { options: statusOptions, clearable: true },
+      formControl: { options: statusOptions, clearable: true },
     },
   },
   {
@@ -41,7 +41,7 @@ export const demoFields = defineFields<DemoRow>([
     required: true,
     visibleIn: { searchForm: false, table: true, editForm: true },
     ui: {
-      controlProps: { min: 0, step: 1, placeholder: '输入金额' },
+      formControl: { min: 0, step: 1, placeholder: '输入金额' },
     },
   },
   {

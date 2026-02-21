@@ -11,17 +11,17 @@ title: 字段 UI 配置
 ```ts
 interface NaiveFieldUi {
   /** 控件属性，透传给字段对应的表单控件组件 */
-  controlProps?: Record<string, unknown>
+  formControl?: Record<string, unknown>
   /** 表单项属性，透传给 NFormItem 等容器 */
   formItem?: Record<string, unknown>
-  /** 按 surface 覆盖 controlProps / formItem 的配置 */
+  /** 按 surface 覆盖 formControl / formItem 的配置 */
   overrides?: {
     editForm?: {
-      controlProps?: Record<string, unknown>
+      formControl?: Record<string, unknown>
       formItem?: Record<string, unknown>
     }
     searchForm?: {
-      controlProps?: Record<string, unknown>
+      formControl?: Record<string, unknown>
       formItem?: Record<string, unknown>
     }
   }
@@ -38,9 +38,9 @@ interface NaiveFieldUi {
 
 | 属性 | 作用 | 透传目标 |
 |---|---|---|
-| `controlProps` | 控件的 props（如 clearable、placeholder、min 等） | 字段对应的控件组件 |
+| `formControl` | 控件的 props（如 clearable、placeholder、min 等） | 字段对应的控件组件 |
 | `formItem` | 表单项容器的 props（如验证规则等） | NFormItem |
-| `overrides` | 按 surface 覆盖 controlProps / formItem | 见下方说明 |
+| `overrides` | 按 surface 覆盖 formControl / formItem | 见下方说明 |
 | `column` | 表格列的额外属性 | DataTableColumn |
 | `options` | 下拉选项数据 | Select 控件 |
 | `component` | 替换默认控件组件 | 渲染层 |
@@ -51,10 +51,10 @@ interface NaiveFieldUi {
 
 ### 合并逻辑
 
-以 `controlProps` 为例，`resolveControlProps(field, surface)` 的合并逻辑为：
+以 `formControl` 为例，`resolveControlProps(field, surface)` 的合并逻辑为：
 
-1. 取 `ui.controlProps` 作为**基础属性**（两个场景共享）
-2. 如果存在 `ui.overrides[surface].controlProps`，将其浅合并到基础属性上（surface 特定值优先）
+1. 取 `ui.formControl` 作为**基础属性**（两个场景共享）
+2. 如果存在 `ui.overrides[surface].formControl`，将其浅合并到基础属性上（surface 特定值优先）
 
 ```ts
 // 字段定义
@@ -63,10 +63,10 @@ interface NaiveFieldUi {
   label: '备注',
   type: 'textarea',
   ui: {
-    controlProps: { placeholder: '请输入' },  // 基础 — 两个场景都生效
+    formControl: { placeholder: '请输入' },  // 基础 — 两个场景都生效
     overrides: {
-      editForm: { controlProps: { autosize: { minRows: 3 } } },  // 仅编辑表单生效
-      searchForm: { controlProps: { rows: 1 } },                  // 仅搜索表单生效
+      editForm: { formControl: { autosize: { minRows: 3 } } },  // 仅编辑表单生效
+      searchForm: { formControl: { rows: 1 } },                  // 仅搜索表单生效
     },
   },
 }
@@ -86,7 +86,7 @@ interface NaiveFieldUi {
   type: 'text',
   required: true,
   ui: {
-    controlProps: { clearable: true },  // 搜索和表单都可清除
+    formControl: { clearable: true },  // 搜索和表单都可清除
     overrides: {
       editForm: {
         formItem: {

@@ -24,7 +24,7 @@ title: Controls 控件
 1. **`defineModel()`** — 作为 `v-model` 接口（Vue 3.4+）
 2. **`field` prop** — 接收 `NaiveCrudField`，用于读取 `ui` 配置
 3. **`surface` prop** — `'editForm' | 'searchForm'`，决定使用哪个场景的覆盖配置
-4. **`resolveControlProps(field, surface)`** — 内部调用，合并 `field.ui.controlProps` 基础值和 `field.ui.overrides[surface].controlProps` 覆盖
+4. **`resolveControlProps(field, surface)`** — 内部调用，合并 `field.ui.formControl` 基础值和 `field.ui.overrides[surface].formControl` 覆盖
 
 ## 使用方式
 
@@ -45,7 +45,7 @@ const fields: NaiveCrudField[] = [
     label: '名称',
     type: 'text',
     ui: {
-      controlProps: {
+      formControl: {
         placeholder: '请输入名称',
         clearable: true,
         maxlength: 100,
@@ -59,7 +59,7 @@ const fields: NaiveCrudField[] = [
     type: 'select',
     ui: {
       options: statusOptions,
-      controlProps: { clearable: true },
+      formControl: { clearable: true },
     },
   },
   {
@@ -67,7 +67,7 @@ const fields: NaiveCrudField[] = [
     label: '金额',
     type: 'money',
     ui: {
-      controlProps: { min: 0, step: 0.01, precision: 2 },
+      formControl: { min: 0, step: 0.01, precision: 2 },
     },
   },
 ]

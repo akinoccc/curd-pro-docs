@@ -68,7 +68,7 @@ const modelValue = defineModel<string | null>()
 | `surface` | `'editForm' \| 'searchForm'` | 当前使用场景，可据此调整行为 |
 | `modelValue` | 由 `defineModel` 定义 | 双向绑定的值 |
 
-此外，`CrudForm` / `CrudSearch` 在渲染控件时还会透传 `resolveControlProps(field, surface)` 的结果作为额外 props，所以你通过 `ui.controlProps` 配置的属性也会自动传到自定义组件上。
+此外，`CrudForm` / `CrudSearch` 在渲染控件时还会透传 `resolveControlProps(field, surface)` 的结果作为额外 props，所以你通过 `ui.formControl` 配置的属性也会自动传到自定义组件上。
 
 ### 2. 在字段中注册
 
@@ -82,10 +82,10 @@ defineFields([
     type: 'custom',
     ui: {
       component: RichTextField,
-      controlProps: { height: 300 },
+      formControl: { height: 300 },
       overrides: {
-        editForm: { controlProps: { toolbar: 'full' } },
-        searchForm: { controlProps: { toolbar: 'minimal' } },
+        editForm: { formControl: { toolbar: 'full' } },
+        searchForm: { formControl: { toolbar: 'minimal' } },
       },
     },
   },
@@ -137,7 +137,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const modelValue = defineModel<string | null>()
 
-const controlProps = computed(() => {
+const formControl = computed(() => {
   if (!props.field) return {}
   return resolveControlProps(props.field, props.surface)
 })
@@ -149,9 +149,9 @@ function handleFinish({ file }: any) {
 
 <template>
   <NUpload
-    :action="controlProps.action as string"
+    :action="formControl.action as string"
     :max="1"
-    v-bind="controlProps"
+    v-bind="formControl"
     @finish="handleFinish"
   >
     <NButton>上传文件</NButton>
@@ -172,7 +172,7 @@ defineFields([
     visibleIn: { searchForm: false },
     ui: {
       component: UploadField,
-      controlProps: { action: '/api/upload', accept: '.pdf,.doc' },
+      formControl: { action: '/api/upload', accept: '.pdf,.doc' },
     },
   },
 ])

@@ -49,14 +49,14 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
       type: 'select',
       required: true,
       visibleIn: { searchForm: true, table: true, editForm: true },
-      ui: { controlProps: { clearable: true, options: statusOptions }, options: statusOptions },
+      ui: { formControl: { clearable: true, options: statusOptions }, options: statusOptions },
     },
     {
       key: 'category',
       label: '分类',
       type: 'select',
       visibleIn: { searchForm: true, table: true, editForm: true },
-      ui: { controlProps: { clearable: true, options: categoryOptions }, options: categoryOptions },
+      ui: { formControl: { clearable: true, options: categoryOptions }, options: categoryOptions },
     },
     {
       key: 'enabled',
@@ -71,7 +71,7 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
       required: true,
       visibleIn: { searchForm: false, table: true, editForm: true },
       ui: {
-        controlProps: { min: 0, step: 1, placeholder: '请输入金额' },
+        formControl: { min: 0, step: 1, placeholder: '请输入金额' },
       },
     },
     {
@@ -80,7 +80,7 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
       type: 'datetimeRange',
       visibleIn: { searchForm: true, table: true, editForm: false },
       ui: {
-        controlProps: { clearable: true },
+        formControl: { clearable: true },
       },
     },
     {
@@ -95,7 +95,7 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
         },
       },
       ui: {
-        controlProps: { autosize: { minRows: 2, maxRows: 6 }, placeholder: '可选填写' },
+        formControl: { autosize: { minRows: 2, maxRows: 6 }, placeholder: '可选填写' },
       },
     },
   ])

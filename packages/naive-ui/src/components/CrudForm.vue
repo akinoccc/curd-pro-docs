@@ -113,7 +113,7 @@ function buildRules(field: CrudField<Row>) {
 
   const rules = Array.isArray(existingRules) ? existingRules : [existingRules]
   // Check if already has required rule
-  const hasRequired = rules.some((r: any) => r?.required === true)
+  const hasRequired = rules.some(r => r?.required === true)
   if (hasRequired) {
     return rules
   }
@@ -156,7 +156,7 @@ function renderFormBody() {
         const slotName = `field-${field.key}`
         const fieldSlot = slots[slotName]
         const model = props.form.model as Record<string, unknown>
-        const formItemProps = resolveFormItemProps(field as any, 'editForm') as Record<string, unknown>
+        const formItemProps = resolveFormItemProps(field as any, 'editForm')
         // `buildRules` will merge `formItemProps.rule` already; avoid overriding our generated rules.
         // eslint-disable-next-line unused-imports/no-unused-vars
         const { rule: _existingRule, ...restFormItemProps } = (formItemProps ?? {})
