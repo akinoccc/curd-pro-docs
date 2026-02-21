@@ -8,7 +8,7 @@ title: CrudForm
 
 - `form`：`UseCrudFormReturn<Row>`（必填）
 - `fields`：`CrudField<Row>[]`（必填）
-- `displayMode`：`'modal' | 'drawer' | 'inline'`
+- `displayMode`：`'modal' | 'drawer'`
 - `v-model:visible`：控制 Modal/Drawer 显示
 - `title?`：字符串或 `(mode) => string`
 - `resetOnClose`：关闭后是否 reset + restoreValidation

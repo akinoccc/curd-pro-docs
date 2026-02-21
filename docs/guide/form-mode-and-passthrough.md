@@ -6,13 +6,12 @@ title: 表单模式与 Props 透传
 
 ## 表单显示模式
 
-`CrudForm` 支持三种显示模式，通过 `displayMode` 属性控制：
+`CrudForm` 支持两种显示模式，通过 `displayMode` 属性控制：
 
 | 模式 | 说明 | 适用场景 |
 |---|---|---|
 | `modal`（默认） | 弹出模态框 | 字段较少的表单 |
 | `drawer` | 从右侧滑出抽屉 | 字段较多、需要更大空间 |
-| `inline` | 直接内嵌在页面中 | 嵌入自定义布局 |
 
 ### 在 AutoCrud 中使用
 
@@ -28,7 +27,7 @@ title: 表单模式与 Props 透传
 
 ### 单独使用 CrudForm
 
-直接使用 `CrudForm` 时可以使用全部三种模式：
+直接使用 `CrudForm` 时可以使用 `modal` / `drawer` 两种模式：
 
 ```vue
 <CrudForm

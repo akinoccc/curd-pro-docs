@@ -4,7 +4,7 @@ title: CrudForm
 
 # CrudForm
 
-表单组件，将 `fields` 渲染为 Naive UI 表单，支持 Modal / Drawer / Inline 三种显示模式。
+表单组件，将 `fields` 渲染为 Naive UI 表单，支持 Modal / Drawer 两种显示模式。
 
 ## Props
 
@@ -12,7 +12,7 @@ title: CrudForm
 |---|---|---|---|
 | `form` | `UseCrudFormReturn<Row>` | — | 表单状态（必填） |
 | `fields` | `CrudField<Row>[]` | — | 字段定义（必填） |
-| `displayMode` | `'modal' \| 'drawer' \| 'inline'` | `'modal'` | 显示模式 |
+| `displayMode` | `'modal' \| 'drawer'` | `'modal'` | 显示模式 |
 | `v-model:visible` | `boolean` | `false` | Modal/Drawer 的显示状态 |
 | `title` | `string \| ((mode: 'create' \| 'edit') => string)` | 自动生成 | 标题（函数可按模式返回不同标题） |
 | `resetOnClose` | `boolean` | `true` | 关闭后是否 reset form + restoreValidation |

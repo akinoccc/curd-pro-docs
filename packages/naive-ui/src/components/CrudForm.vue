@@ -11,7 +11,7 @@ export interface Props<Row> {
   /** Field definitions */
   fields: CrudField<Row>[]
   /** Form display mode */
-  displayMode?: 'modal' | 'drawer' | 'inline'
+  displayMode?: 'modal' | 'drawer'
   /** Modal/drawer visibility */
   visible?: boolean
   /** Modal/drawer title */
@@ -42,6 +42,10 @@ const emit = defineEmits<{
 
 const slots = useSlots()
 const formRef = ref<FormInst | null>(null)
+
+const normalizedDisplayMode = computed<'modal' | 'drawer'>(() => {
+  return props.displayMode === 'drawer' ? 'drawer' : 'modal'
+})
 
 // Computed visible state
 const isVisible = computed({
@@ -187,17 +191,9 @@ function renderFormBody() {
 </script>
 
 <template>
-  <!-- Inline mode -->
-  <div
-    v-if="displayMode === 'inline'"
-    class="crud-form crud-form--inline"
-  >
-    <component :is="() => renderFormBody()" />
-  </div>
-
   <!-- Modal mode -->
   <NModal
-    v-else-if="displayMode === 'modal'"
+    v-if="normalizedDisplayMode === 'modal'"
     v-model:show="isVisible"
     preset="dialog"
     :title="dialogTitle"
