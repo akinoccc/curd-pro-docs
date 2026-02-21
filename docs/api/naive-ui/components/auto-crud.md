@@ -128,7 +128,10 @@ crudRef.value?.openEdit(row) // 打开编辑表单
 
 ### 交互示例
 
-<demo vue="../../../examples/auto-crud-basic.vue" />
+<demo
+  vue="../../../examples/auto-crud-basic.vue"
+  vueFiles="['../../../examples/auto-crud-basic.vue','../../../examples/basic-adapter.ts','../../../examples/basic-schema.ts','../../../examples/basic-types.ts']"
+/>
 
 ::: code-group
 <<< @/examples/auto-crud-basic.vue [页面]

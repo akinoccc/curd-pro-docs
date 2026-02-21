@@ -21,8 +21,11 @@ pnpm lint
 
 ## 交互 Demo（文档内可运行）
 
-在 markdown 里用 `<demo />` 引用 `.vue/.tsx/.html` 文件即可：
+在 markdown 里用 `<demo />` 引用 `.vue/.tsx/.html` 文件即可；如果 Demo 涉及多个文件，可通过 `vueFiles/reactFiles/htmlFiles` 把相关文件一起展示出来：
 
 ```html
-<demo vue="../demos/use-crud-selection-basic.vue" />
+<demo
+  vue="../demos/use-crud-list-basic.vue"
+  vueFiles="['../demos/use-crud-list-basic.vue','../examples/basic-adapter.ts','../examples/basic-types.ts']"
+/>
 ```

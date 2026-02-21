@@ -32,7 +32,10 @@ list.reset()
 
 ## 交互示例
 
-<demo vue="../../../demos/use-crud-list-basic.vue" />
+<demo
+  vue="../../../demos/use-crud-list-basic.vue"
+  vueFiles="['../../../demos/use-crud-list-basic.vue','../../../examples/basic-adapter.ts','../../../examples/basic-types.ts']"
+/>
 
 ## Options
 

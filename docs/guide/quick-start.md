@@ -62,7 +62,10 @@ title: 快速开始
 
 ### 交互预览
 
-<demo vue="../examples/auto-crud-basic.vue" />
+<demo
+  vue="../examples/auto-crud-basic.vue"
+  vueFiles="['../examples/auto-crud-basic.vue','../examples/basic-adapter.ts','../examples/basic-schema.ts','../examples/basic-types.ts']"
+/>
 
 这个组件会自动处理：
 

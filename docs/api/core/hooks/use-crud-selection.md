@@ -28,7 +28,10 @@ selection.selectedCount.value // 1
 
 ## 交互示例
 
-<demo vue="../../../demos/use-crud-selection-basic.vue" />
+<demo
+  vue="../../../demos/use-crud-selection-basic.vue"
+  vueFiles="['../../../demos/use-crud-selection-basic.vue']"
+/>
 
 ## Options
 
