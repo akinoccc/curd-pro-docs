@@ -25,8 +25,6 @@ interface NaiveFieldUi {
     }
   }
   component?: Component
-  column?: Record<string, unknown>
-  options?: SelectOption[]
 }
 ```
 
@@ -35,9 +33,7 @@ interface NaiveFieldUi {
 | `formControl` | `object` | 透传到字段控件的 props，可通过 `overrides` 按场景覆盖 |
 | `formItem` | `object` | 透传到 `NFormItem` 的 props，可通过 `overrides` 按场景覆盖 |
 | `overrides` | `object` | 按 surface（`editForm` / `searchForm`）覆盖 `formControl` / `formItem` |
-| `component` | `Component` | 替换默认控件（高级用法） |
-| `column` | `object` | 额外的 DataTableColumn props |
-| `options` | `SelectOption[]` | Select 字段的选项 |
+| `component` | `Component` | 自定义控件 |
 
 ### 场景覆盖示例
 

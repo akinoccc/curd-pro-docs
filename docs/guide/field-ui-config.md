@@ -25,10 +25,6 @@ interface NaiveFieldUi {
       formItem?: Record<string, unknown>
     }
   }
-  /** 表格列属性，透传给 DataTableColumn */
-  column?: Record<string, unknown>
-  /** 选项数据（select 字段使用） */
-  options?: SelectOption[]
   /** 自定义控件组件 */
   component?: Component
 }
@@ -38,11 +34,9 @@ interface NaiveFieldUi {
 
 | 属性 | 作用 | 透传目标 |
 |---|---|---|
-| `formControl` | 控件的 props（如 clearable、placeholder、min 等） | 字段对应的控件组件 |
+| `formControl` | 控件的 props（如 clearable、placeholder、options 等） | 字段对应的控件组件 |
 | `formItem` | 表单项容器的 props（如验证规则等） | NFormItem |
 | `overrides` | 按 surface 覆盖 formControl / formItem | 见下方说明 |
-| `column` | 表格列的额外属性 | DataTableColumn |
-| `options` | 下拉选项数据 | Select 控件 |
 | `component` | 替换默认控件组件 | 渲染层 |
 
 ## 场景差异化机制

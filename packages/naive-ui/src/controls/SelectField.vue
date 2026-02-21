@@ -17,10 +17,7 @@ const modelValue = defineModel<string | number | (string | number)[] | null>()
 const controlProps = computed<Record<string, any>>(() => {
   if (!props.field)
     return {}
-  const baseProps = resolveControlProps(props.field, props.surface)
-  // Include options from field.ui.options if available
-  const options = props.field.ui?.options ?? baseProps.options
-  return { ...baseProps, options }
+  return resolveControlProps(props.field, props.surface)
 })
 
 const placeholder = computed(() => {

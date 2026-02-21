@@ -1,5 +1,5 @@
 import type { CrudColumn, CrudField } from '@fcurd/core'
-import type { DataTableColumn, SelectOption } from 'naive-ui'
+import type { DataTableColumn } from 'naive-ui'
 import type { Component } from 'vue'
 import { createDiscreteApi } from 'naive-ui'
 import NaiveDateField from './controls/DateField.vue'
@@ -48,10 +48,6 @@ export interface NaiveFieldUi {
   }
   /** Custom component override */
   component?: Component
-  /** Column props for table */
-  column?: Record<string, unknown>
-  /** Select options (for select fields) */
-  options?: SelectOption[]
 }
 
 export type NaiveCrudField<Row = any, FormModel = Row> = CrudField<Row, FormModel, NaiveFieldUi>

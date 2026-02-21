@@ -49,14 +49,14 @@ export function createDemoFields(): NaiveCrudField<DemoRow>[] {
       type: 'select',
       required: true,
       visibleIn: { searchForm: true, table: true, editForm: true },
-      ui: { formControl: { clearable: true, options: statusOptions }, options: statusOptions },
+      ui: { formControl: { clearable: true, options: statusOptions } },
     },
     {
       key: 'category',
       label: '分类',
       type: 'select',
       visibleIn: { searchForm: true, table: true, editForm: true },
-      ui: { formControl: { clearable: true, options: categoryOptions }, options: categoryOptions },
+      ui: { formControl: { clearable: true, options: categoryOptions } },
     },
     {
       key: 'enabled',
