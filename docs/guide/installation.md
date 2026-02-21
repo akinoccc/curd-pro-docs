@@ -30,6 +30,18 @@ pnpm add @fcurd/core @fcurd/naive-ui naive-ui
 `@fcurd/naive-ui` 的 peer dependency 包含 `@fcurd/core`，两个包需要同时安装。
 :::
 
+## 样式引入（必需）
+
+`@fcurd/naive-ui` 组件库包含少量布局/间距相关的全局样式（例如表格头部间距、分页区域布局等），需要在应用入口 **全局引入一次**：
+
+```ts
+import '@fcurd/naive-ui/naive-ui.css'
+```
+
+:::: tip
+本 VitePress 文档站点已默认引入该样式；你的业务项目中仍需要按上述方式手动引入。
+::::
+
 ## 你会得到什么
 
 ### @fcurd/core
