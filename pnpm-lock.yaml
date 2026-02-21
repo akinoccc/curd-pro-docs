@@ -15,11 +15,11 @@ importers:
         specifier: ^2.29.7
         version: 2.29.8(@types/node@22.19.7)
       '@fcurd/core':
-        specifier: workspace:^
-        version: link:packages/core
+        specifier: npm:@fcurd/core@^0.1.0
+        version: 0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       '@fcurd/naive-ui':
-        specifier: workspace:^
-        version: link:packages/naive-ui
+        specifier: npm:@fcurd/naive-ui@^0.1.0
+        version: 0.1.0(@fcurd/core@0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       '@types/node':
         specifier: ^22.19.7
         version: 22.19.7
@@ -780,6 +780,13 @@ packages:
     peerDependenciesMeta:
       vue-router:
         optional: true
+
+  '@fcurd/naive-ui@0.1.0':
+    resolution: {integrity: sha512-qNtX/Pt8W2eKGlECS+fe7Ma+AwJ+Gt+w/U+kuZ5/w3dbvf5MMNJ5N/VXcmWsMkBPw10/aJFvE0XhOHPbJtixhQ==}
+    peerDependencies:
+      '@fcurd/core': ^0.1.0
+      naive-ui: ^2.43.2
+      vue: ^3.4.0
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -3798,6 +3805,12 @@ snapshots:
       vue: 3.5.27(typescript@5.9.3)
     optionalDependencies:
       vue-router: 4.6.0(vue@3.5.27(typescript@5.9.3))
+
+  '@fcurd/naive-ui@0.1.0(@fcurd/core@0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))':
+    dependencies:
+      '@fcurd/core': 0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
+      naive-ui: 2.43.2(vue@3.5.27(typescript@5.9.3))
+      vue: 3.5.27(typescript@5.9.3)
 
   '@humanfs/core@0.19.1': {}
 

@@ -18,8 +18,8 @@
   "devDependencies": {
     "@antfu/eslint-config": "^7.2.0",
     "@changesets/cli": "^2.29.7",
-    "@fcurd/core": "workspace:^",
-    "@fcurd/naive-ui": "workspace:^",
+    "@fcurd/core": "npm:@fcurd/core@^0.1.0",
+    "@fcurd/naive-ui": "npm:@fcurd/naive-ui@^0.1.0",
     "@types/node": "^22.19.7",
     "@vitejs/plugin-vue": "^6.0.3",
     "eslint": "^9.39.2",
