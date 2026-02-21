@@ -11,9 +11,14 @@ const crudRef = ref<InstanceType<typeof AutoCrud> | null>(null)
 
 <template>
   <div style="display: flex; flex-direction: column; gap: 12px">
-    <NAlert :bordered="false" type="info">
+    <NAlert
+      :bordered="false"
+      type="info"
+    >
       <div>
-        这是一个最小的 <NText code>AutoCrud</NText> 示例：搜索（query.search）、分页、排序、表单（Modal）、新增/编辑/删除。
+        这是一个最小的 <NText code>
+          AutoCrud
+        </NText> 示例：搜索（query.search）、分页、排序、表单（Modal）、新增/编辑/删除。
       </div>
     </NAlert>
 
@@ -29,4 +34,3 @@ const crudRef = ref<InstanceType<typeof AutoCrud> | null>(null)
     />
   </div>
 </template>
-

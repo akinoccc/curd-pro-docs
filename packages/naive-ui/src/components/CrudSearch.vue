@@ -6,7 +6,7 @@ import { NButton, NForm, NFormItem, NSpace } from 'naive-ui'
 import { computed, h, reactive, watch } from 'vue'
 import { componentMap, getFieldLabel, resolveControlProps, resolveFormItemProps } from '../adapter'
 
-interface Props {
+export interface Props<Row, Query extends Record<string, unknown>> {
   /** CRUD list state from useCrudList */
   list: UseCrudListReturn<Row, Query>
   /** Field definitions */
@@ -25,7 +25,7 @@ interface Props {
   showSearch?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props<Row, Query>>(), {
   showReset: true,
   showSearch: true,
 })

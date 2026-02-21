@@ -9,7 +9,7 @@ title: useCrudActions
 ## 基本用法
 
 ```ts
-import { useCrudActions, presetActions } from '@fcurd/core'
+import { presetActions, useCrudActions } from '@fcurd/core'
 
 const { actions, getByArea, register, unregister } = useCrudActions<MyRow>({
   actions: [
@@ -20,8 +20,8 @@ const { actions, getByArea, register, unregister } = useCrudActions<MyRow>({
 })
 
 // 按区域获取
-const toolbarActions = getByArea('toolbar')  // [create]
-const rowActions = getByArea('row')          // [edit, delete]
+const toolbarActions = getByArea('toolbar') // [create]
+const rowActions = getByArea('row') // [edit, delete]
 ```
 
 ## Options

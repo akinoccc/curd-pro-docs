@@ -24,7 +24,7 @@ import CrudForm from './CrudForm.vue'
 import CrudSearch from './CrudSearch.vue'
 import CrudTable from './CrudTable.vue'
 
-interface Props {
+export interface Props<Row, Query extends Record<string, unknown> = Record<string, unknown>> {
   /** Data adapter */
   adapter: CrudAdapter<Row, Query>
   /** Field definitions */
@@ -65,7 +65,11 @@ interface Props {
   routeQueryKey?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+export interface RowActionButtonProps<Row> {
+  row: Row
+}
+
+const props = withDefaults(defineProps<Props<Row, Query>>(), {
   formMode: 'modal',
   showSelection: false,
   showActionsColumn: true,
@@ -325,25 +329,21 @@ function renderActionButton(action: CrudAction<Row>, row?: Row) {
 }
 
 // Default action button components for row-actions slot
-interface RowActionButtonProps {
-  row: Row
-}
-
-const EditButton: FunctionalComponent<RowActionButtonProps> = (btnProps) => {
+const EditButton: FunctionalComponent<RowActionButtonProps<Row>> = (btnProps) => {
   const action = rowActions.value.find(a => a.id === 'edit')
   if (!action)
     return null
   return renderActionButton(action, btnProps.row)
 }
 
-const DeleteButton: FunctionalComponent<RowActionButtonProps> = (btnProps) => {
+const DeleteButton: FunctionalComponent<RowActionButtonProps<Row>> = (btnProps) => {
   const action = rowActions.value.find(a => a.id === 'delete')
   if (!action)
     return null
   return renderActionButton(action, btnProps.row)
 }
 
-const ViewButton: FunctionalComponent<RowActionButtonProps> = (btnProps) => {
+const ViewButton: FunctionalComponent<RowActionButtonProps<Row>> = (btnProps) => {
   const action = rowActions.value.find(a => a.id === 'view')
   if (!action)
     return null
@@ -437,7 +437,7 @@ defineExpose({
         :list="list"
         :selection="selection"
         :actions="batchActions"
-        :renderActionButton="renderActionButton"
+        :render-action-button="renderActionButton"
       >
         <NSpace>
           <span>已选择 {{ selection.selectedCount.value }} 项</span>
@@ -457,10 +457,10 @@ defineExpose({
       :list="list"
       :columns="effectiveColumns"
       :selection="(showSelection ? selection : undefined)"
-      :rowKey="rowKey"
-      :rowActions="rowActions"
-      :renderActionButton="renderActionButton"
-      :getRowActionsSlotProps="getRowActionsSlotProps"
+      :row-key="rowKey"
+      :row-actions="rowActions"
+      :render-action-button="renderActionButton"
+      :get-row-actions-slot-props="getRowActionsSlotProps"
     >
       <CrudTable
         :list="list"
@@ -507,9 +507,9 @@ defineExpose({
       :form="form"
       :fields="fields"
       :visible="formVisible"
-      :setVisible="setFormVisible"
+      :set-visible="setFormVisible"
       :mode="form.mode.value"
-      :editingRow="editingRow"
+      :editing-row="editingRow"
       :submit="handleFormSubmit"
     >
       <CrudForm

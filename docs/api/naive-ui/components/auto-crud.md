@@ -54,10 +54,10 @@ title: AutoCrud
 ```ts
 const crudRef = ref<InstanceType<typeof AutoCrud>>()
 
-crudRef.value?.list        // UseCrudListReturn
-crudRef.value?.selection   // UseCrudSelectionReturn
-crudRef.value?.form        // UseCrudFormReturn
-crudRef.value?.refresh()   // 刷新列表
+crudRef.value?.list // UseCrudListReturn
+crudRef.value?.selection // UseCrudSelectionReturn
+crudRef.value?.form // UseCrudFormReturn
+crudRef.value?.refresh() // 刷新列表
 crudRef.value?.openCreate() // 打开新增表单
 crudRef.value?.openEdit(row) // 打开编辑表单
 ```
@@ -100,9 +100,20 @@ crudRef.value?.openEdit(row) // 打开编辑表单
 ```vue
 <template #row-actions="{ row, defaultButtons }">
   <NSpace>
-    <component :is="defaultButtons.Edit" :row="row" />
-    <component :is="defaultButtons.Delete" :row="row" />
-    <NButton size="small" @click="doSomething(row)">自定义</NButton>
+    <component
+      :is="defaultButtons.Edit"
+      :row="row"
+    />
+    <component
+      :is="defaultButtons.Delete"
+      :row="row"
+    />
+    <NButton
+      size="small"
+      @click="doSomething(row)"
+    >
+      自定义
+    </NButton>
   </NSpace>
 </template>
 ```

@@ -5,7 +5,7 @@ import { NDataTable, NPagination, NSpace } from 'naive-ui'
 import { computed, h } from 'vue'
 import { createTableColumns } from '../adapter'
 
-interface Props {
+export interface Props<Row> {
   /** CRUD list state from useCrudList */
   list: UseCrudListReturn<Row, any>
   /** Column definitions */
@@ -28,7 +28,7 @@ interface Props {
   getRowActionsSlotProps?: (row: Row) => Record<string, unknown>
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props<Row>>(), {
   showActionsColumn: false,
   actionsColumnTitle: '操作',
   actionsColumnWidth: 120,

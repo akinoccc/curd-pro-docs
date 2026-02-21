@@ -101,4 +101,3 @@ export function createBasicAdapter(initial?: DemoRow[]): {
 
   return { adapter, reset, getAll }
 }
-

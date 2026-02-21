@@ -5,7 +5,7 @@ import { NButton, NDrawer, NDrawerContent, NForm, NFormItem, NModal, NSpace } fr
 import { computed, h, ref, useSlots } from 'vue'
 import { componentMap, getFieldLabel, resolveControlProps, resolveFormItemProps } from '../adapter'
 
-interface Props {
+export interface Props<Row> {
   /** Form state from useCrudForm */
   form: UseCrudFormReturn<Row>
   /** Field definitions */
@@ -28,7 +28,7 @@ interface Props {
   drawerContentProps?: DrawerContentProps
 }
 
-const props = withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props<Row>>(), {
   displayMode: 'modal',
   visible: false,
   resetOnClose: true,

@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import type { DemoQuery, DemoRow } from './basic-types'
 import { useCrudList, useCrudRouteSync } from '@fcurd/core'
 import { useRoute, useRouter } from 'vue-router'
-import type { DemoQuery, DemoRow } from './basic-types'
 import { createBasicAdapter } from './basic-adapter'
 
 const route = useRoute()
@@ -27,4 +27,3 @@ useCrudRouteSync<DemoQuery>({
     <!-- 这里只演示 route-sync 的核心用法，渲染由你自行决定 -->
   </div>
 </template>
-

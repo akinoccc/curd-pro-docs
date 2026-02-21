@@ -45,9 +45,9 @@ const field: NaiveCrudField = {
   type: 'text',
   ui: {
     control: {
-      placeholder: '请输入',           // 基础值，form 和 search 都生效
-      form: { clearable: true },       // 只在 form 中生效
-      search: { clearable: true },     // 只在 search 中生效
+      placeholder: '请输入', // 基础值，form 和 search 都生效
+      form: { clearable: true }, // 只在 form 中生效
+      search: { clearable: true }, // 只在 search 中生效
     },
   },
 }
@@ -147,7 +147,7 @@ function handleExportResult(
 与 `@fcurd/core` 同名，但 `UiExt` 默认绑定为 `NaiveFieldUi`：
 
 ```ts
-import { defineFields, defineColumns } from '@fcurd/naive-ui'
+import { defineFields } from '@fcurd/naive-ui'
 
 const fields = defineFields<MyRow>([
   { key: 'name', label: '名称', type: 'text', ui: { control: { clearable: true } } },

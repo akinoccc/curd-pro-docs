@@ -21,4 +21,3 @@ pnpm docs:preview
 仓库目前是 workspace 结构：`packages/core`、`packages/naive-ui`。\n+
 发布流程通常包含：更新版本号、变更日志、构建、发布。\n+
 > 具体的发布命令/策略（changesets、npm publish、tag 规则等）如果你希望我补齐，我可以再按你的实际流程完善这一页。
-

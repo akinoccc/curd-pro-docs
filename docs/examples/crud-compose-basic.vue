@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { DemoQuery, DemoRow } from './basic-types'
 import type { CrudAdapter } from '@fcurd/core'
+import type { DemoQuery, DemoRow } from './basic-types'
 import { useCrudForm, useCrudList, useCrudSelection } from '@fcurd/core'
 import { CrudForm, CrudSearch, CrudTable, defineColumns, defineFields } from '@fcurd/naive-ui'
 import { NButton, NCard, NSpace } from 'naive-ui'
@@ -71,7 +71,10 @@ onMounted(() => {
   <NCard title="手动组合：CrudSearch + CrudTable + CrudForm">
     <template #header-extra>
       <NSpace>
-        <NButton type="primary" @click="openCreate">
+        <NButton
+          type="primary"
+          @click="openCreate"
+        >
           新增
         </NButton>
       </NSpace>
@@ -92,7 +95,10 @@ onMounted(() => {
     >
       <template #row-actions="{ row }">
         <NSpace>
-          <NButton size="small" @click="openEdit(row)">
+          <NButton
+            size="small"
+            @click="openEdit(row)"
+          >
             编辑
           </NButton>
         </NSpace>
@@ -108,4 +114,3 @@ onMounted(() => {
     />
   </NCard>
 </template>
-

@@ -18,9 +18,9 @@ const list = useCrudList<MyRow, MyQuery>({
 })
 
 // 获取数据
-list.rows.value      // MyRow[]
-list.total.value     // number
-list.loading.value   // boolean
+list.rows.value // MyRow[]
+list.total.value // number
+list.loading.value // boolean
 
 // 操作
 list.setQuery({ search: { name: 'foo' } })

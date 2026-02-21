@@ -63,7 +63,7 @@ const customActions: CrudAction<MyRow>[] = [
 当你使用 hooks 组合方式时，`useCrudActions` 提供动态注册和按区域过滤的能力：
 
 ```ts
-import { useCrudActions, presetActions } from '@fcurd/core'
+import { presetActions, useCrudActions } from '@fcurd/core'
 
 const { actions, getByArea, register, unregister } = useCrudActions<MyRow>({
   actions: [
@@ -79,7 +79,7 @@ register({
   area: 'row',
   order: 5,
   type: 'success',
-  visible: (ctx) => ctx.row?.status === 'pending',
+  visible: ctx => ctx.row?.status === 'pending',
   onClick: async (ctx) => {
     await api.approve(ctx.row!.id)
     await ctx.refresh()

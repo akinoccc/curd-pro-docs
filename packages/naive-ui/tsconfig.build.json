@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.d.ts"],
+  "exclude": ["**/__tests__/**", "dist", "node_modules"],
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": false,
+    "stripInternal": true,
+    "outDir": "dist",
+    "declarationDir": "dist",
+    "composite": false
+  }
+}

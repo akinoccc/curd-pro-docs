@@ -21,10 +21,5 @@ export const router = createRouter({
       name: routeNames.routeSync,
       component: () => import('./pages/route-sync-page.vue'),
     },
-    {
-      path: '/config',
-      name: routeNames.config,
-      component: () => import('./pages/config-provider-page.vue'),
-    },
   ],
 })

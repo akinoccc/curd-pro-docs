@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { DemoQuery, DemoRow } from '../examples/basic-types'
 import type { CrudSort } from '@fcurd/core'
+import type { DemoQuery, DemoRow } from '../examples/basic-types'
 import { useCrudList } from '@fcurd/core'
 import { computed, ref, watch } from 'vue'
 import { createBasicAdapter } from '../examples/basic-adapter'
@@ -74,7 +74,12 @@ function onResetData() {
     <div style="display: grid; grid-template-columns: 1fr 160px 1fr; gap: 10px; align-items: end">
       <label style="display: grid; gap: 6px">
         <span style="font-size: 12px; opacity: .85">名称包含</span>
-        <input v-model="searchName" type="text" placeholder="例如：示例" style="width: 100%">
+        <input
+          v-model="searchName"
+          type="text"
+          placeholder="例如：示例"
+          style="width: 100%"
+        >
       </label>
 
       <label style="display: grid; gap: 6px">
@@ -96,13 +101,24 @@ function onResetData() {
       </label>
 
       <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end">
-        <button type="button" @click="toggleCreatedAtSort">
+        <button
+          type="button"
+          @click="toggleCreatedAtSort"
+        >
           切换 createdAt 排序
         </button>
-        <button type="button" :disabled="list.loading.value" @click="list.refresh()">
+        <button
+          type="button"
+          :disabled="list.loading.value"
+          @click="list.refresh()"
+        >
           刷新
         </button>
-        <button type="button" :disabled="list.loading.value" @click="onResetData">
+        <button
+          type="button"
+          :disabled="list.loading.value"
+          @click="onResetData"
+        >
           重置数据
         </button>
       </div>
@@ -115,8 +131,15 @@ function onResetData() {
 
       <span style="margin-left: auto; display: inline-flex; gap: 6px; align-items: center">
         <span>每页</span>
-        <select :value="String(list.pageSize.value)" @change="onChangePageSize(($event.target as HTMLSelectElement).value)">
-          <option v-for="n in pageSizeOptions" :key="n" :value="String(n)">
+        <select
+          :value="String(list.pageSize.value)"
+          @change="onChangePageSize(($event.target as HTMLSelectElement).value)"
+        >
+          <option
+            v-for="n in pageSizeOptions"
+            :key="n"
+            :value="String(n)"
+          >
             {{ n }}
           </option>
         </select>
@@ -124,12 +147,18 @@ function onResetData() {
       </span>
     </div>
 
-    <div v-if="list.error.value" style="margin-top: 10px; color: var(--vp-c-danger-1)">
+    <div
+      v-if="list.error.value"
+      style="margin-top: 10px; color: var(--vp-c-danger-1)"
+    >
       请求错误：<code>{{ String(list.error.value) }}</code>
     </div>
 
     <ul style="margin-top: 10px; padding-left: 18px">
-      <li v-for="row in list.rows.value" :key="row.id">
+      <li
+        v-for="row in list.rows.value"
+        :key="row.id"
+      >
         <code>#{{ row.id }}</code>
         {{ row.name }}
         —
@@ -140,10 +169,18 @@ function onResetData() {
     </ul>
 
     <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px">
-      <button type="button" :disabled="list.page.value <= 1 || list.loading.value" @click="prevPage">
+      <button
+        type="button"
+        :disabled="list.page.value <= 1 || list.loading.value"
+        @click="prevPage"
+      >
         上一页
       </button>
-      <button type="button" :disabled="list.loading.value" @click="nextPage">
+      <button
+        type="button"
+        :disabled="list.loading.value"
+        @click="nextPage"
+      >
         下一页
       </button>
       <span style="opacity: .9">
@@ -152,4 +189,3 @@ function onResetData() {
     </div>
   </div>
 </template>
-

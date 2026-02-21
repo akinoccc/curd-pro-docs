@@ -26,4 +26,3 @@ pnpm lint
 ```html
 <demo vue="../demos/use-crud-selection-basic.vue" />
 ```
-

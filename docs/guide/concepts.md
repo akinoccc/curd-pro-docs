@@ -10,8 +10,8 @@ title: 核心概念
 
 ```ts
 interface CrudAdapter<Row, Query> {
-  list: (params: ListParams<Query>) => Promise<ListResult<Row>>   // 必选
-  create?: (data: Partial<Row>) => Promise<Row>                   // 可选
+  list: (params: ListParams<Query>) => Promise<ListResult<Row>> // 必选
+  create?: (data: Partial<Row>) => Promise<Row> // 可选
   update?: (id: string | number, data: Partial<Row>) => Promise<Row>
   remove?: (id: string | number) => Promise<void>
   export?: (params: ExportParams<Query>) => Promise<ExportResult>
@@ -32,7 +32,7 @@ interface CrudAdapter<Row, Query> {
 **扁平结构**（默认）：
 
 ```ts
-const list = useCrudList<Row, { name?: string; status?: string }>({
+const list = useCrudList<Row, { name?: string, status?: string }>({
   adapter,
   initialQuery: { name: '', status: '' },
 })
@@ -55,17 +55,17 @@ const list = useCrudList<Row, { name?: string; status?: string }>({
 
 ```ts
 interface CrudField<Row, FormModel, UiExt> {
-  key: string                           // 字段 key
-  label: string | (() => string)        // 显示名称
-  type: CrudFieldType | string          // 字段类型
-  required?: boolean                    // 是否必填
-  visibleIn?: {                         // 各 surface 的可见性
+  key: string // 字段 key
+  label: string | (() => string) // 显示名称
+  type: CrudFieldType | string // 字段类型
+  required?: boolean // 是否必填
+  visibleIn?: { // 各 surface 的可见性
     search?: boolean | ((ctx) => boolean)
     table?: boolean | ((ctx) => boolean)
     form?: boolean | ((ctx) => boolean)
     detail?: boolean | ((ctx) => boolean)
   }
-  ui?: UiExt                            // UI 框架扩展（Naive UI 层使用 NaiveFieldUi）
+  ui?: UiExt // UI 框架扩展（Naive UI 层使用 NaiveFieldUi）
 }
 ```
 

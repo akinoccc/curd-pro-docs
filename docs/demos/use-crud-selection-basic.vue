@@ -38,10 +38,16 @@ function onCheck(id: number, checked: boolean) {
 <template>
   <div style="border: 1px solid var(--vp-c-divider); border-radius: 10px; padding: 12px">
     <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px">
-      <button type="button" @click="selection.selectAll()">
+      <button
+        type="button"
+        @click="selection.selectAll()"
+      >
         全选当前页
       </button>
-      <button type="button" @click="selection.clear()">
+      <button
+        type="button"
+        @click="selection.clear()"
+      >
         清空
       </button>
 
@@ -68,7 +74,10 @@ function onCheck(id: number, checked: boolean) {
         </tr>
       </thead>
       <tbody>
-        <tr v-for="row in rows" :key="row.id">
+        <tr
+          v-for="row in rows"
+          :key="row.id"
+        >
           <td style="padding: 8px; border-bottom: 1px solid var(--vp-c-divider)">
             <input
               type="checkbox"
@@ -90,4 +99,3 @@ function onCheck(id: number, checked: boolean) {
     </table>
   </div>
 </template>
-

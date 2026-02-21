@@ -38,10 +38,10 @@ interface CrudField<Row = any, FormModel = Row, UiExt = unknown> {
 ## CrudFieldType
 
 ```ts
-type CrudFieldType =
-  | 'text' | 'textarea' | 'select'
-  | 'date' | 'datetime' | 'dateRange' | 'datetimeRange'
-  | 'switch' | 'number' | 'money' | 'custom'
+type CrudFieldType
+  = | 'text' | 'textarea' | 'select'
+    | 'date' | 'datetime' | 'dateRange' | 'datetimeRange'
+    | 'switch' | 'number' | 'money' | 'custom'
 ```
 
 ## CrudColumn

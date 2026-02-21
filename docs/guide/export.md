@@ -97,6 +97,6 @@ const exportAction = presetActions.export({
   adapter,
   filename: 'my-export.xlsx',
   handleExport: handleExportResult,
-  onError: (err) => console.error('导出失败', err),
+  onError: err => console.error('导出失败', err),
 })
 ```

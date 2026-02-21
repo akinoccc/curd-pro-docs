@@ -4,6 +4,7 @@ export default antfu({
   typescript: true,
   vitest: true,
   vue: true,
+  markdown: false,
   ignores: [
     '**/node_modules/*',
     '**/dist/*',

@@ -1,7 +1,6 @@
 import type { SelectOption } from 'naive-ui'
-import { defineColumns, defineFields } from '@fcurd/naive-ui'
-import { cellDateTime, cellEnumTag, cellMoney } from '@fcurd/naive-ui'
 import type { DemoRow } from './basic-types'
+import { cellDateTime, cellEnumTag, cellMoney, defineColumns, defineFields } from '@fcurd/naive-ui'
 
 const statusOptions: SelectOption[] = [
   { label: '草稿', value: 'draft' },
@@ -77,4 +76,3 @@ export const demoColumns = defineColumns<DemoRow>([
     render: cellDateTime(),
   },
 ])
-

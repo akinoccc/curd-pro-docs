@@ -43,4 +43,3 @@ export function createActions(adapter: CrudAdapter<Row>) {
     getBatchActions: () => getByArea('batch'),
   }
 }
-

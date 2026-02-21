@@ -11,7 +11,7 @@ title: Renderers 渲染器
 在 `defineColumns` 的 `render` 属性中调用工厂函数：
 
 ```ts
-import { defineColumns, cellEnumTag, cellMoney, cellDateTime } from '@fcurd/naive-ui'
+import { cellDateTime, cellEnumTag, cellMoney, defineColumns } from '@fcurd/naive-ui'
 
 const columns = defineColumns<MyRow>([
   {
