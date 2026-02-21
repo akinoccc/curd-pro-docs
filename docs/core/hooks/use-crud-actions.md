@@ -19,5 +19,5 @@ title: useCrudActions
 ## 在 Naive UI 组件里怎么用
 
 - `AutoCrud` 默认会根据 adapter 能力生成 `create/edit/delete/export`（并处理 confirm + refresh）。
-  想完全接管时，直接传入 `actions` 覆盖默认行为。
+  传入 `actions` 时会与默认 actions 合并（`id` 相同则覆盖），可用于“只覆盖某一个默认 action”。
 完整示例见：[`AutoCrud` 组件](/naive-ui/components/auto-crud)

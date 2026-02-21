@@ -147,7 +147,7 @@ interface CrudAction<Row> {
 
 `@fcurd/core` 提供一组预设工厂：`presetActions.create` / `.edit` / `.delete` / `.batchDelete` / `.export`。
 
-`AutoCrud` 会根据 adapter 能力自动使用这些预设。你也可以通过 `actions` prop 完全覆盖，或用 `useCrudActions` 的 `register` / `unregister` 动态管理。
+`AutoCrud` 会根据 adapter 能力自动使用这些预设。你也可以通过 `actions` prop 与默认 actions 合并（`id` 相同则覆盖），或用 `useCrudActions` 的 `register` / `unregister` 动态管理。
 
 详见 [自定义 Actions](/guide/custom-actions)。
 

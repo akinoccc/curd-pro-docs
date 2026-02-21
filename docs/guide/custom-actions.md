@@ -30,9 +30,14 @@ presetActions.export({ adapter, handleExport: handleExportResult })
 
 每个工厂返回一个 `CrudAction` 对象，你可以在此基础上覆盖任意属性。
 
-## 完全覆盖 AutoCrud 的 actions
+## 在 AutoCrud 中局部覆盖 actions（推荐）
 
-传入 `actions` prop 会完全替换默认 actions：
+`AutoCrud` 默认会根据 adapter 能力自动生成 `create/edit/delete/export` 等预设 actions。
+
+当你传入 `actions` prop 时，`AutoCrud` 会将其与默认 actions **做合并（merge）**，规则如下：
+
+- `id` 相同：使用你传入的 action **覆盖**默认 action（可用于“只改删除确认文案/点击行为”等）
+- `id` 不同：作为新 action **追加**（可用于新增导入/审核等按钮）
 
 ```vue
 <AutoCrud
@@ -44,19 +49,38 @@ presetActions.export({ adapter, handleExport: handleExportResult })
 ```
 
 ```ts
+const baseDelete = presetActions.delete({
+  adapter,
+  getId: row => row.id,
+})
+
 const customActions: CrudAction<MyRow>[] = [
-  presetActions.create({ onClick: openCreate }),
+  // 只覆盖默认 delete（id 相同会覆盖）
+  {
+    ...baseDelete,
+    confirm: '确定要作废这条记录吗？',
+    onClick: async (ctx) => {
+      // 例如：埋点、权限校验、二次确认等
+      await baseDelete.onClick(ctx)
+    },
+  },
+  // 追加一个全新的 toolbar action（id 不同会追加）
   {
     id: 'import',
     label: '批量导入',
     area: 'toolbar',
     order: 10,
-    onClick: async () => { /* 打开导入弹窗 */ },
+    onClick: async () => {
+      /* 打开导入弹窗 */
+    },
   },
-  presetActions.edit({ onClick: openEdit }),
-  presetActions.delete({ adapter, getId: row => row.id }),
 ]
 ```
+
+### 如何“移除/禁用”默认 actions（不新增字段）
+
+- 想禁用默认的 create/edit/delete/export：使用 `AutoCrud` 已有的 `disableCreate/disableEdit/disableDelete/disableExport`
+- 想隐藏某个默认 action：可以用同 `id` 覆盖并设置 `visible: () => false`
 
 ## 使用 useCrudActions 动态管理
 

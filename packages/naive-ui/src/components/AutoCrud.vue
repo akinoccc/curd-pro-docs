@@ -247,12 +247,36 @@ const defaultActions = computed<CrudAction<Row>[]>(() => {
   return actions
 })
 
-// Merge custom actions with defaults
-const allActions = computed<CrudAction<Row>[]>(() => {
-  if (props.actions) {
-    return props.actions
+function mergeActions(
+  baseActions: CrudAction<Row>[],
+  overrideActions: CrudAction<Row>[] | undefined,
+): CrudAction<Row>[] {
+  if (!overrideActions || overrideActions.length === 0)
+    return baseActions
+
+  const result = [...baseActions]
+  const indexById = new Map<string, number>()
+  for (let i = 0; i < result.length; i++) {
+    indexById.set(result[i].id, i)
   }
-  return defaultActions.value
+
+  for (const action of overrideActions) {
+    const idx = indexById.get(action.id)
+    if (idx !== undefined) {
+      result[idx] = action
+    }
+    else {
+      indexById.set(action.id, result.length)
+      result.push(action)
+    }
+  }
+
+  return result
+}
+
+// Merge custom actions with defaults (override by id)
+const allActions = computed<CrudAction<Row>[]>(() => {
+  return mergeActions(defaultActions.value, props.actions)
 })
 
 // Filter actions by area

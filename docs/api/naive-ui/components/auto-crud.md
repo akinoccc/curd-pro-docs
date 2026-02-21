@@ -15,7 +15,7 @@ title: AutoCrud
 | `columns` | `CrudColumn<Row>[]` | 由 fields 生成 | 表格列定义 |
 | `searchFields` | `CrudField<Row>[]` | 使用 fields | 搜索字段（可独立于 fields 定义搜索表单） |
 | `searchQueryKey` | `string` | — | 搜索条件写入 `query[key]`（不设置则扁平写入 query 根） |
-| `actions` | `CrudAction<Row>[]` | 自动生成 | 自定义 actions（传入则完全覆盖默认） |
+| `actions` | `CrudAction<Row>[]` | 自动生成 | 自定义 actions（与默认 actions 合并，`id` 相同则覆盖） |
 | `formMode` | `'modal' \| 'drawer'` | `'modal'` | 表单显示模式 |
 | `showSelection` | `boolean` | `false` | 是否开启行勾选 |
 | `showActionsColumn` | `boolean` | `true` | 是否显示操作列 |

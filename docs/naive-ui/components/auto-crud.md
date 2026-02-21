@@ -11,7 +11,7 @@ title: AutoCrud
 - `columns?`：`CrudColumn<Row>[]`（默认从 fields 生成）
 - `searchFields?`：搜索字段（默认用 fields）
 - `searchQueryKey?`：把搜索条件写入 `query[searchQueryKey]`（例如 `'search'`）
-- `actions?`：自定义 actions（传入即完全覆盖默认 actions）
+- `actions?`：自定义 actions（与默认 actions 合并，`id` 相同则覆盖）
 - `formMode`：`'modal' | 'drawer'`
 - `showSelection`：是否开启勾选
 - `showActionsColumn`：是否显示"操作列"
