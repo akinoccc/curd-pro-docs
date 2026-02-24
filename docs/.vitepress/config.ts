@@ -4,7 +4,6 @@ import { vitepressDemoPlugin } from 'vitepress-demo-plugin'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 
 const here = fileURLToPath(new URL('.', import.meta.url))
-const naiveUiCssPath = path.resolve(here, '../../packages/naive-ui/dist/naive-ui.css')
 
 function resolveBase(): string {
   const envBase = process.env.VITEPRESS_BASE
@@ -153,11 +152,7 @@ export default async () => {
     },
     vite: {
       resolve: {
-        alias: {
-          // demo 需要用到 @uozi/vito-naive-ui 的少量全局样式
-          '@uozi/vito-naive-ui/naive-ui.css': naiveUiCssPath,
-          '@uozi/vito-naive-ui/dist/naive-ui.css': naiveUiCssPath,
-        },
+        alias: {},
       },
       ssr: {
         noExternal: [
