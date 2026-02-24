@@ -3,26 +3,8 @@ import { fileURLToPath } from 'node:url'
 import { vitepressDemoPlugin } from 'vitepress-demo-plugin'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 
-const here = fileURLToPath(new URL('.', import.meta.url))
-
-function resolveBase(): string {
-  const envBase = process.env.VITEPRESS_BASE
-  if (envBase)
-    return envBase.endsWith('/') ? envBase : `${envBase}/`
-
-  const isGhActions = process.env.GITHUB_ACTIONS === 'true'
-  if (!isGhActions)
-    return '/'
-
-  const repo = process.env.GITHUB_REPOSITORY?.split('/')[1]
-  if (!repo)
-    return '/'
-
-  return `/${repo}/`
-}
-
 export default async () => {
-  const base = resolveBase()
+  const base = '/'
 
   return withMermaid({
     lang: 'zh-CN',
