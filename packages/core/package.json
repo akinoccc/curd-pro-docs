@@ -4,7 +4,7 @@
   "license": "UNLICENSED",
   "repository": {
     "type": "git",
-    "url": "https://github.com/akinoccc/curd-pro-docs.git",
+    "url": "https://github.com/akinoccc/vito.git",
     "directory": "packages/core"
   },
   "main": "./dist/index.js",
