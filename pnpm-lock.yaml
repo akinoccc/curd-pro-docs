@@ -18,11 +18,11 @@ importers:
         specifier: ^22.19.7
         version: 22.19.7
       '@uozi/vito-core':
-        specifier: npm:@uozi/vito-core@^0.1.0
-        version: 0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
+        specifier: npm:@uozi/vito-core@^0.1.1
+        version: 0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       '@uozi/vito-naive-ui':
-        specifier: npm:@uozi/vito-naive-ui@^0.1.0
-        version: 0.1.0(@uozi/vito-core@0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
+        specifier: npm:@uozi/vito-naive-ui@^0.1.1
+        version: 0.1.1(@uozi/vito-core@0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       '@vitejs/plugin-vue':
         specifier: ^6.0.3
         version: 6.0.3(vite@7.3.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
@@ -1328,8 +1328,8 @@ packages:
     peerDependencies:
       vite: ^2.9.0 || ^3.0.0-0 || ^4.0.0 || ^5.0.0-0 || ^6.0.0-0 || ^7.0.0-0 || ^8.0.0-0
 
-  '@uozi/vito-core@0.1.0':
-    resolution: {integrity: sha512-PT7CJ8fAd4wn0smhYK/eQ/c8o4kub9Rebn0OwV2nz7CuBd80bjdRD4WHw9+BkiEcXvuA4Zy2a0h78ZI4KyFm6Q==}
+  '@uozi/vito-core@0.1.1':
+    resolution: {integrity: sha512-7Lues4ZKOKyTZ7f0t1mE/vzDaNmT8NCJHngUwLjzPSOhqU5+Iq7bgfP7ASE4+Lbx43dr7jCXUk68MAM2TYVk8A==}
     peerDependencies:
       vue: ^3.4.0
       vue-router: ^4.6.0
@@ -1337,8 +1337,8 @@ packages:
       vue-router:
         optional: true
 
-  '@uozi/vito-naive-ui@0.1.0':
-    resolution: {integrity: sha512-Lw31QSUDzQx1E+t8hbSjEZ6yJTlgyPo1E1DuqXY65jK4/blSNOQgaNEsCUe1965II+yL/g3ic3UO1Rc4KdQCsg==}
+  '@uozi/vito-naive-ui@0.1.1':
+    resolution: {integrity: sha512-wL6ib8lqdMdhRTAr1KlE67JiS6gql3OS6RSdOoDZ/9s6b7gRDhLZxVl+eEO1iO5y+cmEEnpVIrRHZhFNhTWYTA==}
     peerDependencies:
       '@uozi/vito-core': ^0.1.0
       naive-ui: ^2.43.2
@@ -4869,15 +4869,15 @@ snapshots:
       unplugin-utils: 0.3.1
       vite: 7.3.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2)
 
-  '@uozi/vito-core@0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))':
+  '@uozi/vito-core@0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))':
     dependencies:
       vue: 3.5.27(typescript@5.9.3)
     optionalDependencies:
       vue-router: 4.6.0(vue@3.5.27(typescript@5.9.3))
 
-  '@uozi/vito-naive-ui@0.1.0(@uozi/vito-core@0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))':
+  '@uozi/vito-naive-ui@0.1.1(@uozi/vito-core@0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))':
     dependencies:
-      '@uozi/vito-core': 0.1.0(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
+      '@uozi/vito-core': 0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       naive-ui: 2.43.2(vue@3.5.27(typescript@5.9.3))
       vue: 3.5.27(typescript@5.9.3)
 
