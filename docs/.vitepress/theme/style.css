@@ -1,10 +1,48 @@
 :root {
-  --vp-c-brand-1: #18a058;
-  --vp-c-brand-2: #36ad6a;
-  --vp-c-brand-3: #2fb35f;
+  /* 与 vit o logo 更协调的主题色（珊瑚粉系） */
+  --vp-c-brand-1: #ff4d73;
+  --vp-c-brand-2: #ff6b8d;
+  --vp-c-brand-3: #e63a62;
+
+  /* logo 辅色（外圈暖黄），用于 hero 渐变光晕 */
+  --vito-c-accent-1: #ffd166;
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: -webkit-linear-gradient(
+    120deg,
+    var(--vp-c-brand-1) 30%,
+    var(--vito-c-accent-1)
+  );
+  --vp-home-hero-image-background-image: linear-gradient(
+    -45deg,
+    var(--vp-c-brand-1) 50%,
+    var(--vito-c-accent-1) 50%
+  );
+  --vp-home-hero-image-filter: blur(44px);
+}
+
+@media (min-width: 640px) {
+  :root {
+    --vp-home-hero-image-filter: blur(56px);
+  }
+}
+
+@media (min-width: 960px) {
+  :root {
+    --vp-home-hero-image-filter: blur(68px);
+  }
 }
 
 .vp-doc :where(pre, code) {
   font-variant-ligatures: none;
 }
 
+.VPHero .VPImage {
+  filter: drop-shadow(-2px 4px 6px rgba(0, 0, 0, 0.2));
+  padding: 18px;
+}
+
+/* used in reference/default-theme-search */
+img[src='/search.png'] {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}

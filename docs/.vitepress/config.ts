@@ -23,12 +23,17 @@ function resolveBase(): string {
 }
 
 export default async () => {
+  const base = resolveBase()
+
   return withMermaid({
     lang: 'zh-CN',
     title: 'vito',
     description: '@uozi/vito-core 与 @uozi/vito-naive-ui 文档',
-    base: resolveBase(),
+    base,
     cleanUrls: true,
+    head: [
+      ['link', { rel: 'icon', href: `${base}vito.png` }],
+    ],
     markdown: {
       config(md) {
         md.use(vitepressDemoPlugin)
@@ -38,6 +43,7 @@ export default async () => {
       securityLevel: 'loose',
     },
     themeConfig: {
+      logo: '/vito.png',
       nav: [
         { text: '指南', link: '/guide/introduction' },
         {
