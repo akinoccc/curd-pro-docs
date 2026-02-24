@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: vito
+  name: Vito
   text: Vue 3 CRUD 方案
   tagline: Headless hooks + Naive UI 适配，用声明式 schema 驱动搜索、表格、表单
   actions:
