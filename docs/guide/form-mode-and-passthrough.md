@@ -65,7 +65,7 @@ title: 表单模式与 Props 透传
 
 ## Props 透传
 
-`@fcurd/naive-ui` 的组件支持将 props 透传给底层 Naive UI 组件，让你在不脱离 AutoCrud 的前提下精细控制 UI 行为。
+`@uozi/vito-naive-ui` 的组件支持将 props 透传给底层 Naive UI 组件，让你在不脱离 AutoCrud 的前提下精细控制 UI 行为。
 
 ### tableProps
 

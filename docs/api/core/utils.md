@@ -4,7 +4,7 @@ title: 工具函数
 
 # 工具函数
 
-`@fcurd/core` 的工具函数用于类型推导和字段/列的常用转换。
+`@uozi/vito-core` 的工具函数用于类型推导和字段/列的常用转换。
 
 ## defineFields
 
@@ -19,7 +19,7 @@ function defineFields<Row, FormModel, const Fields extends CrudField<Row, FormMo
 **用法**：
 
 ```ts
-import { defineFields } from '@fcurd/core'
+import { defineFields } from '@uozi/vito-core'
 
 const fields = defineFields<MyRow>([
   { key: 'name', label: '名称', type: 'text', visibleIn: { searchForm: true, editForm: true } },
@@ -29,7 +29,7 @@ const fields = defineFields<MyRow>([
 ```
 
 ::: tip
-在 `@fcurd/naive-ui` 中也有同名的 `defineFields`，它的 `UiExt` 默认绑定为 `NaiveFieldUi`，使用 Naive UI 时推荐用 naive-ui 版本。
+在 `@uozi/vito-naive-ui` 中也有同名的 `defineFields`，它的 `UiExt` 默认绑定为 `NaiveFieldUi`，使用 Naive UI 时推荐用 naive-ui 版本。
 :::
 
 ## defineColumns

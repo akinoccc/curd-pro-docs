@@ -9,7 +9,7 @@ title: useCrudSelection
 ## 基本用法
 
 ```ts
-import { useCrudList, useCrudSelection } from '@fcurd/core'
+import { useCrudList, useCrudSelection } from '@uozi/vito-core'
 
 const list = useCrudList({ adapter })
 const selection = useCrudSelection({

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DemoRow } from '../lib/memory-crud'
-import { AutoCrud } from '@fcurd/naive-ui'
+import { AutoCrud } from '@uozi/vito-naive-ui'
 import { NAlert, NCode, NDivider, NTag, NText } from 'naive-ui'
 import { computed, ref } from 'vue'
 import { createDemoColumns, createDemoFields } from '../lib/demo-schema'

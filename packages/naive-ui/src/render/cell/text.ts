@@ -1,4 +1,4 @@
-import type { CrudTableCellContext } from '@fcurd/core'
+import type { CrudTableCellContext } from '@uozi/vito-core'
 import type { CellRenderFactoryOptions } from './shared'
 import { NEllipsis } from 'naive-ui'
 import { h } from 'vue'

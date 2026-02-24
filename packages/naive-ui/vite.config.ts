@@ -10,7 +10,7 @@ export default defineConfig({
       fileName: format => (format === 'es' ? 'index.mjs' : 'index.js'),
     },
     rollupOptions: {
-      external: ['vue', 'vue-router', 'naive-ui', '@fcurd/core'],
+      external: ['vue', 'vue-router', 'naive-ui', '@uozi/vito-core'],
     },
   },
 })

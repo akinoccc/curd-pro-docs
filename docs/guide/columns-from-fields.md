@@ -4,12 +4,12 @@ title: 从 Fields 生成 Columns
 
 # 从 Fields 生成 Columns
 
-当你已经定义了 `fields`，很多情况下表格列可以从字段定义中自动推导出来。`@fcurd/core` 提供了 `createColumnsFromFields` 工具函数来简化这一过程。
+当你已经定义了 `fields`，很多情况下表格列可以从字段定义中自动推导出来。`@uozi/vito-core` 提供了 `createColumnsFromFields` 工具函数来简化这一过程。
 
 ## 基本用法
 
 ```ts
-import { createColumnsFromFields, defineFields } from '@fcurd/core'
+import { createColumnsFromFields, defineFields } from '@uozi/vito-core'
 
 const fields = defineFields([
   { key: 'name', label: '名称', type: 'text', visibleIn: { table: true } },
@@ -27,7 +27,7 @@ const columns = createColumnsFromFields(fields)
 通过 `overrides` 可以为特定列添加宽度、排序、渲染器等配置：
 
 ```ts
-import { cellEnumTag, cellMoney } from '@fcurd/naive-ui'
+import { cellEnumTag, cellMoney } from '@uozi/vito-naive-ui'
 
 const columns = createColumnsFromFields(fields, {
   overrides: {

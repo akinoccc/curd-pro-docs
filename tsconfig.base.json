@@ -12,8 +12,8 @@
     "noEmit": true,
     "types": ["vue"],
     "paths": {
-      "@fcurd/core": ["./packages/core/src/index.ts"],
-      "@fcurd/naive-ui": ["./packages/naive-ui/src/index.ts"]
+      "@uozi/vito-core": ["./packages/core/src/index.ts"],
+      "@uozi/vito-naive-ui": ["./packages/naive-ui/src/index.ts"]
     }
   }
 }

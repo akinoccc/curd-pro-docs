@@ -15,8 +15,8 @@ export default defineConfig({
     dedupe: ['vue', 'vue-router'],
     alias: {
       // 直接指向源码，确保 .vue 能被 Vite 处理并支持 HMR
-      '@fcurd/core': path.resolve(here, '../core/src'),
-      '@fcurd/naive-ui': path.resolve(here, '../naive-ui/src'),
+      '@uozi/vito-core': path.resolve(here, '../core/src'),
+      '@uozi/vito-naive-ui': path.resolve(here, '../naive-ui/src'),
     },
   },
   server: {

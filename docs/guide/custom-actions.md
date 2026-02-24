@@ -16,10 +16,10 @@ title: 自定义 Actions
 
 ## 预设 Actions
 
-`@fcurd/core` 提供 5 个预设工厂函数，`AutoCrud` 会根据 adapter 能力自动使用它们：
+`@uozi/vito-core` 提供 5 个预设工厂函数，`AutoCrud` 会根据 adapter 能力自动使用它们：
 
 ```ts
-import { presetActions } from '@fcurd/core'
+import { presetActions } from '@uozi/vito-core'
 
 presetActions.create({ onClick: () => { /* 打开创建表单 */ } })
 presetActions.edit({ onClick: (row) => { /* 打开编辑表单 */ } })
@@ -87,7 +87,7 @@ const customActions: CrudAction<MyRow>[] = [
 当你使用 hooks 组合方式时，`useCrudActions` 提供动态注册和按区域过滤的能力：
 
 ```ts
-import { presetActions, useCrudActions } from '@fcurd/core'
+import { presetActions, useCrudActions } from '@uozi/vito-core'
 
 const { actions, getByArea, register, unregister } = useCrudActions<MyRow>({
   actions: [
@@ -150,7 +150,7 @@ const batchActions = getByArea('batch')
 }
 ```
 
-在 `@fcurd/naive-ui` 中，确认框使用 Naive UI 的 `NDialog`（通过 `confirmAction()` 工具函数）。
+在 `@uozi/vito-naive-ui` 中，确认框使用 Naive UI 的 `NDialog`（通过 `confirmAction()` 工具函数）。
 
 ## visible / disabled 条件
 

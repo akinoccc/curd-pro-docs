@@ -1,5 +1,5 @@
 {
-  "name": "@fcurd/playground",
+  "name": "@uozi/vito-playground",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fcurd/core": "workspace:*",
-    "@fcurd/naive-ui": "workspace:*",
+    "@uozi/vito-core": "workspace:*",
+    "@uozi/vito-naive-ui": "workspace:*",
     "naive-ui": "^2.43.2",
     "vue": "^3.5.27",
     "vue-router": "^4.6.0"

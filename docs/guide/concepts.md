@@ -6,7 +6,7 @@ title: 核心概念
 
 ## Adapter（数据层）
 
-`CrudAdapter` 是你的业务 API 与 fcurd 之间的唯一桥梁。UI 层（Naive UI 组件或你自己的组件）只依赖它，不直接调用 HTTP 请求。
+`CrudAdapter` 是你的业务 API 与 vito 之间的唯一桥梁。UI 层（Naive UI 组件或你自己的组件）只依赖它，不直接调用 HTTP 请求。
 
 ```ts
 interface CrudAdapter<Row, Query> {
@@ -145,7 +145,7 @@ interface CrudAction<Row> {
 }
 ```
 
-`@fcurd/core` 提供一组预设工厂：`presetActions.create` / `.edit` / `.delete` / `.batchDelete` / `.export`。
+`@uozi/vito-core` 提供一组预设工厂：`presetActions.create` / `.edit` / `.delete` / `.batchDelete` / `.export`。
 
 `AutoCrud` 会根据 adapter 能力自动使用这些预设。你也可以通过 `actions` prop 与默认 actions 合并（`id` 相同则覆盖），或用 `useCrudActions` 的 `register` / `unregister` 动态管理。
 
@@ -153,7 +153,7 @@ interface CrudAction<Row> {
 
 ## Slots（自定义渲染）
 
-`@fcurd/naive-ui` 的组件约定了一组可预测的 slot 命名：
+`@uozi/vito-naive-ui` 的组件约定了一组可预测的 slot 命名：
 
 | Slot | 说明 | 可用组件 |
 |---|---|---|

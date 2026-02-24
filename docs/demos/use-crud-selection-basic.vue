@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCrudSelection } from '@fcurd/core'
+import { useCrudSelection } from '@uozi/vito-core'
 import { computed, ref } from 'vue'
 
 interface DemoRow {

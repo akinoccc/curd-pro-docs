@@ -4,7 +4,7 @@ title: 表单验证
 
 # 表单验证
 
-`@fcurd/naive-ui` 的 `CrudForm` 组件基于 Naive UI 的 `NForm` 验证体系，提供了自动规则生成和自定义规则两种方式。
+`@uozi/vito-naive-ui` 的 `CrudForm` 组件基于 Naive UI 的 `NForm` 验证体系，提供了自动规则生成和自定义规则两种方式。
 
 ## 自动必填验证
 

@@ -1,4 +1,4 @@
-import type { CrudAdapter, CrudSort, ListResult } from '@fcurd/core'
+import type { CrudAdapter, CrudSort, ListResult } from '@uozi/vito-core'
 import type { DemoQuery, DemoRow } from './basic-types'
 
 function compare(a: unknown, b: unknown): number {

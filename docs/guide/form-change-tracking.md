@@ -11,7 +11,7 @@ title: 表单变更追踪
 当调用 `form.reset(data)` 时，hook 会对 `data` 拍一份快照。之后任何对 `form.model` 的修改都会被追踪，并与快照进行对比。
 
 ```ts
-import { useCrudForm } from '@fcurd/core'
+import { useCrudForm } from '@uozi/vito-core'
 
 const form = useCrudForm({ fields })
 
@@ -124,7 +124,7 @@ function openEdit(row: Row) {
 
 ## CrudForm 组件中的行为
 
-在 `@fcurd/naive-ui` 的 `CrudForm` 组件中：
+在 `@uozi/vito-naive-ui` 的 `CrudForm` 组件中：
 
 - 表单提交时调用 `form.getSubmitData()` 获取提交数据
 - `resetOnClose` 默认为 `true`，关闭弹窗时自动 `form.reset()`

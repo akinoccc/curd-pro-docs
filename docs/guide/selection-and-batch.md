@@ -28,8 +28,8 @@ title: 选择与批量操作
 通过 `actions` prop 传入 `area: 'batch'` 的操作：
 
 ```ts
-import { presetActions } from '@fcurd/core'
-import type { CrudAction } from '@fcurd/core'
+import { presetActions } from '@uozi/vito-core'
+import type { CrudAction } from '@uozi/vito-core'
 
 const actions: CrudAction<MyRow>[] = [
   presetActions.create({ onClick: openCreate }),
@@ -107,7 +107,7 @@ const actions: CrudAction<MyRow>[] = [
 在 Hooks 组合模式下，你可以直接操作选择状态：
 
 ```ts
-import { useCrudList, useCrudSelection } from '@fcurd/core'
+import { useCrudList, useCrudSelection } from '@uozi/vito-core'
 
 const list = useCrudList({ adapter })
 const selection = useCrudSelection({

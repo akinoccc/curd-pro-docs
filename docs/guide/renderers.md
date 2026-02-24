@@ -4,12 +4,12 @@ title: 渲染器
 
 # 渲染器
 
-`@fcurd/naive-ui` 提供了一组**单元格渲染器工厂函数**，用于快速定义表格列的渲染逻辑。每个工厂函数接收配置选项，返回一个 `(ctx: CellContext) => VNode` 的渲染函数，直接赋值给 `CrudColumn.render`。
+`@uozi/vito-naive-ui` 提供了一组**单元格渲染器工厂函数**，用于快速定义表格列的渲染逻辑。每个工厂函数接收配置选项，返回一个 `(ctx: CellContext) => VNode` 的渲染函数，直接赋值给 `CrudColumn.render`。
 
 ## 基本用法
 
 ```ts
-import { cellEnumTag, cellMoney, defineColumns } from '@fcurd/naive-ui'
+import { cellEnumTag, cellMoney, defineColumns } from '@uozi/vito-naive-ui'
 
 const columns = defineColumns([
   { key: 'name', label: '名称' },
@@ -41,7 +41,7 @@ const columns = defineColumns([
 纯文本渲染，空值显示占位符。
 
 ```ts
-import { cellText } from '@fcurd/naive-ui'
+import { cellText } from '@uozi/vito-naive-ui'
 
 { render: cellText() }
 { render: cellText({ placeholder: '暂无' }) }
@@ -52,7 +52,7 @@ import { cellText } from '@fcurd/naive-ui'
 超长文本省略，hover 时展示 tooltip。
 
 ```ts
-import { cellEllipsis } from '@fcurd/naive-ui'
+import { cellEllipsis } from '@uozi/vito-naive-ui'
 
 { render: cellEllipsis() }                          // 单行省略
 { render: cellEllipsis({ lineClamp: 2 }) }           // 两行后省略
@@ -71,7 +71,7 @@ import { cellEllipsis } from '@fcurd/naive-ui'
 将布尔值渲染为 Tag。
 
 ```ts
-import { cellBooleanTag } from '@fcurd/naive-ui'
+import { cellBooleanTag } from '@uozi/vito-naive-ui'
 
 { render: cellBooleanTag() }                         // 是 / 否
 { render: cellBooleanTag({ trueText: '启用', falseText: '关闭' }) }
@@ -98,7 +98,7 @@ import { cellBooleanTag } from '@fcurd/naive-ui'
 将枚举值映射为可读文本（纯文本，无 Tag）。
 
 ```ts
-import { cellEnumLabel } from '@fcurd/naive-ui'
+import { cellEnumLabel } from '@uozi/vito-naive-ui'
 
 // 方式 1：使用 map
 { render: cellEnumLabel({ map: { draft: '草稿', enabled: '启用' } }) }
@@ -117,7 +117,7 @@ import { cellEnumLabel } from '@fcurd/naive-ui'
 将枚举值映射为带颜色的 Tag（继承 `cellEnumLabel` 的所有选项）。
 
 ```ts
-import { cellEnumTag } from '@fcurd/naive-ui'
+import { cellEnumTag } from '@uozi/vito-naive-ui'
 
 { render: cellEnumTag({
   options: statusOptions,
@@ -148,7 +148,7 @@ import { cellEnumTag } from '@fcurd/naive-ui'
 基于 `Intl.DateTimeFormat` 格式化日期时间。自动兼容 `Date` 对象、时间戳（ms）和 ISO 字符串。
 
 ```ts
-import { cellDateTime } from '@fcurd/naive-ui'
+import { cellDateTime } from '@uozi/vito-naive-ui'
 
 // 默认：yyyy/MM/dd HH:mm:ss（zh-CN）
 { render: cellDateTime() }
@@ -175,7 +175,7 @@ import { cellDateTime } from '@fcurd/naive-ui'
 基于 `Intl.NumberFormat` 格式化金额。
 
 ```ts
-import { cellMoney } from '@fcurd/naive-ui'
+import { cellMoney } from '@uozi/vito-naive-ui'
 
 { render: cellMoney() }                              // ¥1,234.56
 { render: cellMoney({ currency: 'USD' }) }            // $1,234.56
@@ -196,7 +196,7 @@ import { cellMoney } from '@fcurd/naive-ui'
 渲染图片缩略图（基于 Naive UI `NImage`）。
 
 ```ts
-import { cellImage } from '@fcurd/naive-ui'
+import { cellImage } from '@uozi/vito-naive-ui'
 
 // 默认：取 value 作为 URL
 { render: cellImage() }
@@ -222,7 +222,7 @@ import { cellImage } from '@fcurd/naive-ui'
 JSON 数据悬浮预览（NPopover + NCode），适合展示复杂对象。
 
 ```ts
-import { cellJsonPopover } from '@fcurd/naive-ui'
+import { cellJsonPopover } from '@uozi/vito-naive-ui'
 
 { render: cellJsonPopover() }
 { render: cellJsonPopover({ previewMaxLen: 40 }) }

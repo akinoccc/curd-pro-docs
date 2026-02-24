@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AutoCrud } from '@fcurd/naive-ui'
+import { AutoCrud } from '@uozi/vito-naive-ui'
 import { NAlert, NText } from 'naive-ui'
 import { ref } from 'vue'
 import { createBasicAdapter } from './basic-adapter'

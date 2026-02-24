@@ -4,14 +4,14 @@ title: Renderers 渲染器
 
 # Renderers 渲染器
 
-`@fcurd/naive-ui` 提供一组表格单元格渲染器工厂函数，返回 `CrudColumn.render(ctx)` 所需的函数。
+`@uozi/vito-naive-ui` 提供一组表格单元格渲染器工厂函数，返回 `CrudColumn.render(ctx)` 所需的函数。
 
 ## 使用方式
 
 在 `defineColumns` 的 `render` 属性中调用工厂函数：
 
 ```ts
-import { cellDateTime, cellEnumTag, cellMoney, defineColumns } from '@fcurd/naive-ui'
+import { cellDateTime, cellEnumTag, cellMoney, defineColumns } from '@uozi/vito-naive-ui'
 
 const columns = defineColumns<MyRow>([
   {

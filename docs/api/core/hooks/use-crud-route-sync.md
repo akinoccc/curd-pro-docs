@@ -9,7 +9,7 @@ title: useCrudRouteSync
 ## 基本用法
 
 ```ts
-import { useCrudList, useCrudRouteSync } from '@fcurd/core'
+import { useCrudList, useCrudRouteSync } from '@uozi/vito-core'
 import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()

@@ -9,7 +9,7 @@ title: useCrudActions
 ## 基本用法
 
 ```ts
-import { presetActions, useCrudActions } from '@fcurd/core'
+import { presetActions, useCrudActions } from '@uozi/vito-core'
 
 const { actions, getByArea, register, unregister } = useCrudActions<MyRow>({
   actions: [
@@ -41,7 +41,7 @@ const rowActions = getByArea('row') // [edit, delete]
 
 ## presetActions 工厂
 
-`@fcurd/core` 提供 5 个预设 action 工厂：
+`@uozi/vito-core` 提供 5 个预设 action 工厂：
 
 ### presetActions.create
 

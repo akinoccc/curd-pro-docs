@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { CrudAdapter } from '@fcurd/core'
+import type { CrudAdapter } from '@uozi/vito-core'
 import type { DemoQuery, DemoRow } from './basic-types'
-import { useCrudForm, useCrudList, useCrudSelection } from '@fcurd/core'
-import { CrudForm, CrudSearch, CrudTable, defineColumns, defineFields } from '@fcurd/naive-ui'
+import { useCrudForm, useCrudList, useCrudSelection } from '@uozi/vito-core'
+import { CrudForm, CrudSearch, CrudTable, defineColumns, defineFields } from '@uozi/vito-naive-ui'
 import { NButton, NCard, NSpace } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { createBasicAdapter } from './basic-adapter'

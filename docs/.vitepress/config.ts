@@ -25,8 +25,8 @@ function resolveBase(): string {
 export default async () => {
   return withMermaid({
     lang: 'zh-CN',
-    title: 'fcurd',
-    description: '@fcurd/core 与 @fcurd/naive-ui 文档',
+    title: 'vito',
+    description: '@uozi/vito-core 与 @uozi/vito-naive-ui 文档',
     base: resolveBase(),
     cleanUrls: true,
     markdown: {
@@ -43,8 +43,8 @@ export default async () => {
         {
           text: 'API 参考',
           items: [
-            { text: '@fcurd/core', link: '/api/core/adapter' },
-            { text: '@fcurd/naive-ui', link: '/api/naive-ui/overview' },
+            { text: '@uozi/vito-core', link: '/api/core/adapter' },
+            { text: '@uozi/vito-naive-ui', link: '/api/naive-ui/overview' },
           ],
         },
         { text: '开发者', link: '/dev/overview' },
@@ -148,9 +148,9 @@ export default async () => {
     vite: {
       resolve: {
         alias: {
-          // demo 需要用到 @fcurd/naive-ui 的少量全局样式
-          '@fcurd/naive-ui/naive-ui.css': naiveUiCssPath,
-          '@fcurd/naive-ui/dist/naive-ui.css': naiveUiCssPath,
+          // demo 需要用到 @uozi/vito-naive-ui 的少量全局样式
+          '@uozi/vito-naive-ui/naive-ui.css': naiveUiCssPath,
+          '@uozi/vito-naive-ui/dist/naive-ui.css': naiveUiCssPath,
         },
       },
       ssr: {

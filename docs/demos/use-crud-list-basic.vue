@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { CrudSort } from '@fcurd/core'
+import type { CrudSort } from '@uozi/vito-core'
 import type { DemoQuery, DemoRow } from '../examples/basic-types'
-import { useCrudList } from '@fcurd/core'
+import { useCrudList } from '@uozi/vito-core'
 import { computed, ref, watch } from 'vue'
 import { createBasicAdapter } from '../examples/basic-adapter'
 

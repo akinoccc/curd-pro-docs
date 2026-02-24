@@ -9,7 +9,7 @@ title: useCrudForm
 ## 基本用法
 
 ```ts
-import { useCrudForm } from '@fcurd/core'
+import { useCrudForm } from '@uozi/vito-core'
 
 const form = useCrudForm<MyRow>({
   fields: [

@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="Row, Query extends Record<string, unknown>">
-import type { CrudField, UseCrudListReturn } from '@fcurd/core'
+import type { CrudField, UseCrudListReturn } from '@uozi/vito-core'
 import type { FormProps } from 'naive-ui'
-import { filterFieldsBySurface } from '@fcurd/core'
+import { filterFieldsBySurface } from '@uozi/vito-core'
 import { NButton, NForm, NFormItem, NSpace } from 'naive-ui'
 import { computed, h, reactive, watch } from 'vue'
 import { componentMap, getFieldLabel, resolveControlProps, resolveFormItemProps } from '../adapter'

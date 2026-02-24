@@ -1,8 +1,8 @@
-import type { CrudColumn } from '@fcurd/core'
-import type { NaiveCrudField } from '@fcurd/naive-ui'
+import type { CrudColumn } from '@uozi/vito-core'
+import type { NaiveCrudField } from '@uozi/vito-naive-ui'
 import type { SelectOption } from 'naive-ui'
 import type { DemoRow } from './memory-crud'
-import { cellBooleanTag, cellEnumTag, cellMoney, defineColumns, defineFields } from '@fcurd/naive-ui'
+import { cellBooleanTag, cellEnumTag, cellMoney, defineColumns, defineFields } from '@uozi/vito-naive-ui'
 
 const statusOptions: SelectOption[] = [
   { label: '草稿', value: 'draft' },

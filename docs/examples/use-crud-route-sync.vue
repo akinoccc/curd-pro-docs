@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DemoQuery, DemoRow } from './basic-types'
-import { useCrudList, useCrudRouteSync } from '@fcurd/core'
+import { useCrudList, useCrudRouteSync } from '@uozi/vito-core'
 import { useRoute, useRouter } from 'vue-router'
 import { createBasicAdapter } from './basic-adapter'
 

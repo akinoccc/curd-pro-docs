@@ -8,7 +8,7 @@ title: 概览
 
 - 本地跑 playground 进行交互验证（不是文档示例来源）
 - 本地跑 docs 预览文档站
-- 维护 `@fcurd/core` 与 `@fcurd/naive-ui` 的导出与兼容性
+- 维护 `@uozi/vito-core` 与 `@uozi/vito-naive-ui` 的导出与兼容性
 
 ## 快速命令
 

@@ -4,7 +4,7 @@ title: Adapter 工具
 
 # Adapter 工具
 
-本页介绍 `@fcurd/naive-ui` 的适配层工具函数和类型扩展。
+本页介绍 `@uozi/vito-naive-ui` 的适配层工具函数和类型扩展。
 
 ## NaiveFieldUi
 
@@ -145,10 +145,10 @@ function handleExportResult(
 
 ## defineFields / defineColumns
 
-与 `@fcurd/core` 同名，但 `UiExt` 默认绑定为 `NaiveFieldUi`：
+与 `@uozi/vito-core` 同名，但 `UiExt` 默认绑定为 `NaiveFieldUi`：
 
 ```ts
-import { defineFields } from '@fcurd/naive-ui'
+import { defineFields } from '@uozi/vito-naive-ui'
 
 const fields = defineFields<MyRow>([
   { key: 'name', label: '名称', type: 'text', ui: { formControl: { clearable: true } } },
@@ -157,5 +157,5 @@ const fields = defineFields<MyRow>([
 ```
 
 ::: tip
-使用 Naive UI 时推荐从 `@fcurd/naive-ui` 导入 `defineFields` / `defineColumns`，这样 `ui` 属性会有完整的类型提示。
+使用 Naive UI 时推荐从 `@uozi/vito-naive-ui` 导入 `defineFields` / `defineColumns`，这样 `ui` 属性会有完整的类型提示。
 :::

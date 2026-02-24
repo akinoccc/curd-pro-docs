@@ -5,7 +5,7 @@ import type {
   CrudAdapter,
   CrudColumn,
   CrudField,
-} from '@fcurd/core'
+} from '@uozi/vito-core'
 import type { PaginationProps } from 'naive-ui'
 import type { FunctionalComponent } from 'vue'
 import {
@@ -15,7 +15,7 @@ import {
   useCrudList,
   useCrudRouteSync,
   useCrudSelection,
-} from '@fcurd/core'
+} from '@uozi/vito-core'
 import { NButton, NCard, NSpace } from 'naive-ui'
 import { computed, h, ref, useSlots } from 'vue'
 import { useRoute, useRouter } from 'vue-router'

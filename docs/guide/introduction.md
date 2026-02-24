@@ -4,12 +4,12 @@ title: 介绍
 
 # 介绍
 
-`fcurd` 是一套面向 Vue 3 的 **声明式 CRUD 方案**，由两个包组成：
+`vito` 是一套面向 Vue 3 的 **声明式 CRUD 方案**，由两个包组成：
 
 | 包 | 定位 | UI 依赖 |
 |---|---|---|
-| `@fcurd/core` | Headless hooks / types / utils | 无 |
-| `@fcurd/naive-ui` | Naive UI 适配层 + 组件 | `naive-ui ^2.43` |
+| `@uozi/vito-core` | Headless hooks / types / utils | 无 |
+| `@uozi/vito-naive-ui` | Naive UI 适配层 + 组件 | `naive-ui ^2.43` |
 
 ## 解决什么问题
 
@@ -22,7 +22,7 @@ title: 介绍
 - URL query 同步（可分享链接）
 - 表格列渲染、字段控件映射
 
-`fcurd` 将这些能力抽象为一组可复用的 hooks + schema，让你只需声明 `adapter`（数据层） + `fields/columns`（UI 描述）即可生成完整页面。
+`vito` 将这些能力抽象为一组可复用的 hooks + schema，让你只需声明 `adapter`（数据层） + `fields/columns`（UI 描述）即可生成完整页面。
 
 ## 架构设计
 
@@ -31,13 +31,13 @@ title: 介绍
 │                  你的业务页面                     │
 │                                                 │
 │   ┌─────────────────────────────────────────┐   │
-│   │         @fcurd/naive-ui                 │   │
+│   │         @uozi/vito-naive-ui             │   │
 │   │   AutoCrud / CrudSearch / CrudTable /   │   │
 │   │   CrudForm / Controls / Renderers       │   │
 │   └──────────────────┬──────────────────────┘   │
 │                      │                          │
 │   ┌──────────────────▼──────────────────────┐   │
-│   │           @fcurd/core                   │   │
+│   │           @uozi/vito-core               │   │
 │   │   useCrudList / useCrudForm /           │   │
 │   │   useCrudSelection / useCrudRouteSync / │   │
 │   │   useCrudActions                        │   │
@@ -57,8 +57,8 @@ title: 介绍
 **核心思路**：
 
 1. **Adapter 隔离数据层** — `CrudAdapter` 是唯一需要你实现的接口，所有 UI 层只依赖它。切换后端 API 只需换一个 adapter。
-2. **Headless hooks 管理状态** — `@fcurd/core` 的 hooks 不渲染任何 UI，只管理响应式状态和副作用（分页、查询、表单、选择等）。
-3. **Adapter 层映射 UI** — `@fcurd/naive-ui` 将 core 的 schema（`CrudField` / `CrudColumn`）映射到 Naive UI 组件，提供即插即用的 `AutoCrud` 等组件。
+2. **Headless hooks 管理状态** — `@uozi/vito-core` 的 hooks 不渲染任何 UI，只管理响应式状态和副作用（分页、查询、表单、选择等）。
+3. **Adapter 层映射 UI** — `@uozi/vito-naive-ui` 将 core 的 schema（`CrudField` / `CrudColumn`）映射到 Naive UI 组件，提供即插即用的 `AutoCrud` 等组件。
 
 ## 两种使用方式
 
@@ -97,7 +97,7 @@ const selection = useCrudSelection({ rows: list.rows, getId: adapter.getId })
 
 ## 与其他方案的对比
 
-| 特性 | 手写 CRUD | ProTable 类组件 | fcurd |
+| 特性 | 手写 CRUD | ProTable 类组件 | vito |
 |---|---|---|---|
 | 数据层可复用 | 每页重写 | 通常耦合 UI | Adapter 隔离 |
 | UI 框架绑定 | 绑定 | 强绑定 | core 无绑定 |

@@ -1,4 +1,4 @@
-import type { CrudColumn, CrudField } from '@fcurd/core'
+import type { CrudColumn, CrudField } from '@uozi/vito-core'
 import type { DataTableColumn } from 'naive-ui'
 import type { Component } from 'vue'
 import { createDiscreteApi } from 'naive-ui'

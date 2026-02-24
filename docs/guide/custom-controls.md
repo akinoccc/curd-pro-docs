@@ -4,7 +4,7 @@ title: 自定义控件
 
 # 自定义控件
 
-`@fcurd/naive-ui` 内置了一组常用控件（text、number、select、date 等）。当内置控件无法满足需求时，有两种方式扩展。
+`@uozi/vito-naive-ui` 内置了一组常用控件（text、number、select、date 等）。当内置控件无法满足需求时，有两种方式扩展。
 
 ## 方式一：通过 Slot 临时替换
 
@@ -44,7 +44,7 @@ title: 自定义控件
 ```vue
 <!-- RichTextField.vue -->
 <script setup lang="ts">
-import type { NaiveCrudField } from '@fcurd/naive-ui'
+import type { NaiveCrudField } from '@uozi/vito-naive-ui'
 
 interface Props {
   field?: NaiveCrudField  // 字段定义
@@ -122,8 +122,8 @@ defineFields([
 ```vue
 <!-- UploadField.vue -->
 <script setup lang="ts">
-import type { NaiveCrudField } from '@fcurd/naive-ui'
-import { resolveControlProps } from '@fcurd/naive-ui'
+import type { NaiveCrudField } from '@uozi/vito-naive-ui'
+import { resolveControlProps } from '@uozi/vito-naive-ui'
 import { NUpload } from 'naive-ui'
 import { computed } from 'vue'
 

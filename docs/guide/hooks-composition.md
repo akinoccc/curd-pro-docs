@@ -41,8 +41,8 @@ graph TB
 
 ```vue
 <script setup lang="ts">
-import { useCrudForm, useCrudList, useCrudSelection } from '@fcurd/core'
-import { CrudForm, CrudSearch, CrudTable } from '@fcurd/naive-ui'
+import { useCrudForm, useCrudList, useCrudSelection } from '@uozi/vito-core'
+import { CrudForm, CrudSearch, CrudTable } from '@uozi/vito-naive-ui'
 import { ref } from 'vue'
 import { adapter, columns, fields } from './schema'
 
@@ -139,7 +139,7 @@ async function handleSubmit(data: any) {
 ## 添加路由同步
 
 ```ts
-import { useCrudRouteSync } from '@fcurd/core'
+import { useCrudRouteSync } from '@uozi/vito-core'
 import { useRoute, useRouter } from 'vue-router'
 
 const router = useRouter()

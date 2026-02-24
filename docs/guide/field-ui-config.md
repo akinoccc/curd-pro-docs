@@ -4,7 +4,7 @@ title: 字段 UI 配置
 
 # 字段 UI 配置
 
-每个 `CrudField` 都有一个可选的 `ui` 属性，用于向 UI 适配层传递额外配置。`ui` 的具体结构由适配层定义——本文以 `@fcurd/naive-ui` 为例说明其结构约定和场景差异化机制。
+每个 `CrudField` 都有一个可选的 `ui` 属性，用于向 UI 适配层传递额外配置。`ui` 的具体结构由适配层定义——本文以 `@uozi/vito-naive-ui` 为例说明其结构约定和场景差异化机制。
 
 ## ui 对象结构
 
@@ -101,4 +101,4 @@ interface NaiveFieldUi {
 
 ## 其他适配层
 
-如果你开发自己的 UI 适配层（如 Element Plus、Ant Design Vue），可以定义不同的 `UiExt` 接口。`@fcurd/core` 的 `CrudField<Row, FormModel, UiExt>` 通过泛型的第三个参数支持此扩展——核心层不关心 `ui` 的具体结构，完全由适配层消费。
+如果你开发自己的 UI 适配层（如 Element Plus、Ant Design Vue），可以定义不同的 `UiExt` 接口。`@uozi/vito-core` 的 `CrudField<Row, FormModel, UiExt>` 通过泛型的第三个参数支持此扩展——核心层不关心 `ui` 的具体结构，完全由适配层消费。

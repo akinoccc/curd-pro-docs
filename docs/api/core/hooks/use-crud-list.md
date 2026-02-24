@@ -9,7 +9,7 @@ title: useCrudList
 ## 基本用法
 
 ```ts
-import { useCrudList } from '@fcurd/core'
+import { useCrudList } from '@uozi/vito-core'
 
 const list = useCrudList<MyRow, MyQuery>({
   adapter,

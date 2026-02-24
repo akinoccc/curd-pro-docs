@@ -1,4 +1,4 @@
-import type { CrudTableCellContext } from '@fcurd/core'
+import type { CrudTableCellContext } from '@uozi/vito-core'
 import type { TagProps } from 'naive-ui'
 import type { CellRenderFactoryOptions } from './shared'
 import { NTag } from 'naive-ui'

@@ -1,5 +1,5 @@
-import type { CrudAdapter } from '@fcurd/core'
-import { presetActions, useCrudActions } from '@fcurd/core'
+import type { CrudAdapter } from '@uozi/vito-core'
+import { presetActions, useCrudActions } from '@uozi/vito-core'
 
 export interface Row {
   id: number
@@ -17,7 +17,7 @@ export function createActions(adapter: CrudAdapter<Row>) {
       presetActions.export({
         adapter,
         handleExport: (result) => {
-          // UI 层负责下载（例如 @fcurd/naive-ui 的 handleExportResult）
+          // UI 层负责下载（例如 @uozi/vito-naive-ui 的 handleExportResult）
           console.log(result)
         },
       }),

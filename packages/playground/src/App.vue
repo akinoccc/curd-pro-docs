@@ -32,7 +32,7 @@ const tabsType = 'line' satisfies TabsProps['type']
             <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
               <div style="display: flex; flex-direction: column; gap: 2px; width: 200px;">
                 <NText strong>
-                  @fcurd playground
+                  @uozi/vito playground
                 </NText>
                 <NText
                   depth="3"

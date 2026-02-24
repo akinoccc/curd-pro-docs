@@ -4,7 +4,7 @@ title: Slots 约定
 
 # Slots 约定
 
-`@fcurd/naive-ui` 的组件使用一套可预测的 slot 命名规则，让你可以在不离开 `AutoCrud` 的前提下自定义任意部分的渲染。
+`@uozi/vito-naive-ui` 的组件使用一套可预测的 slot 命名规则，让你可以在不离开 `AutoCrud` 的前提下自定义任意部分的渲染。
 
 ## 命名规则
 

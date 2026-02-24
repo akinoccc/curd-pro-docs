@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "changeset": "changeset",
-    "dev:playground": "pnpm --filter @fcurd/playground dev",
+    "dev:playground": "pnpm --filter @uozi/vito-playground dev",
     "docs:dev": "vitepress dev docs",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
@@ -19,8 +19,8 @@
   "devDependencies": {
     "@antfu/eslint-config": "^7.2.0",
     "@changesets/cli": "^2.29.7",
-    "@fcurd/core": "npm:@fcurd/core@^0.1.0",
-    "@fcurd/naive-ui": "npm:@fcurd/naive-ui@^0.1.0",
+    "@uozi/vito-core": "workspace:*",
+    "@uozi/vito-naive-ui": "workspace:*",
     "@types/node": "^22.19.7",
     "@vitejs/plugin-vue": "^6.0.3",
     "eslint": "^9.39.2",

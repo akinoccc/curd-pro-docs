@@ -2,9 +2,9 @@
 title: 概览
 ---
 
-# @fcurd/naive-ui 概览
+# @uozi/vito-naive-ui 概览
 
-`@fcurd/naive-ui` 是 `@fcurd/core` 的 Naive UI 适配层，做三件事：
+`@uozi/vito-naive-ui` 是 `@uozi/vito-core` 的 Naive UI 适配层，做三件事：
 
 1. 把 `CrudField` / `CrudColumn` 映射到 Naive UI 的 `NForm` / `NDataTable` / `NDatePicker` 等组件
 2. 提供即插即用组件：`AutoCrud` / `CrudSearch` / `CrudTable` / `CrudForm`

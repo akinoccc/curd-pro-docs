@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AutoCrud } from '@fcurd/naive-ui'
+import { AutoCrud } from '@uozi/vito-naive-ui'
 import { NAlert, NCard, NCode, NDivider, NText } from 'naive-ui'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'

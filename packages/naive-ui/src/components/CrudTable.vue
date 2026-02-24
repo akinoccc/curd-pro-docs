@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="Row">
-import type { CrudColumn, CrudSort, UseCrudListReturn, UseCrudSelectionReturn } from '@fcurd/core'
+import type { CrudColumn, CrudSort, UseCrudListReturn, UseCrudSelectionReturn } from '@uozi/vito-core'
 import type { DataTableColumn, DataTableSortState, PaginationProps } from 'naive-ui'
 import { NDataTable, NPagination, NSpace } from 'naive-ui'
 import { computed, h } from 'vue'

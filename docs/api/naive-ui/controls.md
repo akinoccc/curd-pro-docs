@@ -4,7 +4,7 @@ title: Controls 控件
 
 # Controls 控件
 
-内置字段控件位于 `@fcurd/naive-ui`，通常你不需要手动引入——`componentMap` 会根据 `field.type` 自动选择。
+内置字段控件位于 `@uozi/vito-naive-ui`，通常你不需要手动引入——`componentMap` 会根据 `field.type` 自动选择。
 
 ## 内置控件列表
 
@@ -31,7 +31,7 @@ title: Controls 控件
 大多数情况下你只需在字段定义的 `ui` 中配置 props，不需要直接引用控件组件：
 
 ```ts
-import type { NaiveCrudField } from '@fcurd/naive-ui'
+import type { NaiveCrudField } from '@uozi/vito-naive-ui'
 
 const statusOptions = [
   { label: '草稿', value: 'draft' },

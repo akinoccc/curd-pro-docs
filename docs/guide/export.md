@@ -67,14 +67,14 @@ async export() {
 />
 ```
 
-点击后，`@fcurd/naive-ui` 的 `handleExportResult` 会自动处理三种返回形式的下载。
+点击后，`@uozi/vito-naive-ui` 的 `handleExportResult` 会自动处理三种返回形式的下载。
 
 ## 手动使用 handleExportResult
 
 当你用 hooks 组合方式时，可以直接调用 `handleExportResult`：
 
 ```ts
-import { handleExportResult } from '@fcurd/naive-ui'
+import { handleExportResult } from '@uozi/vito-naive-ui'
 
 async function handleExport() {
   const result = await adapter.export!({
@@ -90,8 +90,8 @@ async function handleExport() {
 使用 `presetActions.export` 工厂创建：
 
 ```ts
-import { presetActions } from '@fcurd/core'
-import { handleExportResult } from '@fcurd/naive-ui'
+import { presetActions } from '@uozi/vito-core'
+import { handleExportResult } from '@uozi/vito-naive-ui'
 
 const exportAction = presetActions.export({
   adapter,

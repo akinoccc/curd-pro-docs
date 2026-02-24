@@ -1,6 +1,6 @@
 import type { SelectOption } from 'naive-ui'
 import type { DemoRow } from './basic-types'
-import { cellDateTime, cellEnumTag, cellMoney, defineColumns, defineFields } from '@fcurd/naive-ui'
+import { cellDateTime, cellEnumTag, cellMoney, defineColumns, defineFields } from '@uozi/vito-naive-ui'
 
 const statusOptions: SelectOption[] = [
   { label: '草稿', value: 'draft' },

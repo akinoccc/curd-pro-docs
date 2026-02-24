@@ -4,7 +4,7 @@ title: 类型定义
 
 # 类型定义
 
-本页列出 `@fcurd/core` 所有公共类型的完整定义。所有类型均从 `@fcurd/core` 直接导出。
+本页列出 `@uozi/vito-core` 所有公共类型的完整定义。所有类型均从 `@uozi/vito-core` 直接导出。
 
 ## CrudField
 

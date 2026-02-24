@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="Row">
-import type { CrudField, UseCrudFormReturn } from '@fcurd/core'
+import type { CrudField, UseCrudFormReturn } from '@uozi/vito-core'
 import type { DrawerContentProps, DrawerProps, FormInst, FormProps, ModalProps } from 'naive-ui'
 import { NButton, NDrawer, NDrawerContent, NForm, NFormItem, NModal, NSpace } from 'naive-ui'
 import { computed, h, ref, useSlots } from 'vue'
