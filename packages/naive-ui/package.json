@@ -15,14 +15,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    },
-    "./naive-ui.css": "./dist/naive-ui.css",
-    "./dist/naive-ui.css": "./dist/naive-ui.css"
+    }
   },
   "files": ["dist"],
-  "sideEffects": [
-    "./dist/naive-ui.css"
-  ],
+  "sideEffects": false,
   "scripts": {
     "build": "rimraf dist && vite build && tsc -p tsconfig.build.json"
   },

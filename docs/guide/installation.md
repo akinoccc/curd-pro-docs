@@ -35,7 +35,7 @@ pnpm add @uozi/vito-core @uozi/vito-naive-ui naive-ui
 `@uozi/vito-naive-ui` 组件库包含少量布局/间距相关的全局样式（例如表格头部间距、分页区域布局等），需要在应用入口 **全局引入一次**：
 
 ```ts
-import '@uozi/vito-naive-ui/naive-ui.css'
+import '@uozi/vito-naive-ui/vito-naive-ui.css'
 ```
 
 :::: tip
