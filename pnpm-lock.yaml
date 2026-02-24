@@ -21,8 +21,8 @@ importers:
         specifier: npm:@uozi/vito-core@^0.1.1
         version: 0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       '@uozi/vito-naive-ui':
-        specifier: npm:@uozi/vito-naive-ui@^0.1.1
-        version: 0.1.1(@uozi/vito-core@0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
+        specifier: npm:@uozi/vito-naive-ui@^0.1.2
+        version: 0.1.2(@uozi/vito-core@0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       '@vitejs/plugin-vue':
         specifier: ^6.0.3
         version: 6.0.3(vite@7.3.1(@types/node@22.19.7)(jiti@2.6.1)(yaml@2.8.2))(vue@3.5.27(typescript@5.9.3))
@@ -1337,10 +1337,10 @@ packages:
       vue-router:
         optional: true
 
-  '@uozi/vito-naive-ui@0.1.1':
-    resolution: {integrity: sha512-wL6ib8lqdMdhRTAr1KlE67JiS6gql3OS6RSdOoDZ/9s6b7gRDhLZxVl+eEO1iO5y+cmEEnpVIrRHZhFNhTWYTA==}
+  '@uozi/vito-naive-ui@0.1.2':
+    resolution: {integrity: sha512-+5+9FY8mdufhzaHBsMG58uTJD5Pc8PWQaQMmaTH1gkgTJSkn5jfCYeXM90SsT3J1qPQH5dRFKR4t8oAkVGmT4g==}
     peerDependencies:
-      '@uozi/vito-core': ^0.1.0
+      '@uozi/vito-core': ^0.1.1
       naive-ui: ^2.43.2
       vue: ^3.4.0
 
@@ -4875,7 +4875,7 @@ snapshots:
     optionalDependencies:
       vue-router: 4.6.0(vue@3.5.27(typescript@5.9.3))
 
-  '@uozi/vito-naive-ui@0.1.1(@uozi/vito-core@0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))':
+  '@uozi/vito-naive-ui@0.1.2(@uozi/vito-core@0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3)))(naive-ui@2.43.2(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))':
     dependencies:
       '@uozi/vito-core': 0.1.1(vue-router@4.6.0(vue@3.5.27(typescript@5.9.3)))(vue@3.5.27(typescript@5.9.3))
       naive-ui: 2.43.2(vue@3.5.27(typescript@5.9.3))

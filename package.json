@@ -21,7 +21,7 @@
     "@changesets/cli": "^2.29.8",
     "@types/node": "^22.19.7",
     "@uozi/vito-core": "npm:@uozi/vito-core@^0.1.1",
-    "@uozi/vito-naive-ui": "npm:@uozi/vito-naive-ui@^0.1.1",
+    "@uozi/vito-naive-ui": "npm:@uozi/vito-naive-ui@^0.1.2",
     "@vitejs/plugin-vue": "^6.0.3",
     "eslint": "^9.39.2",
     "mermaid": "^11.12.3",
