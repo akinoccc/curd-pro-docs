@@ -4,10 +4,10 @@ layout: home
 hero:
   name: Vito
   text: Vue 3 CRUD 方案
-  tagline: Headless hooks + Naive UI 适配，用声明式 schema 驱动搜索、表格、表单
+  tagline: Headless hooks + UI 适配，用声明式 schema 驱动搜索、表格、表单
   image:
     src: /vito.png
-    alt: Vito
+    alt: Vito Logo
   actions:
     - theme: brand
       text: 快速开始

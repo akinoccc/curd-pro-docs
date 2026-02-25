@@ -9,7 +9,7 @@ export default async () => {
   return withMermaid({
     lang: 'zh-CN',
     title: 'Vito',
-    description: '@uozi/vito-core 与 @uozi/vito-naive-ui 文档',
+    description: 'Vue 3 CRUD 方案, Headless hooks + UI 适配，用声明式 schema 驱动搜索、表格、表单',
     base,
     cleanUrls: true,
     head: [
