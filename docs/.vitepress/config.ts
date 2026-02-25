@@ -8,7 +8,7 @@ export default async () => {
 
   return withMermaid({
     lang: 'zh-CN',
-    title: 'vito',
+    title: 'Vito',
     description: '@uozi/vito-core 与 @uozi/vito-naive-ui 文档',
     base,
     cleanUrls: true,
